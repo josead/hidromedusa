@@ -10,33 +10,13 @@ const CALENDAR_API_KEY = process.env.GOOGLE_CALENDAR_API_KEY;
 const HIDROMEDUSA_EVENTS = [
   {
     id: 'ev-1',
-    title: 'Hidromedusa — Solsticio de Invierno',
-    description: 'Inmersión Profunda. Fondo del mar oceánico-intergaláctico. 22hs en adelante.',
+    title: 'Hidromedusa',
+    description: 'Próxima tocada. 22hs en adelante.',
     start: '2026-07-11T22:00:00-03:00',
     end:   '2026-07-12T06:00:00-03:00',
     location: 'Buenos Aires, Argentina',
     url: 'https://hidromedusa.com/#entradas',
-    tags: ['techno', 'ambient'],
-  },
-  {
-    id: 'ev-2',
-    title: 'Hidromedusa — Noches del Kraken',
-    description: 'Sesión Abismal con artistas invitados.',
-    start: '2026-07-12T21:00:00-03:00',
-    end:   '2026-07-13T05:00:00-03:00',
-    location: 'Buenos Aires, Argentina',
-    url: 'https://hidromedusa.com/#entradas',
-    tags: ['experimental', 'electronic'],
-  },
-  {
-    id: 'ev-3',
-    title: 'Hidromedusa — Bioluminiscencia',
-    description: 'Fin de Invierno. Última inmersión de la temporada.',
-    start: '2026-08-30T23:00:00-03:00',
-    end:   '2026-08-31T06:00:00-03:00',
-    location: 'Buenos Aires, Argentina',
-    url: 'https://hidromedusa.com/#entradas',
-    tags: ['live', 'dj-set'],
+    tags: [],
   },
 ];
 
