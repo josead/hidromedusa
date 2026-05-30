@@ -137,7 +137,7 @@ function simulatePaymentSuccess() {
     id: `HM-${Date.now()}`,
     event: 'Próxima Tocada — Hidromedusa',
     type: selectedTicket.name,
-    date: '2026-06-21',
+    date: '2026-07-11',
     price: selectedTicket.price,
   };
   State.tickets.push(ticket);

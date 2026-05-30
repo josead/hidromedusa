@@ -10,7 +10,7 @@ const crypto = require('crypto');
 // In-memory store (use DynamoDB in prod)
 const tickets = new Map();
 const events = new Map([
-  ['ev-1', { id:'ev-1', name:'Solsticio de Invierno', date:'2026-06-21', time:'22:00', venue:'Buenos Aires', capacity:300 }],
+  ['ev-1', { id:'ev-1', name:'Solsticio de Invierno', date:'2026-07-11', time:'22:00', venue:'Buenos Aires', capacity:300 }],
   ['ev-2', { id:'ev-2', name:'Noches del Kraken', date:'2026-07-12', time:'21:00', venue:'Buenos Aires', capacity:250 }],
 ]);
 

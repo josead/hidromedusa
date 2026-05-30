@@ -120,7 +120,7 @@ function scheduleEventReminders() {
 // ──── Events data ─────────────────────────────────────────────────────────────
 function getUpcomingEvents() {
   return [
-    { id:1, artist: 'Hidromedusa', date: '2026-06-21', time: '22:00', venue: 'Buenos Aires', description: 'Solsticio de Invierno — Inmersión Profunda', tickets: true, tags: ['techno','ambient'] },
+    { id:1, artist: 'Hidromedusa', date: '2026-07-11', time: '22:00', venue: 'Buenos Aires', description: 'Solsticio de Invierno — Inmersión Profunda', tickets: true, tags: ['techno','ambient'] },
     { id:2, artist: 'Hidromedusa feat. Artistas Invitados', date: '2026-07-12', time: '21:00', venue: 'Buenos Aires', description: 'Noches del Kraken — Sesión Abismal', tickets: true, tags: ['experimental','electronic'] },
     { id:3, artist: 'Hidromedusa', date: '2026-08-30', time: '23:00', venue: 'Buenos Aires', description: 'Fin de Invierno — Bioluminiscencia', tickets: false, tags: ['live','dj-set'] },
   ];
