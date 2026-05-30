@@ -1,0 +1,30 @@
+{
+  "language_id": "node",
+  "path": ".",
+  "scripts": [
+    "auth/index.js",
+    "mercadopago/index.js",
+    "tickets/index.js",
+    "calendar/index.js",
+    "staff/index.js"
+  ],
+  "endpoints": [
+    { "path": "/auth/exchange",          "method": "POST",   "module": "auth/index",         "fn": "exchange"          },
+    { "path": "/auth/me",                "method": "GET",    "module": "auth/index",         "fn": "me"                },
+    { "path": "/mercadopago/create-preference", "method": "POST", "module": "mercadopago/index", "fn": "createPreference" },
+    { "path": "/mercadopago/webhook",    "method": "POST",   "module": "mercadopago/index",  "fn": "webhook"           },
+    { "path": "/mercadopago/status/:id", "method": "GET",    "module": "mercadopago/index",  "fn": "getStatus"         },
+    { "path": "/tickets/issue",          "method": "POST",   "module": "tickets/index",      "fn": "issueTicket"       },
+    { "path": "/tickets/:id",            "method": "GET",    "module": "tickets/index",      "fn": "getTicket"         },
+    { "path": "/tickets/:id/scan",       "method": "POST",   "module": "tickets/index",      "fn": "scanTicket"        },
+    { "path": "/tickets/user/:uid",      "method": "GET",    "module": "tickets/index",      "fn": "getUserTickets"    },
+    { "path": "/calendar/events",        "method": "GET",    "module": "calendar/index",     "fn": "getEvents"         },
+    { "path": "/calendar/subscribe",     "method": "POST",   "module": "calendar/index",     "fn": "subscribe"         },
+    { "path": "/calendar/ics/:id",       "method": "GET",    "module": "calendar/index",     "fn": "serveIcs"          },
+    { "path": "/staff/tasks/:member",    "method": "GET",    "module": "staff/index",        "fn": "getTasks"          },
+    { "path": "/staff/tasks/:member/toggle", "method": "POST", "module": "staff/index",      "fn": "toggleTask"        },
+    { "path": "/staff/tasks/:member/add","method": "POST",   "module": "staff/index",        "fn": "addTask"           },
+    { "path": "/staff/members",          "method": "GET",    "module": "staff/index",        "fn": "getMembers"        },
+    { "path": "/staff/overview",         "method": "GET",    "module": "staff/index",        "fn": "getOverview"       }
+  ]
+}
