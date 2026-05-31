@@ -10,7 +10,7 @@ const crypto = require('crypto');
 // In-memory store (use DynamoDB in prod)
 const tickets = new Map();
 const events = new Map([
-  ['ev-1', { id:'ev-1', name:'Hidromedusa · 11 Jul', date:'2026-07-11', time:'22:00', venue:'Buenos Aires', capacity:300 }],
+  ['ev-1', { id:'ev-1', name:'Hidromedusa · 11 Jul', date:'2026-07-11', time:'23:00', venue:'990 Espacio Cultural, Tandil', capacity:300 }],
 ]);
 
 async function issueTicket(req) {

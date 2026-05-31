@@ -10,11 +10,11 @@ const CALENDAR_API_KEY = process.env.GOOGLE_CALENDAR_API_KEY;
 const HIDROMEDUSA_EVENTS = [
   {
     id: 'ev-1',
-    title: 'Hidromedusa',
-    description: 'Próxima tocada. 22hs en adelante.',
-    start: '2026-07-11T22:00:00-03:00',
+    title: 'Hidromedusa · 990 Espacio Cultural',
+    description: 'Próxima tocada en 990 Espacio Cultural, Tandil. Puertas 23hs. +18.',
+    start: '2026-07-11T23:00:00-03:00',
     end:   '2026-07-12T06:00:00-03:00',
-    location: 'Buenos Aires, Argentina',
+    location: '990 Espacio Cultural, Tandil, Buenos Aires, AR',
     url: 'https://hidromedusa.com/#entradas',
     tags: [],
   },
