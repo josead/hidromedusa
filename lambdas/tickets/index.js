@@ -132,6 +132,9 @@ async function capture(req) {
         updatedAt: now,
       };
       await store.tickets.put(ticket);
+      // Aviso interno: lead nuevo (o "pidió entrada" si nació pending).
+      await email.sendLeadNotification({ ticket, kind: ticket.status === 'pending' ? 'pending' : 'lead' })
+        .catch((e) => console.error('[capture] notify error:', e && e.message));
       return { status: 200, body: { ticket } };
     }
 
@@ -141,9 +144,15 @@ async function capture(req) {
     if (eml)     patch.buyerEmail = eml;
     if (phone)   patch.buyerPhone = phone;
     if (channel) patch.channel    = channel;
+    const becamePending = wantStatus === 'pending' && rank('pending') > rank(existing.status);
     if (rank(wantStatus) > rank(existing.status)) patch.status = wantStatus;
 
     const updated = await store.tickets.update(id, patch);
+    // Aviso interno solo cuando un lead existente recién pasa a "pidió entrada".
+    if (becamePending) {
+      await email.sendLeadNotification({ ticket: updated, kind: 'pending' })
+        .catch((e) => console.error('[capture] notify error:', e && e.message));
+    }
     return { status: 200, body: { ticket: updated } };
   } catch (err) {
     return { status: 500, body: { error: err.message } };

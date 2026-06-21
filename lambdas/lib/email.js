@@ -20,8 +20,11 @@ const EVENT = {
   dateLabel:'Sáb 11 Jul 2026',
   timeLabel:'20:00 a 03:00',
 };
-const SITE    = 'https://hidromedusa.com';
-const CONTACT = 'hola@hidromedusa.com';
+const SITE      = 'https://hidromedusa.com';
+const CONTACT   = 'hola@hidromedusa.com';
+const STAFF_URL = SITE + '/staff-admin-secreto/';
+// A dónde llegan los avisos internos de leads/compras (verificado en SES).
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'chamot11@gmail.com';
 
 // Paleta + tipografías (con fallback para clientes sin web fonts: Gmail/Outlook).
 const C = {
@@ -98,6 +101,26 @@ function calButton(calUrl) {
 function divider() {
   return pad(`<div style="border-top:1px solid ${C.line};font-size:0;line-height:0;">&nbsp;</div>`, 24);
 }
+// Fila clave/valor para el aviso interno de leads.
+function kv(label, val) {
+  return `<tr>
+    <td style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding:6px 0;width:120px;vertical-align:top;">${label}</td>
+    <td style="font-family:${F.body};font-size:15px;color:${C.bone};padding:6px 0;">${val}</td>
+  </tr>`;
+}
+function adminButton() {
+  return pad(`
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td bgcolor="${C.acid}" style="background:${C.acid};">
+        <a href="${STAFF_URL}" target="_blank" style="display:inline-block;padding:15px 30px;font-family:${F.mono};font-size:14px;font-weight:bold;letter-spacing:1px;color:${C.abyss};text-transform:uppercase;text-decoration:none;">Abrir el panel →</a>
+      </td>
+    </tr></table>`, 24);
+}
+const fmtWhen = (iso) => {
+  if (!iso) return '—';
+  try { return new Date(iso).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'; }
+  catch (e) { return String(iso); }
+};
 
 // Shell: top label + wordmark + sub-label (accent) + filas + footer.
 function htmlDoc({ subLabel, accent = C.acid, rows }) {
@@ -202,6 +225,45 @@ function renderCancelledText({ name }) {
   ].join('\n');
 }
 
+// ── Aviso interno: nuevo lead / pidió entrada ────────────────────────────────
+function renderLeadNotifyHtml({ ticket, kind }) {
+  const isPending = kind === 'pending';
+  const accent = isPending ? C.hot : C.acid;
+  const intro = isPending
+    ? `Alguien apretó <b style="color:${C.hot};">pedir entrada</b>. Generale la palabra desde el panel. 🪼`
+    : `Entró un nuevo lead a la base. 🪼`;
+  const rows =
+    text(intro, 26)
+    + pad(`
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.panel}" style="background:${C.panel};border:1px solid ${accent};">
+        <tr><td style="padding:18px 24px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            ${kv('Nombre', esc(ticket.buyerName) || '—')}
+            ${kv('Email', esc(ticket.buyerEmail) || '—')}
+            ${kv('WhatsApp', esc(ticket.buyerPhone) || '—')}
+            ${kv('Canal', esc(ticket.channel) || '—')}
+            ${kv('Estado', esc(ticket.status))}
+            ${kv('Cuándo', fmtWhen(ticket.updatedAt || ticket.createdAt))}
+            ${kv('ID', esc(ticket.id))}
+          </table>
+        </td></tr>
+      </table>`, 22)
+    + adminButton();
+  return htmlDoc({ subLabel: isPending ? 'Pidió una entrada' : 'Nuevo lead', accent, rows });
+}
+function renderLeadNotifyText({ ticket, kind }) {
+  return [
+    `${kind === 'pending' ? 'Pidió una entrada' : 'Nuevo lead'} — Hidromedusa`, '',
+    `Nombre:   ${ticket.buyerName || '—'}`,
+    `Email:    ${ticket.buyerEmail || '—'}`,
+    `WhatsApp: ${ticket.buyerPhone || '—'}`,
+    `Canal:    ${ticket.channel || '—'}`,
+    `Estado:   ${ticket.status}`,
+    `ID:       ${ticket.id}`, '',
+    `Abrí el panel: ${STAFF_URL}`,
+  ].join('\n');
+}
+
 // ── Envío genérico ───────────────────────────────────────────────────────────
 async function send({ to, subject, html, text: txt, tag }) {
   if (!to) return { skipped: true, reason: 'no-recipient' };
@@ -255,9 +317,19 @@ async function sendTicketCancelled({ to, name }) {
     text: renderCancelledText({ name }),
   });
 }
+// Aviso interno al staff (ADMIN_EMAIL) cuando entra un lead o un "pidió entrada".
+async function sendLeadNotification({ ticket, kind }) {
+  const who = ticket.buyerName || ticket.buyerEmail || ticket.buyerPhone || ticket.id;
+  return send({
+    to: ADMIN_EMAIL, tag: 'lead-notify-' + kind,
+    subject: (kind === 'pending' ? '🔥 Pidió entrada: ' : '🪼 Nuevo lead: ') + who,
+    html: renderLeadNotifyHtml({ ticket, kind }),
+    text: renderLeadNotifyText({ ticket, kind }),
+  });
+}
 
 module.exports = {
-  sendTicketConfirmation, sendPalabraChanged, sendTicketCancelled,
-  renderConfirmationHtml, renderPalabraChangedHtml, renderCancelledHtml,
+  sendTicketConfirmation, sendPalabraChanged, sendTicketCancelled, sendLeadNotification,
+  renderConfirmationHtml, renderPalabraChangedHtml, renderCancelledHtml, renderLeadNotifyHtml,
   googleCalUrl,
 };
