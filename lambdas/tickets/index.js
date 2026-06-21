@@ -173,8 +173,9 @@ async function free(req) {
     }
     const patch = await freePatch(ticket);
     const updated = await store.tickets.update(id, patch);
-    // Best-effort confirmation email (TODO: SES disabled until domain verified).
-    email.sendTicketConfirmation({ to: updated.buyerEmail, name: updated.buyerName, claim: updated.claim })
+    // Best-effort confirmation email — AWAITed so the SES call finishes before
+    // Lambda freezes the execution env (fire-and-forget would risk dropping it).
+    await email.sendTicketConfirmation({ to: updated.buyerEmail, name: updated.buyerName, claim: updated.claim })
       .catch((e) => console.error('[tickets.free] email error:', e && e.message));
     return { status: 200, body: { ticket: updated } };
   } catch (err) {
@@ -193,7 +194,7 @@ async function issue(req) {
     const ticket = newTicket(body);
     Object.assign(ticket, await freePatch(ticket));
     await store.tickets.put(ticket);
-    email.sendTicketConfirmation({ to: ticket.buyerEmail, name: ticket.buyerName, claim: ticket.claim })
+    await email.sendTicketConfirmation({ to: ticket.buyerEmail, name: ticket.buyerName, claim: ticket.claim })
       .catch((e) => console.error('[tickets.issue] email error:', e && e.message));
     return { status: 200, body: { ticket } };
   } catch (err) {

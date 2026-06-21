@@ -34,7 +34,7 @@ async function sendTicketConfirmation({ to, name, claim }) {
   ].join('\n');
 
   if (!ENABLED) {
-    console.log(`[email] SKIPPED (TODO SES) → to=${to} claim=${claim}`);
+    console.log(`[email] SKIPPED (SES_ENABLED!=1) → to=${to} claim=${claim}`);
     return { skipped: true, reason: 'ses-disabled-todo' };
   }
 
@@ -42,7 +42,7 @@ async function sendTicketConfirmation({ to, name, claim }) {
   try {
     const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
     const ses = new SESClient({ region: REGION });
-    await ses.send(new SendEmailCommand({
+    const out = await ses.send(new SendEmailCommand({
       Source: FROM,
       Destination: { ToAddresses: [to] },
       Message: {
@@ -50,9 +50,10 @@ async function sendTicketConfirmation({ to, name, claim }) {
         Body: { Text: { Data: text, Charset: 'UTF-8' } },
       },
     }));
-    return { sent: true };
+    console.log(`[email] SENT → to=${to} claim=${claim} messageId=${out && out.MessageId}`);
+    return { sent: true, messageId: out && out.MessageId };
   } catch (err) {
-    console.error('[email] SES send failed:', err && err.message ? err.message : err);
+    console.error('[email] SES send FAILED:', err && err.message ? err.message : err);
     return { skipped: true, reason: 'ses-error', error: err && err.message };
   }
 }
