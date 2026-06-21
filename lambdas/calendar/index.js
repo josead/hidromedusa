@@ -11,9 +11,9 @@ const HIDROMEDUSA_EVENTS = [
   {
     id: 'ev-1',
     title: 'Hidromedusa · 990 Espacio Cultural',
-    description: 'Próxima tocada en 990 Espacio Cultural, Tandil. Puertas 23hs. +18.',
-    start: '2026-07-11T23:00:00-03:00',
-    end:   '2026-07-12T06:00:00-03:00',
+    description: 'Próxima tocada en 990 Espacio Cultural, Tandil. 20:00 a 03:00. +18.',
+    start: '2026-07-11T20:00:00-03:00',
+    end:   '2026-07-12T03:00:00-03:00',
     location: '990 Espacio Cultural, Tandil, Buenos Aires, AR',
     url: 'https://hidromedusa.com/#entradas',
     tags: [],

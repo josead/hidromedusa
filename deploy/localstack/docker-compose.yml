@@ -1,0 +1,21 @@
+# LocalStack — local DynamoDB for Hidromedusa dev.
+# Usage:
+#   docker compose -f deploy/localstack/docker-compose.yml up -d
+#   DYNAMODB_ENDPOINT=http://localhost:4566 ./deploy/localstack/create-tables.sh
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: hm-localstack
+    ports:
+      - "4566:4566" # edge port (all services)
+    environment:
+      - SERVICES=dynamodb
+      - DEBUG=0
+      - PERSISTENCE=1
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - hm-localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  hm-localstack-data:

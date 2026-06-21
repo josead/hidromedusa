@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>HIDROMEDUSA · Banda + Fiesta desde el fondo de Tandil</title>
-<meta name="description" content="Hidromedusa: banda de synth-rock y fiesta desde Tandil. Entradas, membresías y próximas fechas." />
+<meta name="description" content="Hidromedusa: banda de synth-rock y fiesta desde Tandil. Entradas por WhatsApp y próximas fechas." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira+Stencil+One&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -171,22 +171,6 @@
   .cat-status.hot { background: var(--hot); color: var(--ink); border-color: var(--hot); }
   .cat-arrow { justify-self: end; color: var(--acid); transition: transform .25s, color .2s; }
 
-  /* ---------- Membresía ---------- */
-  .specimens { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 34px; border: 2px solid var(--line-strong); }
-  .spec { padding: 30px 26px; border-right: 2px solid var(--line-strong); position: relative; display: flex; flex-direction: column; background: var(--bg); }
-  .spec:last-child { border-right: none; }
-  .spec.feat { background: var(--bg-2); box-shadow: inset 0 0 0 2px var(--acid); }
-  .spec-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; }
-  .spec.feat .spec-tag { color: var(--acid); }
-  .spec-name { font-family: var(--display); font-size: 40px; line-height: 0.9; margin: 14px 0 6px; text-transform: uppercase; }
-  .spec.feat .spec-name { color: var(--acid); }
-  .spec-price { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-  .spec-price b { font-family: var(--display); font-size: 30px; color: var(--bone); letter-spacing: 0; }
-  .spec ul { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 24px; flex: 1; }
-  .spec li { font-size: 14px; display: flex; gap: 9px; align-items: flex-start; line-height: 1.35; color: var(--bone-dim); }
-  .spec li::before { content: "→"; font-family: var(--mono); color: var(--hot); flex-shrink: 0; }
-  .spec.feat li::before { color: var(--acid); }
-
   /* ---------- Quiénes somos ---------- */
   .somos-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; }
   .somos-body { font-size: 17px; line-height: 1.6; color: var(--muted); }
@@ -270,6 +254,29 @@
   .task-pri { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border: 1px solid var(--muted); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; }
   .task-pri.high { border-color: var(--hot); color: var(--hot); }
 
+  /* ---------- Ticket card (redeem) ---------- */
+  .tk-card { border: 2px solid var(--acid); background: var(--abyss); position: relative; }
+  .tk-top { padding: 18px 20px; border-bottom: 2px dashed var(--acid); display: flex; justify-content: space-between; align-items: flex-start; }
+  .tk-top .tk-type { font-family: var(--display); font-size: 30px; text-transform: uppercase; line-height: 0.9; color: var(--acid); }
+  .tk-top .tk-ev { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; margin-top: 6px; }
+  .tk-status { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; border: 1.5px solid var(--acid); color: var(--acid); padding: 4px 9px; flex-shrink: 0; }
+  .tk-status.used { border-color: var(--muted); color: var(--muted); }
+  .tk-pass { padding: 26px 22px; text-align: center; background: var(--bone); color: var(--ink); }
+  .tk-pass .k { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .55; }
+  .tk-pass .v { font-family: var(--display); font-size: clamp(30px,7vw,44px); line-height: .95; text-transform: uppercase; margin: 8px 0 10px; word-break: break-word; }
+  .tk-pass .n { font-family: var(--mono); font-size: 11px; line-height: 1.5; opacity: .7; }
+  .tk-meta { padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .tk-meta .k { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .tk-meta .v { font-family: var(--body); font-weight: 600; font-size: 14px; }
+  /* claim chip + copy (staff entradas) */
+  .claim-chip { display: inline-flex; align-items: center; gap: 10px; border: 2px solid var(--acid); background: rgba(198,255,26,0.08); padding: 8px 12px; margin-top: 8px; }
+  .claim-chip .ph { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--acid); letter-spacing: 0.04em; }
+  .claim-chip button { background: var(--acid); border: none; color: var(--ink); font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 5px 9px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.06em; }
+  /* staff ticket rows */
+  .tk-row { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; padding: 14px 16px; border: 1.5px solid var(--line); margin-bottom: 8px; background: var(--bg); }
+  .tk-row .tk-who { font-size: 14px; font-weight: 600; }
+  .tk-row .tk-info { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 3px; }
+
   /* ---------- Toast ---------- */
   #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 300; display: none; background: var(--acid); color: var(--ink); font-family: var(--mono); font-size: 13px; font-weight: 700; padding: 13px 22px; border: 2px solid var(--ink); letter-spacing: 0.03em; }
 
@@ -283,9 +290,7 @@
     .stub-side::before { top: -11px; left: 30px; } .stub-side::after { bottom: auto; top: -11px; right: 30px; left: auto; }
     .tier { border-right: none; border-bottom: 2px solid var(--line-strong); }
     .tier:last-child { border-bottom: none; }
-    .specimens { grid-template-columns: 1fr; }
-    .spec { border-right: none; border-bottom: 2px solid var(--line-strong); }
-    .spec:last-child { border-bottom: none; }
+    .tk-meta { grid-template-columns: 1fr; }
     .cat-row { grid-template-columns: 40px 1fr 44px; row-gap: 4px; }
     .cat-date { grid-column: 2; } .cat-venue { grid-column: 1 / -1; } .cat-status { grid-column: 2; }
     .somos-intro { grid-template-columns: 1fr; }
@@ -300,23 +305,16 @@
   <!-- ================= NAV ================= -->
   <nav>
     <div class="brand" onclick="scrollToTop()">
-      <span class="brand-mark">
-        <svg viewBox="0 0 40 40" fill="none">
-          <path d="M6 20 C6 9 14 4 20 4 C26 4 34 9 34 20 C34 22 32 23 30 22 C29 25 27 24 26 22 C25 25 23 25 22 22 C21 25 19 25 18 22 C17 24 15 25 14 22 C12 23 10 22 10 20 Z" fill="#ECE7DA"/>
-          <path d="M14 23 C13 28 12 32 11 36 M20 24 C20 29 20 33 20 37 M26 23 C27 28 28 32 29 36" stroke="#ECE7DA" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-      </span>
-      <span><span class="brand-name">HIDROMEDUSA</span><br /><span class="brand-sub">BANDA + FIESTA · TANDIL</span></span>
+      <span class="brand-name">HIDROMEDUSA</span>
     </div>
     <div class="nav-links">
       <a onclick="goTo('entradas')">Entradas</a>
       <a onclick="goTo('fechas')">Fechas</a>
-      <a onclick="goTo('membresia')">Membresía</a>
-      <a onclick="goTo('somos')">Quiénes somos</a>
+      <a onclick="openModal('m-redeem')">Reclamar tu palabra</a>
     </div>
     <div class="nav-actions">
       <a class="btn btn-line" onclick="openModal('m-auth')" id="btn-login">Ingresar</a>
-      <button id="avatar" onclick="openStaffOrProfile()"></button>
+      <button id="avatar" onclick="logout()" title="Cerrar sesión"></button>
       <a class="btn btn-acid" onclick="goTo('entradas')">Entradas</a>
       <button class="menu-toggle" onclick="openModal('m-menu')" aria-label="menú"><i data-lucide="menu"></i></button>
     </div>
@@ -333,27 +331,12 @@
       </div>
       <div class="hero-main">
         <div>
-          <h1 class="reveal">HIDRO<br /><span class="hl">MEDUSA</span></h1>
-        </div>
-        <div class="plate reveal">
-          <div class="plate-label"><span>FIG. 1</span><span>HYDROMEDUSAE</span></div>
-          <div class="plate-body">
-            <span class="plate-cross">
-              <span style="top:8px;left:8px">N</span><span style="top:8px;right:8px">E</span>
-              <span style="bottom:8px;left:8px">S</span><span style="bottom:8px;right:8px">W</span>
-            </span>
-            <svg viewBox="0 0 40 40" fill="none" id="hero-jelly">
-              <path d="M6 20 C6 9 14 4 20 4 C26 4 34 9 34 20 C34 22 32 23 30 22 C29 25 27 24 26 22 C25 25 23 25 22 22 C21 25 19 25 18 22 C17 24 15 25 14 22 C12 23 10 22 10 20 Z" fill="#C6FF1A"/>
-              <path d="M14 23 C13 28 12 32 11 36 M20 24 C20 29 20 33 20 37 M26 23 C27 28 28 32 29 36" stroke="#C6FF1A" stroke-width="1.4" stroke-linecap="round"/>
-              <circle cx="16" cy="14" r="1.4" fill="#060607"/><circle cx="24" cy="14" r="1.4" fill="#060607"/>
-            </svg>
-          </div>
-          <div class="plate-foot">PROF. ∞ · BIOLUMINISCENTE · NOCTURNA</div>
+          <h1 class="reveal">HIDRO<br /><span class="hl" id="hero-word">MEDUSA</span></h1>
         </div>
       </div>
       <div class="hero-bottom reveal">
         <a class="btn btn-acid btn-lg" onclick="goTo('entradas')">Conseguir entrada <i data-lucide="arrow-right" width="16"></i></a>
-        <a class="btn btn-line btn-lg" onclick="goTo('membresia')">Ver membresías</a>
+        <a class="btn btn-line btn-lg" onclick="openModal('m-redeem')">Reclamar tu palabra</a>
         <span class="scroll-note">↓ Desplegá el catálogo</span>
       </div>
     </div>
@@ -362,7 +345,6 @@
   <!-- ================= MARQUEE ================= -->
   <div class="marquee">
     <div class="marquee-track">
-      <span>BIENVENIDOS AL ABISMO</span><span class="alt">✦</span><span>11 JUL · 990 ESPACIO CULTURAL</span><span class="alt">✦</span><span>TANDIL · AR</span><span class="alt">✦</span><span>SYNTH-ROCK</span><span class="alt">✦</span>
       <span>BIENVENIDOS AL ABISMO</span><span class="alt">✦</span><span>11 JUL · 990 ESPACIO CULTURAL</span><span class="alt">✦</span><span>TANDIL · AR</span><span class="alt">✦</span><span>SYNTH-ROCK</span><span class="alt">✦</span>
     </div>
   </div>
@@ -380,50 +362,49 @@
           <h3>990<br />Espacio Cultural</h3>
           <div class="stub-meta">
             <div><div class="k">Fecha</div><div class="v">Sáb 11 Jul 2026</div></div>
-            <div><div class="k">Puertas</div><div class="v">23:00 hs</div></div>
+            <div><div class="k">Horario</div><div class="v">20:00 a 03:00</div></div>
             <div><div class="k">Edad</div><div class="v">+18</div></div>
             <div><div class="k">Lugar</div><div class="v"><a href="https://www.instagram.com/990.espaciocultural/" target="_blank" rel="noopener" style="color:var(--acid)">990 · Tandil ↗</a></div></div>
           </div>
         </div>
         <div class="stub-side">
           <div>
-            <div class="price-k">Desde</div>
+            <div class="price-k">Entrada única</div>
             <div class="price-v">$10.000</div>
-            <div class="price-n">General · VIP $20.000</div>
+            <div class="price-n">ARS · sticker en la puerta</div>
           </div>
-          <a class="btn btn-acid btn-block" style="margin-top:22px" onclick="goTo('tiers')">Elegir entrada ↓</a>
+          <div style="margin-top:22px;display:flex;flex-direction:column;gap:8px">
+            <a class="btn btn-acid btn-block" onclick="openModal('m-redeem')">Reclamar tu palabra secreta</a>
+            <a class="btn btn-line btn-block" onclick="buy()">Pedir mi entrada</a>
+            <a class="btn btn-line btn-block" onclick="addToCalendar()">Agregar a calendario 📅</a>
+          </div>
         </div>
       </div>
 
       <!-- tiers -->
-      <div class="tiers reveal" id="tiers">
-        <div class="tier">
-          <span class="tier-tag">Acceso 01</span>
-          <div class="tier-name">General</div>
+      <div class="tiers reveal" id="tiers" style="grid-template-columns:minmax(0,460px);justify-content:center">
+        <div class="tier vip">
+          <span class="tier-tag">Acceso único</span>
+          <div class="tier-name">Entrada</div>
           <div class="tier-price">$10.000 <small>ARS</small></div>
+          <div class="secret">
+            <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--acid);flex-shrink:0;margin-top:2px"></i>
+            <div><b>Palabra icebreaker</b><p>Tu entrada trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
+          </div>
+          <div class="secret">
+            <i data-lucide="gift" style="width:18px;height:18px;color:var(--hot);flex-shrink:0;margin-top:2px"></i>
+            <div><b>Primeras 10: merch secreto</b><p>Las primeras 10 entradas vienen con merch — qué es, es secreto. Se revela en la fiesta. 🤫</p></div>
+          </div>
           <ul>
             <li>Acceso a la tocada</li>
             <li>Barra habilitada</li>
-            <li>Entrada con QR único</li>
+            <li>Entrada-sticker (te la dan en la puerta)</li>
+            <li>Tu palabra icebreaker</li>
           </ul>
-          <a class="btn btn-line btn-block" onclick="buy('general')">Comprar General</a>
-        </div>
-        <div class="tier vip">
-          <span class="tier-tag">Acceso 02 · más profundo</span>
-          <div class="tier-name">VIP</div>
-          <div class="tier-price">$20.000 <small>ARS</small></div>
-          <div class="secret">
-            <i data-lucide="gift" style="width:18px;height:18px;color:var(--hot);flex-shrink:0;margin-top:2px"></i>
-            <div><b>Merch secreto</b><p>Viene con merch — pero qué es, es secreto. Se revela en la fiesta. 🤫</p></div>
-          </div>
-          <ul>
-            <li>Todo lo de General</li>
-            <li>Merch sorpresa (se revela en la noche)</li>
-            <li>Podés tirar tu idea de merch al comprar</li>
-          </ul>
-          <a class="btn btn-hot btn-block" onclick="buy('vip')">Comprar VIP</a>
+          <a class="btn btn-hot btn-block" onclick="buy()">Pedir mi entrada</a>
         </div>
       </div>
+      <p class="sec-intro reveal" style="font-size:15px;max-width:640px;margin-top:24px">Pedís tu entrada por WhatsApp o Instagram. Cuando confirmás el pago, te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu palabra»</a> para confirmar tu lugar. En la puerta decís tus palabras clave y te damos tu entrada-sticker.</p>
     </div>
   </section>
 
@@ -440,72 +421,12 @@
     </div>
   </section>
 
-  <!-- ================= MEMBRESÍA ================= -->
-  <section class="block" id="membresia">
-    <div class="wrap">
-      <div class="sec-row reveal"><span class="sec-num">[ 03 ]</span><span class="sec-kicker">Club Abismo</span></div>
-      <h2 class="sec-h reveal">MEMBRESÍA</h2>
-      <p class="sec-intro reveal">Descuentos, preventas y beneficios para los que vienen siempre.</p>
-      <div class="specimens reveal">
-        <div class="spec">
-          <span class="spec-tag">Nivel 01 · superficie</span>
-          <div class="spec-name">Plancton</div>
-          <div class="spec-price"><b>Gratis</b></div>
-          <ul>
-            <li>Fechas y novedades primero</li>
-            <li>Preventa 24h anticipada</li>
-            <li>Playlist mensual del abismo</li>
-          </ul>
-          <a class="btn btn-line btn-block" onclick="join('plancton')">Sumarme gratis</a>
-        </div>
-        <div class="spec feat">
-          <span class="spec-tag">Nivel 02 · más elegido</span>
-          <div class="spec-name">Medusa</div>
-          <div class="spec-price"><b>$3.500</b> / mes</div>
-          <ul>
-            <li>Todo lo de Plancton</li>
-            <li>2×1 en todas las entradas</li>
-            <li>15% off en merch</li>
-            <li>Sorteos mensuales</li>
-          </ul>
-          <a class="btn btn-acid btn-block" onclick="join('medusa')">Quiero ser Medusa</a>
-        </div>
-        <div class="spec">
-          <span class="spec-tag">Nivel 03 · abismo</span>
-          <div class="spec-name">Abisal</div>
-          <div class="spec-price"><b>$7.000</b> / mes</div>
-          <ul>
-            <li>Todo lo de Medusa</li>
-            <li>Entrada libre a todas las fechas</li>
-            <li>Acceso al backstage</li>
-            <li>Merch exclusivo cada año</li>
-          </ul>
-          <a class="btn btn-line btn-block" onclick="join('abisal')">Bajar al fondo</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= QUIÉNES SOMOS ================= -->
-  <section class="block deep" id="somos">
-    <div class="wrap">
-      <div class="sec-row reveal"><span class="sec-num">[ 04 ]</span><span class="sec-kicker">La especie</span></div>
-      <div class="somos-intro reveal">
-        <h2 class="sec-h">QUIÉNES<br />SOMOS</h2>
-        <div class="somos-body">
-          <p><b>Hidromedusa</b> es banda y es fiesta, desde Tandil. Synth-rock crudo y fechas que son más fiesta que recital.</p>
-          <p>Hacemos la música y armamos la fiesta — todo de la misma criatura.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ================= CTA ================= -->
   <section class="cta">
     <div class="wrap">
-      <h2 class="reveal">ENTRATE.</h2>
-      <p class="reveal">La próxima inmersión es el 11 de julio.</p>
-      <a class="btn btn-acid btn-lg reveal" onclick="goTo('entradas')">Conseguir entrada <i data-lucide="arrow-right" width="16"></i></a>
+      <h2 class="reveal">AGENDAR.</h2>
+      <p class="reveal">Sábado 11 de julio · 20:00 a 03:00 · 990 Espacio Cultural, Tandil.</p>
+      <a class="btn btn-acid btn-lg reveal" onclick="addToCalendar()">Agendar la fecha <i data-lucide="calendar-plus" width="16"></i></a>
     </div>
   </section>
 
@@ -524,12 +445,10 @@
           <h5>Catálogo</h5>
           <a onclick="goTo('entradas')">Entradas</a>
           <a onclick="goTo('fechas')">Fechas</a>
-          <a onclick="goTo('membresia')">Membresía</a>
-          <a onclick="goTo('somos')">Quiénes somos</a>
+          <a onclick="openModal('m-redeem')">Reclamar tu palabra</a>
         </div>
         <div class="foot-col">
           <h5>Banda</h5>
-          <a onclick="openStaff()">Staff</a>
           <a onclick="openLegal('terminos')">Términos</a>
           <a onclick="openLegal('privacidad')">Privacidad</a>
         </div>
@@ -573,22 +492,29 @@
   <!-- Buy -->
   <div class="modal" id="m-buy">
     <div class="modal-box">
-      <div class="modal-head"><h4 id="buy-title">Comprar entrada</h4><button class="modal-x" onclick="closeModal('m-buy')">×</button></div>
+      <div class="modal-head"><h4 id="buy-title">Pedir entrada</h4><button class="modal-x" onclick="closeModal('m-buy')">×</button></div>
       <div class="modal-body">
         <div style="border:2px solid var(--line-strong);padding:14px 16px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center">
-          <div><div style="font-family:var(--display);font-size:24px;text-transform:uppercase" id="buy-name">VIP</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted)" id="buy-sub">990 Espacio Cultural · 11 Jul</div></div>
-          <div style="font-family:var(--display);font-size:30px;color:var(--acid)" id="buy-price">$20.000</div>
+          <div><div style="font-family:var(--display);font-size:24px;text-transform:uppercase" id="buy-name">Entrada</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted)" id="buy-sub">990 Espacio Cultural · 11 Jul</div></div>
+          <div style="font-family:var(--display);font-size:30px;color:var(--acid)" id="buy-price">$10.000</div>
         </div>
         <label class="field-label">Nombre completo</label>
-        <input class="field" id="buy-buyer" placeholder="Tu nombre" />
-        <label class="field-label">Email</label>
-        <input class="field" id="buy-email" type="email" placeholder="tu@correo.com" />
-        <div id="buy-merch-block" style="display:none">
-          <label class="field-label" style="color:var(--hot)">¿Idea de merch? (opcional · es secreto igual 🤫)</label>
-          <textarea class="field" id="buy-merch" placeholder="Tirá tu idea: remera, buzo, lo que se te ocurra..."></textarea>
+        <input class="field" id="buy-buyer" placeholder="Ej. Gustavo Cerati" />
+        <label class="field-label">Email <span style="color:var(--muted)">(opcional)</span></label>
+        <input class="field" id="buy-email" type="email" placeholder="cerati@correo.com" />
+        <label class="field-label">WhatsApp</label>
+        <input class="field" id="buy-phone" type="tel" placeholder="Ej. 2494 123456" />
+        <div style="border:2px dashed var(--line-strong);padding:14px 16px;margin:6px 0 16px">
+          <div class="field-label" style="margin-bottom:8px">1 · Transferí al alias 🧾</div>
+          <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
+            <span id="alias-text" style="font-family:var(--mono);font-size:18px;color:var(--acid);letter-spacing:.02em">pasa.la.gorra</span>
+            <button type="button" class="btn btn-line" style="padding:7px 16px;white-space:nowrap" onclick="copyAlias()">Copiar</button>
+          </div>
+          <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:10px;line-height:1.5">Transferí $10.000 al alias y sacá captura del comprobante. 2 · Mandala por WhatsApp o Instagram 👇 y te pasamos tus palabras clave.</p>
         </div>
-        <button class="btn btn-acid btn-block btn-lg" onclick="payMP()">Pagar con Mercado Pago 🟢</button>
-        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:12px">Seguro · SSL · QR único por entrada</p>
+        <button class="btn btn-acid btn-block btn-lg" onclick="payWhatsApp()">Mandar captura por WhatsApp 🟢</button>
+        <button class="btn btn-line btn-block btn-lg" style="margin-top:8px" onclick="payInstagram()">Mandar captura por Instagram 📸</button>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">El staff confirma el pago y te habilita tus palabras clave (dos palabras) para reclamar tu entrada.</p>
       </div>
     </div>
   </div>
@@ -613,10 +539,26 @@
       <div class="modal-body">
         <button class="auth-btn" onclick="closeModal('m-menu');goTo('entradas')">Entradas</button>
         <button class="auth-btn" onclick="closeModal('m-menu');goTo('fechas')">Fechas</button>
-        <button class="auth-btn" onclick="closeModal('m-menu');goTo('membresia')">Membresía</button>
-        <button class="auth-btn" onclick="closeModal('m-menu');goTo('somos')">Quiénes somos</button>
-        <button class="auth-btn" onclick="closeModal('m-menu');openStaff()">Staff</button>
+        <button class="auth-btn" onclick="closeModal('m-menu');openModal('m-redeem')">Reclamar tu palabra</button>
+        <button class="auth-btn" onclick="closeModal('m-menu');addToCalendar()">Agregar a calendario</button>
         <button class="auth-btn" onclick="closeModal('m-menu');openModal('m-auth')">Ingresar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Redeem (Tengo un código) -->
+  <div class="modal" id="m-redeem">
+    <div class="modal-box">
+      <div class="modal-head"><h4>Reclamá tu palabra</h4><button class="modal-x" onclick="closeRedeem()">×</button></div>
+      <div class="modal-body">
+        <div id="redeem-form">
+          <p style="color:var(--bone-dim);font-size:14px;line-height:1.5;margin-bottom:16px">Cargá tu <b style="color:var(--acid)">palabra icebreaker</b> (dos palabras). Se habilita después de que confirmes el pago por WhatsApp o Instagram.</p>
+          <label class="field-label">Tu palabra icebreaker</label>
+          <input class="field" id="redeem-claim" placeholder="ej. medusa violeta" autocomplete="off" onkeydown="if(event.key==='Enter')redeem()" />
+          <button class="btn btn-acid btn-block btn-lg" onclick="redeem()">Ver mi entrada</button>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5">¿Todavía no pagaste tu entrada? <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Pedila acá →</a></p>
+        </div>
+        <div id="redeem-result"></div>
       </div>
     </div>
   </div>
@@ -628,19 +570,6 @@
     <div class="legal-body" id="legal-content"></div>
   </div>
 
-  <!-- Staff -->
-  <div class="overlay" id="o-staff">
-    <div class="overlay-head"><h3>Staff · Panel de control</h3><button class="btn btn-line" onclick="closeOverlay('o-staff')">Cerrar ×</button></div>
-    <div class="staff-wrap">
-      <div class="staff-side">
-        <div class="lbl">Integrante</div>
-        <select class="member-pick" id="member-pick" onchange="selectMember(this.value)"></select>
-        <div class="lbl">Paneles</div>
-        <div id="staff-nav"></div>
-      </div>
-      <div class="staff-main" id="staff-main"></div>
-    </div>
-  </div>
 
   <div id="toast"></div>
 
@@ -649,6 +578,39 @@
    HIDROMEDUSA · rave underground — comportamientos
    ============================================================ */
 lucide.createIcons();
+
+/* ---------- Config ---------- */
+window.HM_CONFIG = window.HM_CONFIG || {
+  API_BASE:        '',                 // '' => modo demo/offline
+  WHATSAPP_NUMBER: '5492494481699',    // E.164 sin '+'
+  INSTAGRAM_HANDLE: 'hidromedusa',     // usuario de IG para el DM (ig.me/m/<handle>)
+  ALIAS: 'pasa.la.gorra',              // alias para transferir el pago
+  GOOGLE_CLIENT_ID:    '',
+  APPLE_CLIENT_ID:     '',
+  INSTAGRAM_CLIENT_ID: '',
+};
+try { localStorage.setItem('hm_api_base', window.HM_CONFIG.API_BASE || ''); } catch(e){}
+
+/* ---------- Event (fallback hardcodeado) ---------- */
+const HM_EVENT = {
+  id:'ev-1', title:'Hidromedusa · 990 Espacio Cultural',
+  start:'2026-07-11T20:00:00-03:00', end:'2026-07-12T03:00:00-03:00',
+  venue:'990 Espacio Cultural, Tandil, Buenos Aires, AR',
+  dateLabel:'Sáb 11 Jul 2026 · 20:00 a 03:00', shortLabel:'990 Espacio Cultural, 11 Jul'
+};
+
+/* ---------- API helper (lanza si falla o si API_BASE vacío) ---------- */
+async function api(path, opts={}){
+  const base = (window.HM_CONFIG.API_BASE || '').replace(/\/$/,'');
+  if(!base) throw new Error('no-api');
+  const res = await fetch(base + path, {
+    method: opts.method || 'GET',
+    headers: { 'Content-Type':'application/json', ...(HM.user&&HM.user.token ? { Authorization:'Bearer '+HM.user.token } : {}) },
+    ...(opts.body ? { body: JSON.stringify(opts.body) } : {})
+  });
+  if(!res.ok) throw new Error('http-'+res.status);
+  return res.json();
+}
 
 /* ---------- State ---------- */
 const HM = {
@@ -679,18 +641,41 @@ function closeOverlay(id){ document.getElementById(id).classList.remove('open');
 let toastT;
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',3200); }
 
-/* ---------- Auth (demo) ---------- */
-function login(provider){
-  closeModal('m-auth');
+/* ---------- Auth ---------- */
+const AUTH_PROVIDERS={
+  google:    { name:'Google',    cfg:'GOOGLE_CLIENT_ID',    authUrl:'https://accounts.google.com/o/oauth2/v2/auth', scope:'openid email profile' },
+  apple:     { name:'Apple',     cfg:'APPLE_CLIENT_ID',     authUrl:'https://appleid.apple.com/auth/authorize',    scope:'name email' },
+  instagram: { name:'Instagram', cfg:'INSTAGRAM_CLIENT_ID', authUrl:'https://api.instagram.com/oauth/authorize',   scope:'user_profile' },
+};
+function onAuthUser(user){
+  HM.user={ name:user.name||user.email||'Abismo', email:user.email||null, provider:user.provider, token:user.token||null };
+  HM.save(); updateAuthUI();
+  toast('¡Bienvenide al abismo, '+HM.user.name+'! 🪼');
+  if('Notification' in window && Notification.permission==='default') setTimeout(()=>openModal('m-notif'),1200);
+}
+function demoLogin(provider){
   const names={google:'Flasher Demo',apple:'Abyssal User',instagram:'Tentacle Kid'};
   const emails={google:'demo@gmail.com',apple:'demo@icloud.com',instagram:null};
   toast('Conectando con '+provider+'... 🔐');
-  setTimeout(()=>{
-    HM.user={ name:names[provider], email:emails[provider], provider, rank:'plancton' };
-    HM.save(); updateAuthUI();
-    toast('¡Bienvenide al abismo, '+HM.user.name+'! 🪼');
-    if('Notification' in window && Notification.permission==='default') setTimeout(()=>openModal('m-notif'),1200);
-  },700);
+  setTimeout(()=>onAuthUser({ name:names[provider], email:emails[provider], provider }),700);
+}
+function login(provider){
+  closeModal('m-auth');
+  const p=AUTH_PROVIDERS[provider];
+  const clientId=p && window.HM_CONFIG[p.cfg];
+  if(!clientId){ demoLogin(provider); return; }  // sin creds => demo
+  const redirect=location.origin+'/auth/callback.html';
+  const params=new URLSearchParams({ client_id:clientId, redirect_uri:redirect, response_type:'code', scope:p.scope, state:provider });
+  const popup=window.open(p.authUrl+'?'+params, 'hm-auth', 'width=500,height=650,scrollbars=yes');
+  toast('Conectando con '+p.name+'... 🔐');
+  const handler=e=>{
+    if(e.origin!==location.origin) return;
+    if(!e.data||e.data.type!=='auth-success'){ if(e.data&&e.data.type==='auth-error'){ window.removeEventListener('message',handler); toast('No pudimos iniciar sesión'); } return; }
+    window.removeEventListener('message',handler);
+    if(popup) popup.close();
+    onAuthUser(e.data.user||{});
+  };
+  window.addEventListener('message',handler);
 }
 function logout(){ HM.user=null; HM.save(); updateAuthUI(); toast('Hasta la próxima inmersión 🌊'); }
 function updateAuthUI(){
@@ -698,52 +683,147 @@ function updateAuthUI(){
   if(HM.user){ btn.style.display='none'; av.style.display='grid'; av.textContent=HM.user.name[0].toUpperCase(); }
   else { btn.style.display='inline-flex'; av.style.display='none'; }
 }
-function openStaffOrProfile(){ openStaff(); }
 updateAuthUI();
 
-/* ---------- Buy flow ---------- */
-const TICKETS={ general:{name:'General',price:'$10.000',merch:false}, vip:{name:'VIP',price:'$20.000',merch:true} };
-let currentBuy=null;
-function buy(id){
-  if(!HM.user){ openModal('m-auth'); toast('Primero ingresá para comprar 🔐'); return; }
-  currentBuy=id; const t=TICKETS[id];
-  document.getElementById('buy-title').textContent='Comprar '+t.name;
-  document.getElementById('buy-name').textContent=t.name;
-  document.getElementById('buy-price').textContent=t.price;
-  document.getElementById('buy-merch-block').style.display=t.merch?'block':'none';
-  document.getElementById('buy-buyer').value=HM.user.name||'';
-  document.getElementById('buy-email').value=HM.user.email||'';
+/* ---------- Buy flow (WhatsApp) ---------- */
+const TICKET={ name:'Entrada', price:'$10.000', type:'general' };
+function buy(){
+  document.getElementById('buy-title').textContent='Pedir entrada';
+  document.getElementById('buy-name').textContent=TICKET.name;
+  document.getElementById('buy-price').textContent=TICKET.price;
+  if(HM.user){ document.getElementById('buy-buyer').value=HM.user.name||''; document.getElementById('buy-email').value=HM.user.email||''; }
   openModal('m-buy');
 }
-function payMP(){
-  const name=document.getElementById('buy-buyer').value, email=document.getElementById('buy-email').value;
-  if(!name||!email){ toast('Completá tus datos primero'); return; }
-  const merchIdea=document.getElementById('buy-merch').value;
-  toast('Conectando con Mercado Pago... 🟢');
-  setTimeout(()=>{
-    const t=TICKETS[currentBuy];
-    HM.tickets.push({ id:'HM-'+Date.now().toString(36).toUpperCase(), type:t.name, date:'2026-07-11', merchIdea:merchIdea||null });
-    HM.save(); closeModal('m-buy');
-    let msg='¡Entrada '+t.name+' confirmada! 🎫';
-    if(currentBuy==='vip' && merchIdea) msg='¡VIP confirmada! Anotamos tu idea de merch 🤫';
-    toast(msg);
-  },1100);
+// Junta los datos del pedido, registra el lead (best-effort) y devuelve el mensaje
+// armado — o null si falta el nombre. Compartido por WhatsApp e Instagram.
+function collectOrder(){
+  const name=document.getElementById('buy-buyer').value.trim();
+  const email=document.getElementById('buy-email').value.trim();
+  const phone=document.getElementById('buy-phone').value.trim();
+  if(!name){ toast('Decinos tu nombre'); return null; }
+  api('/tickets/request',{ method:'POST', body:{ type:TICKET.type, buyerName:name, buyerEmail:email||null, buyerPhone:phone||null } }).catch(()=>{});
+  const alias=window.HM_CONFIG.ALIAS||'pasa.la.gorra';
+  return '¡Hola Hidromedusa! Quiero una entrada ('+TICKET.price+') para '+HM_EVENT.shortLabel+'. Soy '+name+'. Te paso la captura del pago al alias '+alias+'.';
+}
+function payWhatsApp(){
+  const msg=collectOrder(); if(msg===null) return;
+  window.open('https://wa.me/'+window.HM_CONFIG.WHATSAPP_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
+  closeModal('m-buy');
+  toast('Te abrimos WhatsApp con tu pedido 🟢');
+}
+function payInstagram(){
+  const msg=collectOrder(); if(msg===null) return;
+  // Instagram no permite prellenar el texto del DM: lo copiamos al portapapeles.
+  try { navigator.clipboard && navigator.clipboard.writeText(msg); } catch(e){}
+  const handle=(window.HM_CONFIG.INSTAGRAM_HANDLE||'hidromedusa').replace(/^@/,'');
+  window.open('https://ig.me/m/'+handle,'_blank');
+  closeModal('m-buy');
+  toast('Te abrimos el DM de Instagram — pegá el mensaje que copiamos 📋');
+}
+function copyAlias(){
+  const alias=window.HM_CONFIG.ALIAS||'pasa.la.gorra';
+  const done=function(){ toast('Alias copiado: '+alias+' 📋'); };
+  try {
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(alias).then(done).catch(function(){ fallbackCopy(alias,done); }); }
+    else fallbackCopy(alias,done);
+  } catch(e){ fallbackCopy(alias,done); }
+}
+function fallbackCopy(text,done){
+  const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); done(); } catch(e){ toast('Copiá el alias: '+text); }
+  document.body.removeChild(ta);
 }
 
-/* ---------- Membership ---------- */
-function join(plan){
-  if(plan==='plancton'){ if(!HM.user){ openModal('m-auth'); return; } toast('¡Ya sos Plancton! Bienvenide al cardumen 🦠'); return; }
-  if(!HM.user){ openModal('m-auth'); toast('Ingresá para suscribirte'); return; }
-  toast('Suscripción '+plan+' — conectando con MP... 🟢');
-  setTimeout(()=>{ HM.user.rank=plan; HM.save(); toast('¡Ahora sos nivel '+plan.charAt(0).toUpperCase()+plan.slice(1)+'! 🪼'); },1200);
+/* ---------- Redeem (frase secreta) ---------- */
+async function redeem(){
+  const claim=(document.getElementById('redeem-claim').value||'').trim();
+  if(!claim){ toast('Cargá tu frase de dos palabras'); return; }
+  let data;
+  try { data=await api('/tickets/redeem',{ method:'POST', body:{ claim } }); }
+  catch(err){
+    if(err && /http-(404|410)/.test(err.message)){ toast('No encontramos ese código 🪼'); return; }
+    // demo/offline: aceptar cualquier frase y mostrar una entrada de muestra
+    data={ ticket:{ id:'HM-'+claim.toLowerCase().replace(/\s+/g,'-'), type:'general', claim, status:'freed' }, event:HM_EVENT };
+  }
+  renderTicketCard(data.ticket, data.event||HM_EVENT);
 }
+function renderTicketCard(tk, ev){
+  const typeLabel='ENTRADA';
+  const statusMap={ freed:'Válida', pending:'Pendiente', used:'Usada', cancelled:'Cancelada' };
+  const status=statusMap[tk.status]||'Válida';
+  const box=document.getElementById('redeem-result');
+  box.innerHTML=`
+    <div class="tk-card">
+      <div class="tk-top">
+        <div><div class="tk-type">${typeLabel}</div><div class="tk-ev">${(ev&&ev.title)||HM_EVENT.title}</div></div>
+        <div class="tk-status ${tk.status==='used'?'used':''}">${status}</div>
+      </div>
+      <div class="tk-pass">
+        <div class="k">Tus palabras clave</div>
+        <div class="v">${tk.claim||'—'}</div>
+        <div class="n">Decí estas palabras en la puerta y te damos tu entrada-sticker.</div>
+      </div>
+      <div class="tk-meta">
+        <div><div class="k">Fecha</div><div class="v">${(ev&&ev.dateLabel)||HM_EVENT.dateLabel}</div></div>
+        <div><div class="k">Lugar</div><div class="v">${(ev&&ev.venue)||HM_EVENT.venue}</div></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:14px;line-height:1.5;border-top:1px dashed var(--line-strong);padding-top:12px">🍹 Si compartís una palabra con otra persona en la fiesta, se presentan y ganan una consumición.</div>
+    </div>
+    <button class="btn btn-line btn-block" style="margin-top:14px" onclick="closeRedeem()">Cerrar</button>`;
+  document.getElementById('redeem-form').style.display='none';
+}
+function closeRedeem(){
+  closeModal('m-redeem');
+  document.getElementById('redeem-form').style.display='';
+  document.getElementById('redeem-result').innerHTML='';
+  document.getElementById('redeem-claim').value='';
+}
+
 
 /* ---------- Newsletter ---------- */
 function subscribeNews(){
   const e=document.getElementById('news-email').value;
   if(!e||!e.includes('@')){ toast('Dejanos un email válido'); return; }
+  api('/newsletter/subscribe',{ method:'POST', body:{ email:e } }).catch(()=>{});
   document.getElementById('news-email').value='';
   toast('¡Listo! Te mandamos señales desde el fondo 📡');
+}
+
+/* ---------- Calendario ---------- */
+function fmtICS(d){ return new Date(d).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,''); }
+function buildGoogleCalUrl(ev){
+  const params=new URLSearchParams({
+    action:'TEMPLATE', text:ev.title,
+    dates:fmtICS(ev.start)+'/'+fmtICS(ev.end),
+    details:'Hidromedusa en vivo + fiesta. Entradas por WhatsApp.', location:ev.venue
+  });
+  return 'https://calendar.google.com/calendar/render?'+params;
+}
+function buildICS(ev){
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Hidromedusa//ES','BEGIN:VEVENT',
+    'UID:'+ev.id+'@hidromedusa','DTSTAMP:'+fmtICS(Date.now()),
+    'DTSTART:'+fmtICS(ev.start),'DTEND:'+fmtICS(ev.end),
+    'SUMMARY:'+ev.title,'LOCATION:'+ev.venue,
+    'DESCRIPTION:Hidromedusa en vivo + fiesta. Entradas por WhatsApp.',
+    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+}
+async function addToCalendar(){
+  let googleUrl, icsUrl;
+  try {
+    const r=await api('/calendar/subscribe',{ method:'POST', body:{ eventId:HM_EVENT.id } });
+    googleUrl=r.googleUrl; icsUrl=r.icsUrl;
+  } catch(e){ /* fallback cliente */ }
+  if(!googleUrl) googleUrl=buildGoogleCalUrl(HM_EVENT);
+  window.open(googleUrl,'_blank');
+  // descargar ICS (del backend si lo dio, si no generado en cliente)
+  if(!icsUrl){
+    const blob=new Blob([buildICS(HM_EVENT)],{type:'text/calendar'});
+    icsUrl=URL.createObjectURL(blob);
+  }
+  const a=document.createElement('a'); a.href=icsUrl; a.download='hidromedusa.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('Agendá la fecha 📅 Te abrimos Google Calendar');
 }
 
 /* ---------- Notifications ---------- */
@@ -753,8 +833,8 @@ function enableNotif(){
   Notification.requestPermission().then(p=>{
     if(p==='granted'){
       toast('¡Señales activadas! Te avisamos antes de cada tocada 🔔');
-      const ms=new Date('2026-07-11T23:00:00-03:00')-Date.now()-86400000;
-      if(ms>0) setTimeout(()=>new Notification('¡Mañana toca Hidromedusa!',{body:'Tandil · 23:00. ¡Preparate!'}),ms);
+      const ms=new Date('2026-07-11T20:00:00-03:00')-Date.now()-86400000;
+      if(ms>0) setTimeout(()=>new Notification('¡Mañana toca Hidromedusa!',{body:'Tandil · 20:00 a 03:00. ¡Preparate!'}),ms);
     }
   });
 }
@@ -762,16 +842,16 @@ function enableNotif(){
 /* ---------- Legal ---------- */
 const LEGAL={
   terminos:{ title:'Términos y Condiciones', html:`
-    <h4>1. Compra de entradas</h4><p>La compra de entradas es definitiva e intransferible. Al pagar aceptás estos términos. Las entradas se validan con un código QR único al ingreso.</p>
-    <h4>2. Reembolsos</h4><p>No se realizan reembolsos salvo cancelación del evento por parte de Hidromedusa. En ese caso se informa por los canales oficiales y se gestiona la devolución en 15 días hábiles.</p>
-    <h4>3. Entrada VIP y merch secreto</h4><p>La entrada VIP incluye merch sorpresa que se revela el día de la fiesta. El tipo de merch puede variar entre fechas. Las ideas de merch enviadas al comprar son sugerencias y no garantizan un producto específico.</p>
+    <h4>1. Pedido de entradas</h4><p>Las entradas se piden por WhatsApp o por mensaje directo de Instagram. El staff confirma el cupo y te entrega tus palabras clave (dos palabras). En la puerta decís tus palabras clave y te damos tu entrada-sticker. La entrada es intransferible.</p>
+    <h4>2. Reembolsos</h4><p>No se realizan reembolsos salvo cancelación del evento por parte de Hidromedusa. En ese caso se informa por los canales oficiales.</p>
+    <h4>3. Entrada VIP y merch secreto</h4><p>La entrada VIP incluye merch sorpresa que se revela el día de la fiesta. El tipo de merch puede variar entre fechas. Las ideas de merch enviadas al pedir son sugerencias y no garantizan un producto específico.</p>
     <h4>4. Acceso</h4><p>Ingreso +18 con documento. Hidromedusa se reserva el derecho de admisión.</p>
     <h4>5. Notificaciones</h4><p>Podés optar por recibir avisos antes de las tocadas y novedades. Te podés dar de baja cuando quieras.</p>
     <h4>6. Conducta</h4><p>El respeto entre asistentes es fundamental. Cualquier conducta que atente contra la seguridad de otros es motivo de expulsión sin reembolso.</p>` },
   privacidad:{ title:'Política de Privacidad', html:`
-    <h4>Qué datos recopilamos</h4><p>Nombre, email y datos de autenticación del proveedor que elijas (Google, Apple o Instagram), historial de compras y preferencias de notificación.</p>
-    <h4>Para qué los usamos</h4><p>Para <b>contar con vos para la diversión</b>: recordatorios antes de las tocadas, novedades y gestión de tu membresía. Nunca vendemos tus datos.</p>
-    <h4>Mercado Pago</h4><p>El pago lo procesa Mercado Pago. Hidromedusa no almacena datos de tarjeta.</p>
+    <h4>Qué datos recopilamos</h4><p>Nombre y, si los dejás, email y WhatsApp para gestionar tu entrada. Si iniciás sesión (opcional), los datos básicos del proveedor que elijas (Google, Apple o Instagram) y tus preferencias de notificación.</p>
+    <h4>Para qué los usamos</h4><p>Para <b>contar con vos para la diversión</b>: confirmar tu entrada por WhatsApp o Instagram, recordatorios antes de las tocadas y novedades. Nunca vendemos tus datos.</p>
+    <h4>Pagos</h4><p>El pago se coordina directamente por WhatsApp con el staff. No procesamos ni almacenamos datos de tarjeta en el sitio.</p>
     <h4>Tus derechos</h4><p>Podés acceder, rectificar o borrar tus datos cuando quieras escribiendo a <b>hola@hidromedusa.com</b>.</p>
     <h4>Seguridad</h4><p>Usamos cifrado SSL/TLS en todas las comunicaciones.</p>` }
 };
@@ -791,14 +871,43 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{
 }),{threshold:0.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-/* hero jelly subtle float */
-anime({ targets:'#hero-jelly', translateY:[-4,4], duration:3000, direction:'alternate', easing:'easeInOutSine', loop:true });
+/* hero word rotator — HIDRO + [palabra], con pausa (detenido) en cada una y vuelta a MEDUSA */
+(function(){
+  const el=document.getElementById('hero-word');
+  if(!el) return;
+  const WORDS=['MEDUSA','FEST','MAGIA','MÚSICA','AMIGOS','ABISMO','FIESTA'];
+  let i=0;
+  setInterval(function(){
+    i=(i+1)%WORDS.length;
+    if(window.anime){
+      anime({ targets:el, opacity:[0,1], translateY:[16,0], duration:380, easing:'easeOutExpo',
+        begin:function(){ el.textContent=WORDS[i]; } });
+    } else { el.textContent=WORDS[i]; }
+  },1700);  // ~1.7s detenido en cada palabra
+})();
 
 /* nav bg already solid; ensure icons render after dynamic insertions */
 window.addEventListener('load',()=>lucide.createIcons());
+
+/* marquesina infinita sin huecos — repite el contenido hasta superar el viewport y ajusta la velocidad */
+(function(){
+  const track=document.querySelector('.marquee-track');
+  const cont=document.querySelector('.marquee');
+  if(!track||!cont) return;
+  const unit=track.innerHTML;          // unidad base
+  const SPEED=90;                      // px por segundo
+  function build(){
+    let set=unit; track.innerHTML=set; let g=0;
+    while(track.scrollWidth < cont.clientWidth && g<40){ set+=unit; track.innerHTML=set; g++; }
+    track.innerHTML=set+set;           // dos sets => translateX(-50%) loopea sin saltos
+    const oneSet=track.scrollWidth/2;
+    track.style.animationDuration=Math.max(12,Math.round(oneSet/SPEED))+'s';
+  }
+  build();
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(build);  // recalcular con la fuente ya cargada
+  let rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(build,200); });
+})();
 </script>
 
-<!-- staff panel logic -->
-<script src="js/staff-panel.js"></script>
 </body>
 </html>

@@ -4,12 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "npx serve public -p 3000",
-    "build": "npm run build:css",
-    "build:css": "npx tailwindcss -i ./client/css/input.css -o ./public/css/app.css --minify",
-    "watch:css": "npx tailwindcss -i ./client/css/input.css -o ./public/css/app.css --watch"
+    "db:up": "docker compose -f deploy/localstack/docker-compose.yml up -d",
+    "db:down": "docker compose -f deploy/localstack/docker-compose.yml down",
+    "db:init": "bash deploy/localstack/create-tables.sh"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.0",
     "serve": "^14.2.0"
   }
 }

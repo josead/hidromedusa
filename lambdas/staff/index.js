@@ -1,142 +1,107 @@
 // MetaCall Lambda — Staff operations
-// Endpoints:
-//   GET  /staff/tasks/:member         → { panels: { [panelId]: tasks[] } }
-//   POST /staff/tasks/:member/toggle  { panelId, taskId } → { task }
-//   POST /staff/tasks/:member/add     { panelId, label, priority } → { task }
-//   GET  /staff/members               → [members]
-//   GET  /staff/overview              → { panels, totalPct }
+// Tasks are GLOBAL per panel (shared across all staff), persisted in DynamoDB
+// via lambdas/lib/store.js (`tasks` API, seeded from TASK_SEED). Members are
+// static config per CONTRACT.md.
+//
+// Endpoints (see metacall.json):
+//   GET  /staff/members        → [{ id, name, role, panels }]
+//   GET  /staff/tasks          → { panels: { [panelId]: tasks[] } }   (global)
+//   POST /staff/tasks/toggle   { panelId, taskId, staffToken } → { task }
+//   POST /staff/tasks/add      { panelId, label, priority, staffToken } → { task }
+//   GET  /staff/overview       → { panels:[{ id, tasks, pct }], totalPct }
 
+const store = require('../lib/store');
+
+// ── Static staff config (exactly per CONTRACT.md "Staff members") ──
 const STAFF_MEMBERS = {
-  guido: { name:'Guido', role:'Arte & Producción', panels:['arte','finanzas','asistencia'] },
-  jose:  { name:'Jose',  role:'Tech & Sistemas',   panels:['arte','finanzas','asistencia','sistemas'] },
-  juan:  { name:'Juan',  role:'Operaciones',        panels:['entradas_fisicas','arte'] },
-  meli:  { name:'Meli',  role:'Colaboradora',       panels:['arte','costura','redes'] },
+  guido: { name:'Guido', role:'Arte · Visuales',        panels:['arte','finanzas','asistencia'] },
+  jose:  { name:'Jose',  role:'Síntesis · Sistemas',    panels:['arte','finanzas','asistencia','sistemas'] },
+  juan:  { name:'Juan',  role:'En vivo · Operaciones',  panels:['entradas_fisicas','arte'] },
+  meli:  { name:'Meli',  role:'Colaboradora',           panels:['arte','costura','redes'] },
 };
 
-// Task store — persisted per session (use DynamoDB with TTL in prod)
-const taskStore = new Map();
-
-function defaultTasks() {
-  return {
-    arte:            [
-      { id:'art-1', label:'Flyer próxima fecha',          done:false, priority:'high' },
-      { id:'art-2', label:'Instagram Stories templates',  done:false, priority:'med'  },
-      { id:'art-3', label:'Diseño wristband Flashero',    done:true,  priority:'med'  },
-      { id:'art-4', label:'Animación intro streams',      done:false, priority:'low'  },
-    ],
-    finanzas:        [
-      { id:'fin-1', label:'Break-even próxima fecha',     done:false, priority:'high' },
-      { id:'fin-2', label:'Revisar comisión MP',          done:false, priority:'med'  },
-      { id:'fin-3', label:'Cotizar sonido + iluminación', done:false, priority:'high' },
-    ],
-    asistencia:      [
-      { id:'asi-1', label:'Confirmar lista VIP',          done:false, priority:'high' },
-      { id:'asi-2', label:'Definir cupo cortesías',       done:false, priority:'med'  },
-      { id:'asi-3', label:'Avisar artistas invitados',    done:true,  priority:'high' },
-    ],
-    sistemas:        [
-      { id:'sys-1', label:'Lambdas a producción',         done:false, priority:'high' },
-      { id:'sys-2', label:'Dominio hidromedusa.com',      done:false, priority:'high' },
-      { id:'sys-3', label:'MP webhooks reales',           done:false, priority:'high' },
-      { id:'sys-4', label:'OAuth credentials',            done:false, priority:'high' },
-      { id:'sys-5', label:'QR scanner puerta',            done:false, priority:'med'  },
-    ],
-    entradas_fisicas:[
-      { id:'ef-1',  label:'Imprimir talonario',           done:false, priority:'high' },
-      { id:'ef-2',  label:'Puntos de venta físicos',      done:false, priority:'med'  },
-    ],
-    costura:         [
-      { id:'cos-1', label:'Wristbands nivel Medusa',      done:false, priority:'med'  },
-      { id:'cos-2', label:'Parche bordado logo',          done:false, priority:'low'  },
-    ],
-    redes:           [
-      { id:'red-1', label:'Post anuncio fecha',           done:false, priority:'high' },
-      { id:'red-2', label:'Stories countdown',            done:false, priority:'med'  },
-      { id:'red-3', label:'Reels post-evento',            done:false, priority:'med'  },
-    ],
-  };
+// ── Staff gate ──
+// True when no STAFF_TOKEN is configured (dev) or the body token matches.
+function requireStaff(req) {
+  const want = process.env.STAFF_TOKEN;
+  if (!want) return true; // unset/empty => allow all
+  return req && req.body && req.body.staffToken === want;
 }
 
-function getMemberTasks(member) {
-  if (!taskStore.has(member)) taskStore.set(member, defaultTasks());
-  const all = taskStore.get(member);
-  const panels = STAFF_MEMBERS[member]?.panels || [];
-  return Object.fromEntries(panels.map(p => [p, all[p] || []]));
-}
-
-async function getTasks(req) {
-  const member = req.params?.member?.toLowerCase();
-  if (!STAFF_MEMBERS[member]) return { status: 404, body: { error: 'Unknown staff member' } };
-  return { status: 200, body: { member, panels: getMemberTasks(member) } };
-}
-
-async function toggleTask(req) {
-  const member = req.params?.member?.toLowerCase();
-  const { panelId, taskId } = req.body || {};
-  if (!STAFF_MEMBERS[member] || !panelId || !taskId) return { status: 400, body: { error: 'Bad request' } };
-
-  if (!taskStore.has(member)) taskStore.set(member, defaultTasks());
-  const tasks = taskStore.get(member)[panelId] || [];
-  const task = tasks.find(t => t.id === taskId);
-  if (!task) return { status: 404, body: { error: 'Task not found' } };
-
-  task.done = !task.done;
-  return { status: 200, body: { task } };
-}
-
-async function addTask(req) {
-  const member = req.params?.member?.toLowerCase();
-  const { panelId, label, priority = 'med' } = req.body || {};
-  if (!STAFF_MEMBERS[member] || !panelId || !label) return { status: 400, body: { error: 'Bad request' } };
-
-  if (!taskStore.has(member)) taskStore.set(member, defaultTasks());
-  const store = taskStore.get(member);
-  if (!store[panelId]) store[panelId] = [];
-
-  const task = { id: `custom-${Date.now()}`, label, done: false, priority };
-  store[panelId].push(task);
-  return { status: 200, body: { task } };
-}
-
+// ── Members (static) ──
 async function getMembers() {
   return {
     status: 200,
-    body: Object.entries(STAFF_MEMBERS).map(([id, m]) => ({ id, ...m }))
+    body: Object.entries(STAFF_MEMBERS).map(([id, m]) => ({ id, name: m.name, role: m.role, panels: m.panels })),
   };
 }
 
-async function getOverview() {
-  const panels = {};
-  let totalTasks = 0, totalDone = 0;
-
-  for (const [member, cfg] of Object.entries(STAFF_MEMBERS)) {
-    const memberTasks = getMemberTasks(member);
-    for (const [panelId, tasks] of Object.entries(memberTasks)) {
-      if (!panels[panelId]) panels[panelId] = { tasks: [], members: [] };
-      tasks.forEach(t => {
-        const existing = panels[panelId].tasks.find(x => x.id === t.id);
-        if (!existing) {
-          panels[panelId].tasks.push(t);
-          totalTasks++;
-          if (t.done) totalDone++;
-        }
-      });
-      panels[panelId].members.push(member);
-    }
+// ── Tasks (global, all panels) ──
+async function getTasks(req) {
+  try {
+    const panels = await store.tasks.getAll();
+    return { status: 200, body: { panels } };
+  } catch (err) {
+    return { status: 500, body: { error: String(err && err.message || err) } };
   }
-
-  return {
-    status: 200,
-    body: {
-      panels: Object.entries(panels).map(([id, p]) => ({
-        id,
-        tasks: p.tasks,
-        members: [...new Set(p.members)],
-        pct: p.tasks.length ? Math.round(p.tasks.filter(t=>t.done).length / p.tasks.length * 100) : 0,
-      })),
-      totalPct: totalTasks ? Math.round(totalDone / totalTasks * 100) : 0,
-    }
-  };
 }
 
+// ── Toggle a task's done flag (staff) ──
+async function toggleTask(req) {
+  if (!requireStaff(req)) return { status: 401, body: { error: 'Unauthorized' } };
+  const { panelId, taskId } = (req && req.body) || {};
+  if (!panelId || !taskId) return { status: 400, body: { error: 'Bad request' } };
+
+  try {
+    const list = await store.tasks.getPanel(panelId);     // seeded if absent
+    const task = (list || []).find(t => t.id === taskId);
+    if (!task) return { status: 404, body: { error: 'Task not found' } };
+
+    task.done = !task.done;
+    await store.tasks.putPanel(panelId, list);
+    return { status: 200, body: { task } };
+  } catch (err) {
+    return { status: 500, body: { error: String(err && err.message || err) } };
+  }
+}
+
+// ── Append a custom task to a panel (staff) ──
+async function addTask(req) {
+  if (!requireStaff(req)) return { status: 401, body: { error: 'Unauthorized' } };
+  const { panelId, label, priority = 'med' } = (req && req.body) || {};
+  if (!panelId || !label) return { status: 400, body: { error: 'Bad request' } };
+
+  try {
+    const list = await store.tasks.getPanel(panelId);     // seeded if absent
+    const task = { id: `custom-${Date.now()}`, label, done: false, priority };
+    list.push(task);
+    await store.tasks.putPanel(panelId, list);
+    return { status: 200, body: { task } };
+  } catch (err) {
+    return { status: 500, body: { error: String(err && err.message || err) } };
+  }
+}
+
+// ── Progress overview across every panel ──
+async function getOverview() {
+  try {
+    const all = await store.tasks.getAll();
+    let totalTasks = 0, totalDone = 0;
+    const panels = Object.entries(all).map(([id, tasks]) => {
+      const list = tasks || [];
+      const done = list.filter(t => t.done).length;
+      totalTasks += list.length;
+      totalDone  += done;
+      return { id, tasks: list, pct: list.length ? Math.round(done / list.length * 100) : 0 };
+    });
+    return {
+      status: 200,
+      body: { panels, totalPct: totalTasks ? Math.round(totalDone / totalTasks * 100) : 0 },
+    };
+  } catch (err) {
+    return { status: 500, body: { error: String(err && err.message || err) } };
+  }
+}
+
+// Names must match metacall.json routing.
 module.exports = { getTasks, toggleTask, addTask, getMembers, getOverview };

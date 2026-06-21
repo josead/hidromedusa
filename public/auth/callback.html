@@ -1,17 +1,47 @@
 <!DOCTYPE html>
-<html><head><title>Hidromedusa — Auth</title>
+<html lang="es"><head><meta charset="UTF-8" /><title>Hidromedusa — Auth</title>
 <style>
-  body { background:#020b18; color:#00f5ff; font-family:'Space Grotesk',sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
-  .spinner { width:40px; height:40px; border:3px solid rgba(0,245,255,.2); border-top-color:#00f5ff; border-radius:50%; animation:spin .8s linear infinite; }
+  body { background:#0a0a0b; color:#C6FF1A; font-family:'Space Grotesk',system-ui,sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+  .spinner { width:40px; height:40px; border:3px solid rgba(198,255,26,.2); border-top-color:#C6FF1A; border-radius:50%; animation:spin .8s linear infinite; margin:0 auto; }
   @keyframes spin { to { transform:rotate(360deg); } }
-  p { margin-top:1rem; opacity:.5; font-size:.875rem; }
-</style>
-</head>
+  p { margin-top:1rem; opacity:.6; font-size:.875rem; font-family:'Space Mono',monospace; letter-spacing:.05em; }
+</style></head>
 <body>
   <div style="text-align:center">
     <div class="spinner"></div>
     <p>Autenticando...</p>
   </div>
-  <script src="../js/auth.js"></script>
+  <script>
+  /* Self-contained OAuth callback. Reads code/state, exchanges via the API,
+     postMessages the result to the opener, then closes. No external deps. */
+  (function(){
+    // mismo default que index.html; permite override desde localStorage
+    var API_BASE = '';
+    try { var saved = localStorage.getItem('hm_api_base'); if (saved) API_BASE = saved; } catch(e){}
+    API_BASE = (API_BASE || '').replace(/\/$/, '');
+
+    var params = new URLSearchParams(location.search);
+    var code = params.get('code');
+    var state = params.get('state');               // provider
+    var redirect_uri = location.origin + '/auth/callback.html';
+
+    function done(msg){ try { if (window.opener) window.opener.postMessage(msg, location.origin); } catch(e){} window.close(); }
+
+    if (!code) { done({ type:'auth-error', reason:'no-code' }); return; }
+    if (!API_BASE) {
+      // sin backend: devolvemos un usuario demo para no romper el flujo
+      var demo = { name:'Abismo Demo', email:null, provider:state||'oauth' };
+      done({ type:'auth-success', user:demo });
+      return;
+    }
+    fetch(API_BASE + '/auth/exchange', {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ code:code, provider:state, redirect_uri:redirect_uri })
+    })
+    .then(function(r){ if(!r.ok) throw new Error('http-'+r.status); return r.json(); })
+    .then(function(user){ done({ type:'auth-success', user:user }); })
+    .catch(function(){ done({ type:'auth-error' }); });
+  })();
+  </script>
 </body>
 </html>

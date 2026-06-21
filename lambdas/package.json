@@ -1,0 +1,13 @@
+{
+  "name": "hidromedusa-lambdas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MetaCall serverless lambdas for Hidromedusa (tickets, staff, calendar, auth, newsletter).",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/lib-dynamodb": "^3.600.0"
+  }
+}
