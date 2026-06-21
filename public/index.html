@@ -658,9 +658,18 @@ function collectOrder(channel){
   const alias=window.HM_CONFIG.ALIAS||'pasa.la.gorra';
   return '¡Hola Hidromedusa! Quiero una entrada ('+TICKET.price+') para '+HM_EVENT.shortLabel+'. Soy '+name+'. Te paso la captura del pago al alias '+alias+'.';
 }
+// Abre un link externo en otra pestaña SIN dejar una pestaña en blanco: un
+// <a target="_blank"> navega directo al destino, mientras que window.open crea
+// primero un about:blank y, cuando WhatsApp deriva a la app, esa pestaña queda
+// vacía. Así no te saca de la web ni deja la página en blanco.
+function openExternal(url){
+  const a=document.createElement('a');
+  a.href=url; a.target='_blank'; a.rel='noopener noreferrer';
+  document.body.appendChild(a); a.click(); a.remove();
+}
 function payWhatsApp(){
   const msg=collectOrder('whatsapp'); if(msg===null) return;
-  window.open('https://wa.me/'+window.HM_CONFIG.WHATSAPP_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
+  openExternal('https://wa.me/'+window.HM_CONFIG.WHATSAPP_NUMBER+'?text='+encodeURIComponent(msg));
   closeModal('m-buy');
   toast('Te abrimos WhatsApp con tu pedido 🟢');
 }
@@ -669,7 +678,7 @@ function payInstagram(){
   // Instagram no permite prellenar el texto del DM: lo copiamos al portapapeles.
   try { navigator.clipboard && navigator.clipboard.writeText(msg); } catch(e){}
   const handle=(window.HM_CONFIG.INSTAGRAM_HANDLE||'hidromedusa').replace(/^@/,'');
-  window.open('https://ig.me/m/'+handle,'_blank');
+  openExternal('https://ig.me/m/'+handle);
   closeModal('m-buy');
   toast('Te abrimos el DM de Instagram — pegá el mensaje que copiamos 📋');
 }

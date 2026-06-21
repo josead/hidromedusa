@@ -28,7 +28,10 @@
   .btn:hover{border-color:var(--acid);}
   .btn-acid{background:var(--acid);color:var(--ink);border-color:var(--acid);}
   .btn-acid:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(198,255,26,.25);}
+  .btn-hot{border-color:var(--hot);color:var(--hot);}
+  .btn-hot:hover{background:var(--hot);color:#fff;border-color:var(--hot);}
   .btn-sm{padding:6px 11px;font-size:11px;}
+  .row-actions{display:flex;gap:6px;flex-wrap:wrap;}
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
   .stat{border:2px solid var(--line-strong);padding:14px 16px;}
   .stat .n{font-family:var(--display);font-size:34px;line-height:1;color:var(--acid);}
@@ -47,6 +50,7 @@
   .pill.pending{color:var(--hot);border-color:var(--hot);}
   .pill.freed{color:var(--acid);border-color:var(--acid);}
   .pill.used{color:var(--muted);}
+  .pill.cancelled{color:var(--hot);border-color:var(--hot);}
   .claim{font-family:var(--mono);font-size:15px;color:var(--acid);cursor:pointer;letter-spacing:.02em;}
   .claim:hover{text-decoration:underline;}
   .sub{font-family:var(--mono);font-size:11px;color:var(--muted);}
@@ -107,7 +111,7 @@
     <h2 class="sec">Con palabra <span class="c" id="c-words"></span></h2>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>Palabras clave</th><th>Quién la tiene</th><th>Contacto</th><th>Estado</th><th>Cuándo</th></tr></thead>
+        <thead><tr><th>Palabras clave</th><th>Quién la tiene</th><th>Contacto</th><th>Estado</th><th>Cuándo</th><th>Acciones</th></tr></thead>
         <tbody id="tb-words"></tbody>
       </table>
     </div>
@@ -121,7 +125,7 @@
       <input class="field" id="i-email" type="email" placeholder="Email (opcional)" />
     </div>
     <button class="btn btn-acid" onclick="issueDirect()">Generar palabra ahora</button>
-    <div class="todo">TODO · Email: al generar la palabra el backend ya llama a <b>sendTicketConfirmation</b> (AWS SES) — desactivado hasta verificar el dominio <b>entrada@hidromedusa.com</b>. Activar con SES_ENABLED=1.</div>
+    <div class="todo">Email (AWS SES, en vivo desde <b>entrada@hidromedusa.com</b>): al <b>generar</b> o <b>cambiar</b> palabra se manda la confirmación; al <b>invalidar</b> se avisa que la entrada dejó de servir. <b>Eliminar</b> NO envía email (borra el registro).</div>
   </section>
 </div>
 
@@ -181,7 +185,7 @@ function copyClaim(c){ try{ navigator.clipboard.writeText(c); toast('Palabra cop
 function render(tickets){
   const pend=tickets.filter(t=>t.status==='lead'||t.status==='pending')
     .sort((a,b)=>(b.updatedAt||b.createdAt||'').localeCompare(a.updatedAt||a.createdAt||''));
-  const words=tickets.filter(t=>t.status==='freed'||t.status==='used')
+  const words=tickets.filter(t=>t.status==='freed'||t.status==='used'||t.status==='cancelled')
     .sort((a,b)=>(b.freedAt||b.createdAt||'').localeCompare(a.freedAt||a.createdAt||''));
 
   // Stats
@@ -201,7 +205,10 @@ function render(tickets){
       <td><span class="sub">${esc(t.channel)||'—'}</span></td>
       <td><span class="pill ${t.status}">${t.status==='pending'?'Pagó?':'Lead'}</span></td>
       <td class="sub">${fmtWhen(t.updatedAt||t.createdAt)}</td>
-      <td><button class="btn btn-acid btn-sm" onclick="freeTicket('${esc(t.id)}',this)">Generar palabra</button></td>
+      <td><div class="row-actions">
+        <button class="btn btn-acid btn-sm" onclick="freeTicket('${esc(t.id)}',this)">Generar palabra</button>
+        <button class="btn btn-hot btn-sm" onclick="deleteTicket('${esc(t.id)}','${esc(t.buyerName||'')}')">Eliminar</button>
+      </div></td>
     </tr>`).join('') : `<tr><td colspan="6" class="empty">No hay leads ni pendientes todavía.</td></tr>`;
 
   // Con palabra
@@ -211,9 +218,21 @@ function render(tickets){
       <td><span class="claim" onclick="copyClaim('${esc(t.claim)}')">${esc(t.claim)||'—'}</span></td>
       <td class="name">${esc(t.buyerName)||'<span class="sub">—</span>'}</td>
       <td>${contact(t)}</td>
-      <td><span class="pill ${t.status}">${t.status==='used'?'Usada':'Válida'}</span></td>
+      <td><span class="pill ${t.status}">${statusLabel(t.status)}</span></td>
       <td class="sub">${fmtWhen(t.freedAt||t.createdAt)}</td>
-    </tr>`).join('') : `<tr><td colspan="5" class="empty">Todavía no se generó ninguna palabra.</td></tr>`;
+      <td>${wordActions(t)}</td>
+    </tr>`).join('') : `<tr><td colspan="6" class="empty">Todavía no se generó ninguna palabra.</td></tr>`;
+}
+
+function statusLabel(s){ return s==='used'?'Usada':s==='cancelled'?'Invalidada':'Válida'; }
+function wordActions(t){
+  const id=esc(t.id), nm=esc(t.buyerName||'');
+  const del=`<button class="btn btn-hot btn-sm" onclick="deleteTicket('${id}','${nm}')">Eliminar</button>`;
+  if(t.status==='cancelled') return `<div class="row-actions">${del}</div>`;
+  const change=`<button class="btn btn-sm" onclick="rewordTicket('${id}','${nm}')">Cambiar palabra</button>`;
+  const cancel=`<button class="btn btn-hot btn-sm" onclick="cancelTicket('${id}','${nm}')">Invalidar</button>`;
+  // 'freed' = válida (cambiar + invalidar + eliminar); 'used' = ya entró (solo invalidar/eliminar)
+  return `<div class="row-actions">${t.status==='freed'?change:''}${cancel}${del}</div>`;
 }
 
 async function load(){
@@ -251,6 +270,41 @@ async function issueDirect(){
     toast('Generada: '+claim+' 📋');
     try{ navigator.clipboard.writeText(claim); }catch(e){}
     document.getElementById('i-name').value='';document.getElementById('i-phone').value='';document.getElementById('i-email').value='';
+    load();
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+// Cambiar palabra: vacío = generar al azar; o escribís una a mano (dos-palabras).
+async function rewordTicket(id,name){
+  const custom=prompt('Nueva palabra para '+(name||'esta entrada')+'.\nDejá vacío para generar una al azar.\nFormato: dos-palabras (ej: medusa-violeta)','');
+  if(custom===null) return; // canceló el prompt
+  try{
+    const data=await api('/tickets/'+encodeURIComponent(id)+'/reword',{method:'POST',body:{claim:custom.trim()}});
+    const claim=data.ticket&&data.ticket.claim;
+    toast('Palabra actualizada: '+claim+(data.ticket&&data.ticket.buyerEmail?' · email enviado 📧':' 📋'));
+    try{ navigator.clipboard.writeText(claim); }catch(e){}
+    load();
+  }catch(e){
+    toast(e.message==='http-409'?'Esa palabra ya está en uso':'Error: '+e.message);
+  }
+}
+
+// Invalidar: la palabra deja de servir y se avisa por email (si hay).
+async function cancelTicket(id,name){
+  if(!confirm('¿Invalidar la entrada de '+(name||'esta persona')+'?\nLa palabra deja de servir y se le avisa por email.')) return;
+  try{
+    const data=await api('/tickets/'+encodeURIComponent(id)+'/cancel',{method:'POST',body:{}});
+    toast('Entrada invalidada'+(data.ticket&&data.ticket.buyerEmail?' · email enviado 📧':''));
+    load();
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+// Eliminar: borra el registro para siempre. NO envía email.
+async function deleteTicket(id,name){
+  if(!confirm('¿Eliminar para siempre la entrada de '+(name||'esta persona')+'?\nNo se puede deshacer y NO se envía email.')) return;
+  try{
+    await api('/tickets/'+encodeURIComponent(id)+'/delete',{method:'POST',body:{}});
+    toast('Eliminada 🗑️');
     load();
   }catch(e){ toast('Error: '+e.message); }
 }

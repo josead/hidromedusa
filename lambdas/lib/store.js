@@ -95,6 +95,11 @@ const tickets = {
     }));
     return r.Attributes || null;
   },
+  // Hard-delete a ticket by id (staff "Eliminar"). No-op if it doesn't exist.
+  async remove(id) {
+    await run('tickets.remove', new DeleteCommand({ TableName: T.tickets, Key: { id } }));
+    return true;
+  },
 };
 
 // ── Tasks ─────────────────────────────────────────

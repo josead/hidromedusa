@@ -66,6 +66,15 @@ async function freePatch(ticket) {
   return { claim, claimNorm, qrData, status: 'freed', freedAt: new Date().toISOString() };
 }
 
+// Patch that sets a SPECIFIC (staff-chosen) claim on a ticket — keeps status.
+function claimPatch(ticket, claim) {
+  const claimNorm = claimcode.normalize(claim);
+  const qrData = Buffer.from(JSON.stringify({
+    id: ticket.id, claim, type: ticket.type, eventId: ticket.eventId,
+  })).toString('base64');
+  return { claim, claimNorm, qrData };
+}
+
 // Build a fresh pending ticket record from a request body.
 function newTicket(body) {
   const { type, buyerName, buyerEmail, buyerPhone, merchIdea } = body;
@@ -202,13 +211,82 @@ async function issue(req) {
   }
 }
 
+// STAFF: change a ticket's palabra. With body.claim → set that exact phrase
+// (must be unique); without → mint a fresh random one. Emails the new palabra.
+async function reword(req) {
+  if (!requireStaff(req)) return { status: 401, body: { error: 'Staff token required' } };
+  try {
+    const id = req.params?.id;
+    const ticket = await store.tickets.get(id);
+    if (!ticket) return { status: 404, body: { error: 'Ticket not found' } };
+    if (ticket.status !== 'freed') {
+      return { status: 400, body: { error: 'Solo se puede cambiar la palabra de una entrada válida' } };
+    }
+    const oldClaim = ticket.claim;
+    const custom = (req.body && typeof req.body.claim === 'string') ? req.body.claim.trim() : '';
+    let patch;
+    if (custom) {
+      const norm = claimcode.normalize(custom);
+      if (!norm) return { status: 400, body: { error: 'Palabra inválida' } };
+      const taken = await store.tickets.byClaim(norm);
+      if (taken && taken.id !== id) return { status: 409, body: { error: 'Esa palabra ya está en uso' } };
+      patch = claimPatch(ticket, custom);
+    } else {
+      const fp = await freePatch(ticket);
+      patch = { claim: fp.claim, claimNorm: fp.claimNorm, qrData: fp.qrData };
+    }
+    const updated = await store.tickets.update(id, patch);
+    await email.sendPalabraChanged({ to: updated.buyerEmail, name: updated.buyerName, claim: updated.claim, oldClaim })
+      .catch((e) => console.error('[tickets.reword] email error:', e && e.message));
+    return { status: 200, body: { ticket: updated, oldClaim } };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
+// STAFF: invalidate a ticket. Keeps the record (status 'cancelled') so the palabra
+// stops working in redeem/scan, and emails the buyer that it was invalidated.
+async function cancel(req) {
+  if (!requireStaff(req)) return { status: 401, body: { error: 'Staff token required' } };
+  try {
+    const id = req.params?.id;
+    const ticket = await store.tickets.get(id);
+    if (!ticket) return { status: 404, body: { error: 'Ticket not found' } };
+    if (ticket.status === 'cancelled') return { status: 200, body: { ticket } };
+    const updated = await store.tickets.update(id, {
+      status: 'cancelled', cancelledAt: new Date().toISOString(),
+    });
+    await email.sendTicketCancelled({ to: updated.buyerEmail, name: updated.buyerName })
+      .catch((e) => console.error('[tickets.cancel] email error:', e && e.message));
+    return { status: 200, body: { ticket: updated } };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
+// STAFF: hard-delete a ticket (mistake/test cleanup). No email — the record is gone.
+async function remove(req) {
+  if (!requireStaff(req)) return { status: 401, body: { error: 'Staff token required' } };
+  try {
+    const id = req.params?.id;
+    const ticket = await store.tickets.get(id);
+    if (!ticket) return { status: 404, body: { error: 'Ticket not found' } };
+    await store.tickets.remove(id);
+    return { status: 200, body: { deleted: true, id } };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
 // PUBLIC: redeem a claim phrase → ticket + event (for the ticket card / palabras clave).
 async function redeem(req) {
   const { claim } = req.body || {};
   try {
     const norm = claimcode.normalize(claim);
     const ticket = await store.tickets.byClaim(norm);
-    if (!ticket) return { status: 404, body: { error: 'No encontramos ese código' } };
+    if (!ticket || ticket.status === 'cancelled') {
+      return { status: 404, body: { error: 'No encontramos ese código' } };
+    }
     const event = EVENTS[ticket.eventId] || null;
     return { status: 200, body: { ticket, event } };
   } catch (err) {
@@ -223,6 +301,9 @@ async function scan(req) {
     const id = req.params?.id;
     const ticket = await store.tickets.get(id);
     if (!ticket) return { status: 404, body: { valid: false, reason: 'Ticket not found' } };
+    if (ticket.status === 'cancelled') {
+      return { status: 200, body: { valid: false, reason: 'Entrada invalidada' } };
+    }
     if (ticket.status === 'used') {
       return { status: 200, body: { valid: false, reason: 'Ticket already used', usedAt: ticket.usedAt } };
     }
@@ -250,4 +331,4 @@ async function getTicket(req) {
   }
 }
 
-module.exports = { request, capture, list, free, issue, redeem, scan, getTicket };
+module.exports = { request, capture, list, free, issue, reword, cancel, remove, redeem, scan, getTicket };
