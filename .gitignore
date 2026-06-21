@@ -1,0 +1,23 @@
+# ── Notas personales / manejo de redes (NUNCA al repo público) ──
+redes/
+Stack.md
+
+# ── Entorno / secretos ──
+.env
+.env.local
+*.local
+deploy/.secrets*
+
+# ── Dependencias / build ──
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+
+# ── Sistema operativo / editores ──
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
