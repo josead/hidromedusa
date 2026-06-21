@@ -3,8 +3,34 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HIDROMEDUSA · Banda + Fiesta desde el fondo de Tandil</title>
-<meta name="description" content="Hidromedusa: banda de synth-rock y fiesta desde Tandil. Entradas por WhatsApp y próximas fechas." />
+<title>Hidromedusa — Música en vivo de Tandil</title>
+<meta name="description" content="Hidromedusa — música en vivo de Tandil." />
+<link rel="canonical" href="https://hidromedusa.com/" />
+<meta name="theme-color" content="#0a0a0b" />
+
+<!-- icons -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="shortcut icon" href="/favicon.ico" />
+
+<!-- link preview (Open Graph + Twitter) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hidromedusa" />
+<meta property="og:title" content="Hidromedusa" />
+<meta property="og:description" content="Música en vivo de Tandil." />
+<meta property="og:url" content="https://hidromedusa.com/" />
+<meta property="og:image" content="https://hidromedusa.com/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Hidromedusa — música en vivo de Tandil" />
+<meta property="og:locale" content="es_AR" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Hidromedusa" />
+<meta name="twitter:description" content="Música en vivo de Tandil." />
+<meta name="twitter:image" content="https://hidromedusa.com/og.png" />
+
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira+Stencil+One&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -117,7 +143,7 @@
   .sec-num { font-family: var(--mono); font-size: 13px; color: var(--acid); letter-spacing: 0.1em; }
   .sec-kicker { font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
   .sec-h { font-family: var(--display); font-size: clamp(46px, 8vw, 108px); line-height: 0.85; letter-spacing: 0.01em; text-transform: uppercase; }
-  .sec-intro { font-family: var(--serif); font-style: italic; font-size: clamp(20px,2.4vw,28px); max-width: 540px; line-height: 1.25; margin-top: 14px; color: var(--muted); }
+  .sec-intro { font-family: var(--serif); font-style: italic; font-size: clamp(20px,2.4vw,28px); max-width: 540px; line-height: 1.25; margin-top: 14px; color: var(--bone-dim); }
 
   .reveal { opacity: 0; transform: translateY(22px); }
 
@@ -178,7 +204,7 @@
 
   /* ---------- Quiénes somos ---------- */
   .somos-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; }
-  .somos-body { font-size: 17px; line-height: 1.6; color: var(--muted); }
+  .somos-body { font-size: 17px; line-height: 1.6; color: var(--bone-dim); }
   .somos-body p { margin-bottom: 14px; }
   .somos-body b { color: var(--bone); }
 
@@ -302,6 +328,20 @@
     .foot-grid { grid-template-columns: 1fr 1fr; }
     .staff-wrap { grid-template-columns: 1fr; }
     .staff-side { border-right: none; border-bottom: 2px solid var(--line-strong); }
+  }
+  /* ---- legibilidad en celular ---- */
+  @media (max-width: 600px) {
+    /* el wordmark hueco (outline) se engrosa para que no se pierda en pantalla chica */
+    .hero h1 .hl { -webkit-text-stroke-width: 2.5px; }
+    .cta h2 { -webkit-text-stroke-width: 2.5px; }
+    /* respiro de interlineado en párrafos */
+    .sec-intro { line-height: 1.4; }
+    /* piso de tamaño para las etiquetas mono más chicas */
+    .brand-sub { font-size: 9.5px; }
+    .plate-foot, .plate-cross span, .tk-meta .k, .tk-status,
+    .stub-meta .k, .tier-tag, .cat-status, .tk-top .tk-ev { font-size: 11px; }
+    /* más contraste en pie de página */
+    .foot-col a, .foot-brand p { color: var(--bone-dim); }
   }
 </style>
 </head>
