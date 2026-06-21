@@ -156,6 +156,11 @@
   .secret { border: 1.5px dashed var(--hot); padding: 12px 14px; margin: 0 0 24px; display: flex; gap: 10px; align-items: flex-start; }
   .secret b { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--hot); text-transform: uppercase; display: block; margin-bottom: 3px; }
   .secret p { font-size: 13px; color: var(--bone-dim); line-height: 1.4; }
+  .incluye { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; align-items: start; }
+  .incluye-h { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .incluye-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .incluye-list li { font-size: 15px; display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; color: var(--bone-dim); }
+  .incluye-list li::before { content: "→"; font-family: var(--mono); color: var(--acid); flex-shrink: 0; }
 
   /* ---------- Fechas ---------- */
   .cat-row { display: grid; grid-template-columns: 56px 150px 1fr 130px 50px; align-items: center; gap: 16px; padding: 22px 8px; border-top: 1.5px solid var(--line); text-decoration: none; color: var(--bone); transition: background .2s, padding .25s, color .2s; cursor: pointer; }
@@ -285,7 +290,7 @@
     .menu-toggle { display: block; }
     .hero-main { grid-template-columns: 1fr; }
     .plate { width: 100%; }
-    .stub, .tiers { grid-template-columns: 1fr; }
+    .stub, .tiers, .incluye { grid-template-columns: 1fr; }
     .stub-side { border-left: none; border-top: 2px dashed var(--line-strong); }
     .stub-side::before { top: -11px; left: 30px; } .stub-side::after { bottom: auto; top: -11px; right: 30px; left: auto; }
     .tier { border-right: none; border-bottom: 2px solid var(--line-strong); }
@@ -363,7 +368,6 @@
           <div class="stub-meta">
             <div><div class="k">Fecha</div><div class="v">Sáb 11 Jul 2026</div></div>
             <div><div class="k">Horario</div><div class="v">20:00 a 03:00</div></div>
-            <div><div class="k">Edad</div><div class="v">+18</div></div>
             <div><div class="k">Lugar</div><div class="v"><a href="https://www.instagram.com/990.espaciocultural/" target="_blank" rel="noopener" style="color:var(--acid)">990 · Tandil ↗</a></div></div>
           </div>
         </div>
@@ -382,26 +386,25 @@
       </div>
 
       <!-- tiers -->
-      <div class="tiers reveal" id="tiers" style="grid-template-columns:minmax(0,460px);justify-content:center">
-        <div class="tier vip">
-          <span class="tier-tag">Acceso único</span>
-          <div class="tier-name">Entrada</div>
-          <div class="tier-price">$10.000 <small>ARS</small></div>
-          <div class="secret">
-            <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--acid);flex-shrink:0;margin-top:2px"></i>
-            <div><b>Palabra icebreaker</b><p>Tu entrada trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
-          </div>
-          <div class="secret">
-            <i data-lucide="gift" style="width:18px;height:18px;color:var(--hot);flex-shrink:0;margin-top:2px"></i>
-            <div><b>Primeras 10: merch secreto</b><p>Las primeras 10 entradas vienen con merch — qué es, es secreto. Se revela en la fiesta. 🤫</p></div>
-          </div>
-          <ul>
+      <div class="incluye reveal">
+        <div>
+          <div class="incluye-h">Qué incluye</div>
+          <ul class="incluye-list">
             <li>Acceso a la tocada</li>
             <li>Barra habilitada</li>
             <li>Entrada-sticker (te la dan en la puerta)</li>
             <li>Tu palabra icebreaker</li>
           </ul>
-          <a class="btn btn-hot btn-block" onclick="buy()">Pedir mi entrada</a>
+        </div>
+        <div>
+          <div class="secret">
+            <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--acid);flex-shrink:0;margin-top:2px"></i>
+            <div><b>Palabra icebreaker</b><p>Tu entrada trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
+          </div>
+          <div class="secret" style="margin-bottom:0">
+            <i data-lucide="gift" style="width:18px;height:18px;color:var(--hot);flex-shrink:0;margin-top:2px"></i>
+            <div><b>Primeras 10: merch secreto</b><p>Las primeras 10 entradas vienen con merch — qué es, es secreto. Se revela en la fiesta. 🤫</p></div>
+          </div>
         </div>
       </div>
       <p class="sec-intro reveal" style="font-size:15px;max-width:640px;margin-top:24px">Pedís tu entrada por WhatsApp o Instagram. Cuando confirmás el pago, te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu palabra»</a> para confirmar tu lugar. En la puerta decís tus palabras clave y te damos tu entrada-sticker.</p>
@@ -845,7 +848,7 @@ const LEGAL={
     <h4>1. Pedido de entradas</h4><p>Las entradas se piden por WhatsApp o por mensaje directo de Instagram. El staff confirma el cupo y te entrega tus palabras clave (dos palabras). En la puerta decís tus palabras clave y te damos tu entrada-sticker. La entrada es intransferible.</p>
     <h4>2. Reembolsos</h4><p>No se realizan reembolsos salvo cancelación del evento por parte de Hidromedusa. En ese caso se informa por los canales oficiales.</p>
     <h4>3. Entrada VIP y merch secreto</h4><p>La entrada VIP incluye merch sorpresa que se revela el día de la fiesta. El tipo de merch puede variar entre fechas. Las ideas de merch enviadas al pedir son sugerencias y no garantizan un producto específico.</p>
-    <h4>4. Acceso</h4><p>Ingreso +18 con documento. Hidromedusa se reserva el derecho de admisión.</p>
+    <h4>4. Acceso</h4><p>Podés venir con quien quieras. Hidromedusa se reserva el derecho de admisión.</p>
     <h4>5. Notificaciones</h4><p>Podés optar por recibir avisos antes de las tocadas y novedades. Te podés dar de baja cuando quieras.</p>
     <h4>6. Conducta</h4><p>El respeto entre asistentes es fundamental. Cualquier conducta que atente contra la seguridad de otros es motivo de expulsión sin reembolso.</p>` },
   privacidad:{ title:'Política de Privacidad', html:`
