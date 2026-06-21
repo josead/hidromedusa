@@ -365,7 +365,7 @@
           <h3>990<br />Espacio Cultural</h3>
           <div class="stub-meta">
             <div><div class="k">Fecha</div><div class="v">Sáb 11 Jul 2026</div></div>
-            <div><div class="k">Horario</div><div class="v">20:00 a 03:00</div></div>
+            <div><div class="k">Horario</div><div class="v">21:00 a 03:00</div></div>
             <div><div class="k">Lugar</div><div class="v"><a href="https://www.instagram.com/990.espaciocultural/" target="_blank" rel="noopener" style="color:var(--acid)">990 · Tandil ↗</a></div></div>
           </div>
         </div>
@@ -426,7 +426,7 @@
   <section class="cta">
     <div class="wrap">
       <h2 class="reveal">AGENDAR.</h2>
-      <p class="reveal">Sábado 11 de julio · 20:00 a 03:00 · 990 Espacio Cultural, Tandil.</p>
+      <p class="reveal">Sábado 11 de julio · 21:00 a 03:00 · 990 Espacio Cultural, Tandil.</p>
       <a class="btn btn-acid btn-lg reveal" onclick="addToCalendar()">Agendar la fecha <i data-lucide="calendar-plus" width="16"></i></a>
     </div>
   </section>
@@ -569,9 +569,9 @@ try { localStorage.setItem('hm_api_base', window.HM_CONFIG.API_BASE || ''); } ca
 /* ---------- Event (fallback hardcodeado) ---------- */
 const HM_EVENT = {
   id:'ev-1', title:'Hidromedusa · 990 Espacio Cultural',
-  start:'2026-07-11T20:00:00-03:00', end:'2026-07-12T03:00:00-03:00',
+  start:'2026-07-11T21:00:00-03:00', end:'2026-07-12T03:00:00-03:00',
   venue:'990 Espacio Cultural, Tandil, Buenos Aires, AR',
-  dateLabel:'Sáb 11 Jul 2026 · 20:00 a 03:00', shortLabel:'990 Espacio Cultural, 11 Jul'
+  dateLabel:'Sáb 11 Jul 2026 · 21:00 a 03:00', shortLabel:'990 Espacio Cultural, 11 Jul'
 };
 
 /* ---------- API helper (lanza si falla o si API_BASE vacío) ---------- */
@@ -795,8 +795,8 @@ function enableNotif(){
   Notification.requestPermission().then(p=>{
     if(p==='granted'){
       toast('¡Señales activadas! Te avisamos antes de cada tocada 🔔');
-      const ms=new Date('2026-07-11T20:00:00-03:00')-Date.now()-86400000;
-      if(ms>0) setTimeout(()=>new Notification('¡Mañana toca Hidromedusa!',{body:'Tandil · 20:00 a 03:00. ¡Preparate!'}),ms);
+      const ms=new Date('2026-07-11T21:00:00-03:00')-Date.now()-86400000;
+      if(ms>0) setTimeout(()=>new Notification('¡Mañana toca Hidromedusa!',{body:'Tandil · 21:00 a 03:00. ¡Preparate!'}),ms);
     }
   });
 }

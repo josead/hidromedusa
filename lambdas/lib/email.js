@@ -14,11 +14,11 @@ const REGION  = process.env.SES_REGION || process.env.AWS_REGION || 'sa-east-1';
 // ── Evento (espejo del HM_EVENT hardcodeado en public/index.html) ────────────
 const EVENT = {
   title:    'Hidromedusa · 990 Espacio Cultural',
-  start:    '2026-07-11T20:00:00-03:00',
+  start:    '2026-07-11T21:00:00-03:00',
   end:      '2026-07-12T03:00:00-03:00',
   venue:    '990 Espacio Cultural, Tandil, Buenos Aires, AR',
   dateLabel:'Sáb 11 Jul 2026',
-  timeLabel:'20:00 a 03:00',
+  timeLabel:'21:00 a 03:00',
 };
 const SITE      = 'https://hidromedusa.com';
 const CONTACT   = 'hola@hidromedusa.com';

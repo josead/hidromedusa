@@ -24,7 +24,7 @@ const EVENTS = {
     id: 'ev-1',
     name: 'Hidromedusa · 11 Jul',
     date: '2026-07-11',
-    time: '20:00 a 03:00',
+    time: '21:00 a 03:00',
     venue: '990 Espacio Cultural, Tandil',
   },
 };
