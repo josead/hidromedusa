@@ -29,9 +29,9 @@
     --body: "Space Grotesk", sans-serif;
     --mono: "Space Mono", monospace;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--bone); font-family: var(--body); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--bone); font-family: var(--body); overflow-x: hidden; -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
   ::selection { background: var(--acid); color: var(--ink); }
   img { display: block; }
   a { color: inherit; }
@@ -478,11 +478,11 @@
           <div style="font-family:var(--display);font-size:30px;color:var(--acid)" id="buy-price">$10.000</div>
         </div>
         <label class="field-label">Nombre completo</label>
-        <input class="field" id="buy-buyer" placeholder="Ej. Gustavo Cerati" />
+        <input class="field" id="buy-buyer" placeholder="Ej. Gustavo Cerati" onblur="scheduleLead()" />
         <label class="field-label">Email <span style="color:var(--muted)">(opcional)</span></label>
-        <input class="field" id="buy-email" type="email" placeholder="cerati@correo.com" />
+        <input class="field" id="buy-email" type="email" placeholder="cerati@correo.com" onblur="scheduleLead()" />
         <label class="field-label">WhatsApp</label>
-        <input class="field" id="buy-phone" type="tel" placeholder="Ej. 2494 123456" />
+        <input class="field" id="buy-phone" type="tel" placeholder="Ej. 2494 123456" onblur="scheduleLead()" />
         <div style="border:2px dashed var(--line-strong);padding:14px 16px;margin:6px 0 16px">
           <div class="field-label" style="margin-bottom:8px">1 · Transferí al alias 🧾</div>
           <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
@@ -622,25 +622,50 @@ function buy(){
   document.getElementById('buy-price').textContent=TICKET.price;
   openModal('m-buy');
 }
-// Junta los datos del pedido, registra el lead (best-effort) y devuelve el mensaje
+// leadId estable por navegador: dedup del lead (mismo id => merge sin pisar).
+function leadId(){
+  let id=null; try { id=localStorage.getItem('hm_lead_id'); } catch(e){}
+  if(!id || !/^HM-[A-Za-z0-9]{4,}$/.test(id)){
+    let r=''; try { const a=new Uint8Array(6); (crypto||window.crypto).getRandomValues(a); r=Array.from(a,b=>b.toString(16).padStart(2,'0')).join(''); }
+    catch(e){ r=(Math.floor(Math.random()*1e12)).toString(16); }
+    id='HM-'+r.toUpperCase();
+    try { localStorage.setItem('hm_lead_id', id); } catch(e){}
+  }
+  return id;
+}
+// Manda nombre/email/whatsapp a la DB (upsert, sin pisar). stage 'lead' (al escribir)
+// o 'pending' (al apretar pagar). Best-effort: nunca rompe el flujo si el API falla.
+function captureLead(stage, channel){
+  const name=(document.getElementById('buy-buyer').value||'').trim();
+  const email=(document.getElementById('buy-email').value||'').trim();
+  const phone=(document.getElementById('buy-phone').value||'').trim();
+  if(!name && !email && !phone) return;
+  api('/tickets/capture',{ method:'POST', body:{
+    leadId:leadId(), stage:stage||'lead', channel:channel||null,
+    buyerName:name||null, buyerEmail:email||null, buyerPhone:phone||null
+  } }).catch(()=>{});
+}
+// Captura on-blur con debounce (se dispara al salir de Nombre/Email).
+let _leadT;
+function scheduleLead(){ clearTimeout(_leadT); _leadT=setTimeout(()=>captureLead('lead'),500); }
+
+// Junta los datos del pedido, sube el lead a 'pending' y devuelve el mensaje
 // armado — o null si falta el nombre. Compartido por WhatsApp e Instagram.
-function collectOrder(){
+function collectOrder(channel){
   const name=document.getElementById('buy-buyer').value.trim();
-  const email=document.getElementById('buy-email').value.trim();
-  const phone=document.getElementById('buy-phone').value.trim();
   if(!name){ toast('Decinos tu nombre'); return null; }
-  api('/tickets/request',{ method:'POST', body:{ type:TICKET.type, buyerName:name, buyerEmail:email||null, buyerPhone:phone||null } }).catch(()=>{});
+  captureLead('pending', channel);
   const alias=window.HM_CONFIG.ALIAS||'pasa.la.gorra';
   return '¡Hola Hidromedusa! Quiero una entrada ('+TICKET.price+') para '+HM_EVENT.shortLabel+'. Soy '+name+'. Te paso la captura del pago al alias '+alias+'.';
 }
 function payWhatsApp(){
-  const msg=collectOrder(); if(msg===null) return;
+  const msg=collectOrder('whatsapp'); if(msg===null) return;
   window.open('https://wa.me/'+window.HM_CONFIG.WHATSAPP_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
   closeModal('m-buy');
   toast('Te abrimos WhatsApp con tu pedido 🟢');
 }
 function payInstagram(){
-  const msg=collectOrder(); if(msg===null) return;
+  const msg=collectOrder('instagram'); if(msg===null) return;
   // Instagram no permite prellenar el texto del DM: lo copiamos al portapapeles.
   try { navigator.clipboard && navigator.clipboard.writeText(msg); } catch(e){}
   const handle=(window.HM_CONFIG.INSTAGRAM_HANDLE||'hidromedusa').replace(/^@/,'');

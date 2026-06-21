@@ -12,6 +12,11 @@
 const crypto = require('crypto');
 const store = require('../lib/store');
 const claimcode = require('../lib/claimcode');
+const email = require('../lib/email');
+
+// Lifecycle order — status only ever moves FORWARD (never downgrades).
+const STATUS_RANK = { lead: 0, pending: 1, freed: 2, used: 3, cancelled: 3 };
+const rank = (s) => (s in STATUS_RANK ? STATUS_RANK[s] : -1);
 
 // In-file event map (hardcoded fallback per CONTRACT.md "Event").
 const EVENTS = {
@@ -26,11 +31,15 @@ const EVENTS = {
 
 // ── Helpers ───────────────────────────────────────
 
-// Staff gate: open when STAFF_TOKEN unset/empty, else require matching body token.
+// Staff gate: open when STAFF_TOKEN unset/empty, else require a matching token
+// from the body (POST), the query string (GET ?staffToken=) or an
+// Authorization: Bearer <token> header — whichever the caller can send.
 function requireStaff(req) {
   const want = process.env.STAFF_TOKEN;
   if (!want) return true;
-  return req.body?.staffToken === want;
+  const auth = req.headers?.authorization || req.headers?.Authorization || '';
+  const fromHeader = auth.replace(/^Bearer\s+/i, '').trim();
+  return req.body?.staffToken === want || req.query?.staffToken === want || fromHeader === want;
 }
 
 // Fresh, store-unique ticket id.
@@ -69,7 +78,8 @@ function newTicket(body) {
     buyerPhone: buyerPhone || null,
     merchIdea: merchIdea || null,
     claim: null,
-    claimNorm: null,
+    // claimNorm intentionally OMITTED until a claim is minted: it's the GSI key
+    // and the index is sparse — writing null here is rejected by DynamoDB.
     qrData: null,
     status: 'pending',
     issuedBy: null,
@@ -81,19 +91,62 @@ function newTicket(body) {
 
 // ── Handlers ──────────────────────────────────────
 
-// PUBLIC: log a WhatsApp lead as a pending ticket (no claim yet).
-async function request(req) {
+// PUBLIC: upsert a lead/intent — single funnel (lead → pending → freed → used).
+// Deduped by client-supplied leadId (used as the ticket id). MERGE semantics:
+// only provided non-empty fields are written (never blanks existing data), and
+// status only moves forward. Called on form blur (stage 'lead') and on the pay
+// button (stage 'pending'). No claim is minted here — that's staff's `free`.
+async function capture(req) {
   const body = req.body || {};
-  const { type, buyerName } = body;
-  if (type !== 'general' && type !== 'vip') return { status: 400, body: { error: 'Invalid type' } };
-  if (!buyerName) return { status: 400, body: { error: 'buyerName required' } };
+  const leadId = typeof body.leadId === 'string' && /^HM-[A-Za-z0-9]{4,}$/.test(body.leadId)
+    ? body.leadId : null;
+  const wantStatus = body.stage === 'pending' ? 'pending' : 'lead';
+  const channel = body.channel || null;
+
+  // At least one identifying field is required to bother persisting.
+  const name  = (body.buyerName  || '').trim() || null;
+  const eml   = (body.buyerEmail || '').trim() || null;
+  const phone = (body.buyerPhone || '').trim() || null;
+  if (!name && !eml && !phone) return { status: 400, body: { error: 'Nothing to capture' } };
+
   try {
-    const ticket = newTicket(body);
-    await store.tickets.put(ticket);
-    return { status: 200, body: { ticket } };
+    const id = leadId || makeId();
+    const existing = leadId ? await store.tickets.get(id) : null;
+    const now = new Date().toISOString();
+
+    if (!existing) {
+      const ticket = {
+        ...newTicket({ type: 'general', buyerName: name, buyerEmail: eml, buyerPhone: phone }),
+        id,
+        status: wantStatus,
+        channel,
+        updatedAt: now,
+      };
+      await store.tickets.put(ticket);
+      return { status: 200, body: { ticket } };
+    }
+
+    // MERGE: don't override existing values with null; status only advances.
+    const patch = { updatedAt: now };
+    if (name)    patch.buyerName  = name;
+    if (eml)     patch.buyerEmail = eml;
+    if (phone)   patch.buyerPhone = phone;
+    if (channel) patch.channel    = channel;
+    if (rank(wantStatus) > rank(existing.status)) patch.status = wantStatus;
+
+    const updated = await store.tickets.update(id, patch);
+    return { status: 200, body: { ticket: updated } };
   } catch (err) {
     return { status: 500, body: { error: err.message } };
   }
+}
+
+// PUBLIC (legacy): log a lead as a pending ticket. Kept for back-compat; new
+// frontend uses `capture`. Delegates to the same single-funnel logic.
+async function request(req) {
+  const body = req.body || {};
+  if (!body.buyerName) return { status: 400, body: { error: 'buyerName required' } };
+  return capture({ body: { ...body, stage: 'pending' } });
 }
 
 // STAFF: list tickets, optional ?status= filter.
@@ -120,6 +173,9 @@ async function free(req) {
     }
     const patch = await freePatch(ticket);
     const updated = await store.tickets.update(id, patch);
+    // Best-effort confirmation email (TODO: SES disabled until domain verified).
+    email.sendTicketConfirmation({ to: updated.buyerEmail, name: updated.buyerName, claim: updated.claim })
+      .catch((e) => console.error('[tickets.free] email error:', e && e.message));
     return { status: 200, body: { ticket: updated } };
   } catch (err) {
     return { status: 500, body: { error: err.message } };
@@ -137,6 +193,8 @@ async function issue(req) {
     const ticket = newTicket(body);
     Object.assign(ticket, await freePatch(ticket));
     await store.tickets.put(ticket);
+    email.sendTicketConfirmation({ to: ticket.buyerEmail, name: ticket.buyerName, claim: ticket.claim })
+      .catch((e) => console.error('[tickets.issue] email error:', e && e.message));
     return { status: 200, body: { ticket } };
   } catch (err) {
     return { status: 500, body: { error: err.message } };
@@ -191,4 +249,4 @@ async function getTicket(req) {
   }
 }
 
-module.exports = { request, list, free, issue, redeem, scan, getTicket };
+module.exports = { request, capture, list, free, issue, redeem, scan, getTicket };

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>HM · Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0a0b; --bg-2:#141417; --abyss:#060607; --bone:#ECE7DA; --bone-dim:#A8A399;
+    --muted:#6f6b63; --line:rgba(236,231,218,0.16); --line-strong:rgba(236,231,218,0.55);
+    --acid:#C6FF1A; --hot:#FF2E88; --ink:#0a0a0b;
+    --display:"Anton",sans-serif; --body:"Space Grotesk",sans-serif; --mono:"Space Mono",monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  body{background:var(--bg);color:var(--bone);font-family:var(--body);overscroll-behavior:none;-webkit-font-smoothing:antialiased;min-height:100vh;}
+  a{color:var(--acid);}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 18px 80px;}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--line-strong);padding-bottom:16px;margin-bottom:24px;flex-wrap:wrap;}
+  .brand{font-family:var(--display);font-size:30px;text-transform:uppercase;letter-spacing:.02em;line-height:1;}
+  .brand small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.18em;margin-top:4px;}
+  .top-actions{display:flex;gap:8px;align-items:center;}
+  .btn{font-family:var(--mono);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border:2px solid var(--line);background:var(--bg);color:var(--bone);padding:9px 14px;transition:all .15s;white-space:nowrap;}
+  .btn:hover{border-color:var(--acid);}
+  .btn-acid{background:var(--acid);color:var(--ink);border-color:var(--acid);}
+  .btn-acid:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(198,255,26,.25);}
+  .btn-sm{padding:6px 11px;font-size:11px;}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+  .stat{border:2px solid var(--line-strong);padding:14px 16px;}
+  .stat .n{font-family:var(--display);font-size:34px;line-height:1;color:var(--acid);}
+  .stat .l{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-top:6px;}
+  section{margin-bottom:34px;}
+  h2.sec{font-family:var(--display);font-size:22px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2.sec .c{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:700;}
+  .tablewrap{border:2px solid var(--line-strong);overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:560px;}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle;}
+  th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);background:var(--abyss);position:sticky;top:0;}
+  tr:last-child td{border-bottom:none;}
+  td.name{font-weight:600;}
+  .pill{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border:1px solid var(--line-strong);}
+  .pill.lead{color:var(--bone-dim);}
+  .pill.pending{color:var(--hot);border-color:var(--hot);}
+  .pill.freed{color:var(--acid);border-color:var(--acid);}
+  .pill.used{color:var(--muted);}
+  .claim{font-family:var(--mono);font-size:15px;color:var(--acid);cursor:pointer;letter-spacing:.02em;}
+  .claim:hover{text-decoration:underline;}
+  .sub{font-family:var(--mono);font-size:11px;color:var(--muted);}
+  .empty{padding:22px 14px;color:var(--muted);font-family:var(--mono);font-size:12px;text-align:center;}
+  .issue-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+  .field{width:100%;background:var(--bg);border:2px solid var(--line);padding:10px 12px;color:var(--bone);font-family:var(--body);font-size:14px;outline:none;}
+  .field:focus{border-color:var(--acid);}
+  .todo{border:2px dashed var(--line-strong);padding:12px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px;}
+  /* Gate */
+  .gate{position:fixed;inset:0;z-index:50;background:var(--abyss);display:flex;align-items:center;justify-content:center;padding:20px;}
+  .gate-box{border:2px solid var(--line-strong);background:var(--bg-2);max-width:380px;width:100%;padding:28px;}
+  .gate-box h1{font-family:var(--display);font-size:30px;text-transform:uppercase;margin-bottom:6px;}
+  .gate-box p{color:var(--bone-dim);font-size:13px;line-height:1.5;margin-bottom:18px;}
+  .gate-err{color:var(--hot);font-family:var(--mono);font-size:11px;margin-top:10px;min-height:14px;}
+  /* Toast */
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--acid);color:var(--ink);font-family:var(--mono);font-size:12px;font-weight:700;padding:11px 18px;display:none;z-index:80;max-width:90vw;}
+  @media(max-width:680px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .issue-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Gate -->
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <h1>🪼 Panel</h1>
+    <p>Acceso de staff. Ingresá la clave para conectar con el sistema de entradas.</p>
+    <input class="field" id="gate-input" type="password" placeholder="clave" autocomplete="off" onkeydown="if(event.key==='Enter')unlock()" />
+    <button class="btn btn-acid" style="width:100%;margin-top:12px" onclick="unlock()">Entrar</button>
+    <div class="gate-err" id="gate-err"></div>
+  </div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+  <header class="top">
+    <div class="brand">Hidromedusa<small>PANEL · ENTRADAS</small></div>
+    <div class="top-actions">
+      <button class="btn btn-sm" onclick="load()">↻ Actualizar</button>
+      <button class="btn btn-sm" onclick="logout()">Salir</button>
+    </div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <section>
+    <h2 class="sec">Leads &amp; pendientes <span class="c" id="c-pend"></span></h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Nombre</th><th>Contacto</th><th>Canal</th><th>Estado</th><th>Cuándo</th><th></th></tr></thead>
+        <tbody id="tb-pend"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">Con palabra <span class="c" id="c-words"></span></h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Palabras clave</th><th>Quién la tiene</th><th>Contacto</th><th>Estado</th><th>Cuándo</th></tr></thead>
+        <tbody id="tb-words"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">Emitir directo (walk-in)</h2>
+    <div class="issue-grid">
+      <input class="field" id="i-name" placeholder="Nombre *" />
+      <input class="field" id="i-phone" placeholder="WhatsApp (opcional)" />
+      <input class="field" id="i-email" type="email" placeholder="Email (opcional)" />
+    </div>
+    <button class="btn btn-acid" onclick="issueDirect()">Generar palabra ahora</button>
+    <div class="todo">TODO · Email: al generar la palabra el backend ya llama a <b>sendTicketConfirmation</b> (AWS SES) — desactivado hasta verificar el dominio <b>entrada@hidromedusa.com</b>. Activar con SES_ENABLED=1.</div>
+  </section>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API_BASE='https://p2vsvdihylfl6w4c6pfnnuwd4u0dwcvw.lambda-url.sa-east-1.on.aws';
+let TOKEN=null;
+
+function token(){ if(!TOKEN){ try{ TOKEN=localStorage.getItem('hm_staff_token'); }catch(e){} } return TOKEN||''; }
+let toastT;
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',3000); }
+
+async function api(path, opts={}){
+  const res=await fetch(API_BASE+path,{
+    method:opts.method||'GET',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token()},
+    ...(opts.body?{body:JSON.stringify({...opts.body,staffToken:token()})}:{})
+  });
+  if(res.status===401) throw new Error('401');
+  if(!res.ok) throw new Error('http-'+res.status);
+  return res.json();
+}
+
+async function unlock(){
+  const v=(document.getElementById('gate-input').value||'').trim();
+  const err=document.getElementById('gate-err');
+  if(!v){ err.textContent='Cargá la clave.'; return; }
+  TOKEN=v; err.textContent='Conectando…';
+  try{
+    await api('/tickets?staffToken='+encodeURIComponent(v));
+    try{ localStorage.setItem('hm_staff_token',v); }catch(e){}
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='';
+    load();
+  }catch(e){
+    TOKEN=null;
+    err.textContent = e.message==='401' ? 'Clave incorrecta.' : 'No se pudo conectar (¿internet?).';
+  }
+}
+function logout(){ TOKEN=null; try{ localStorage.removeItem('hm_staff_token'); }catch(e){} location.reload(); }
+
+function fmtWhen(iso){
+  if(!iso) return '—';
+  try{ const d=new Date(iso); return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); }
+  catch(e){ return iso.slice(0,16).replace('T',' '); }
+}
+function contact(t){
+  const bits=[];
+  if(t.buyerPhone) bits.push(t.buyerPhone);
+  if(t.buyerEmail) bits.push(t.buyerEmail);
+  return bits.length? bits.join(' · ') : '<span class="sub">sin contacto</span>';
+}
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function copyClaim(c){ try{ navigator.clipboard.writeText(c); toast('Palabra copiada: '+c+' 📋'); }catch(e){ toast(c); } }
+
+function render(tickets){
+  const pend=tickets.filter(t=>t.status==='lead'||t.status==='pending')
+    .sort((a,b)=>(b.updatedAt||b.createdAt||'').localeCompare(a.updatedAt||a.createdAt||''));
+  const words=tickets.filter(t=>t.status==='freed'||t.status==='used')
+    .sort((a,b)=>(b.freedAt||b.createdAt||'').localeCompare(a.freedAt||a.createdAt||''));
+
+  // Stats
+  const n=s=>tickets.filter(t=>t.status===s).length;
+  document.getElementById('stats').innerHTML=
+    [['Leads',n('lead')],['Pendientes',n('pending')],['Con palabra',n('freed')],['Usadas',n('used')]]
+    .map(([l,v])=>`<div class="stat"><div class="n">${v}</div><div class="l">${l}</div></div>`).join('');
+  document.getElementById('c-pend').textContent=pend.length?('· '+pend.length):'';
+  document.getElementById('c-words').textContent=words.length?('· '+words.length):'';
+
+  // Leads & pendientes
+  const tbp=document.getElementById('tb-pend');
+  tbp.innerHTML = pend.length ? pend.map(t=>`
+    <tr>
+      <td class="name">${esc(t.buyerName)||'<span class="sub">—</span>'}</td>
+      <td>${contact(t)}</td>
+      <td><span class="sub">${esc(t.channel)||'—'}</span></td>
+      <td><span class="pill ${t.status}">${t.status==='pending'?'Pagó?':'Lead'}</span></td>
+      <td class="sub">${fmtWhen(t.updatedAt||t.createdAt)}</td>
+      <td><button class="btn btn-acid btn-sm" onclick="freeTicket('${esc(t.id)}',this)">Generar palabra</button></td>
+    </tr>`).join('') : `<tr><td colspan="6" class="empty">No hay leads ni pendientes todavía.</td></tr>`;
+
+  // Con palabra
+  const tbw=document.getElementById('tb-words');
+  tbw.innerHTML = words.length ? words.map(t=>`
+    <tr>
+      <td><span class="claim" onclick="copyClaim('${esc(t.claim)}')">${esc(t.claim)||'—'}</span></td>
+      <td class="name">${esc(t.buyerName)||'<span class="sub">—</span>'}</td>
+      <td>${contact(t)}</td>
+      <td><span class="pill ${t.status}">${t.status==='used'?'Usada':'Válida'}</span></td>
+      <td class="sub">${fmtWhen(t.freedAt||t.createdAt)}</td>
+    </tr>`).join('') : `<tr><td colspan="5" class="empty">Todavía no se generó ninguna palabra.</td></tr>`;
+}
+
+async function load(){
+  try{
+    const data=await api('/tickets?staffToken='+encodeURIComponent(token()));
+    render(data.tickets||[]);
+  }catch(e){
+    if(e.message==='401'){ toast('Sesión vencida'); logout(); return; }
+    toast('Error cargando: '+e.message);
+  }
+}
+
+async function freeTicket(id,btn){
+  if(btn){ btn.disabled=true; btn.textContent='…'; }
+  try{
+    const data=await api('/tickets/'+encodeURIComponent(id)+'/free',{method:'POST',body:{}});
+    const claim=data.ticket&&data.ticket.claim;
+    toast('Palabra generada: '+claim+' 📋');
+    try{ navigator.clipboard.writeText(claim); }catch(e){}
+    load();
+  }catch(e){
+    toast('Error: '+e.message);
+    if(btn){ btn.disabled=false; btn.textContent='Generar palabra'; }
+  }
+}
+
+async function issueDirect(){
+  const name=(document.getElementById('i-name').value||'').trim();
+  if(!name){ toast('Cargá un nombre'); return; }
+  const phone=(document.getElementById('i-phone').value||'').trim();
+  const email=(document.getElementById('i-email').value||'').trim();
+  try{
+    const data=await api('/tickets/issue',{method:'POST',body:{type:'general',buyerName:name,buyerPhone:phone||null,buyerEmail:email||null}});
+    const claim=data.ticket&&data.ticket.claim;
+    toast('Generada: '+claim+' 📋');
+    try{ navigator.clipboard.writeText(claim); }catch(e){}
+    document.getElementById('i-name').value='';document.getElementById('i-phone').value='';document.getElementById('i-email').value='';
+    load();
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+// Auto-login si ya hay token guardado.
+(function(){
+  if(token()){
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='';
+    load();
+  } else {
+    document.getElementById('gate-input').focus();
+  }
+})();
+</script>
+</body>
+</html>

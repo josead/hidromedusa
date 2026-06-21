@@ -9,6 +9,7 @@ const newsletter = require('./newsletter/index');
 // path → handler. `params` names map regex capture groups onto req.params.
 const ROUTES = [
   { m: 'POST', re: /^\/tickets\/request$/,        fn: tickets.request },
+  { m: 'POST', re: /^\/tickets\/capture$/,        fn: tickets.capture },
   { m: 'POST', re: /^\/tickets\/redeem$/,         fn: tickets.redeem },
   { m: 'POST', re: /^\/tickets\/issue$/,          fn: tickets.issue },
   { m: 'GET',  re: /^\/tickets$/,                 fn: tickets.list },
