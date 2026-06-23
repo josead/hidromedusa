@@ -47,7 +47,7 @@ function googleCalUrl() {
     action: 'TEMPLATE',
     text: EVENT.title,
     dates: fmtICS(EVENT.start) + '/' + fmtICS(EVENT.end),
-    details: 'Hidromedusa en vivo + fiesta. Entradas por WhatsApp.',
+    details: 'Hidromedusa en vivo. Entradas por WhatsApp.',
     location: EVENT.venue,
   });
   return 'https://calendar.google.com/calendar/render?' + p.toString();

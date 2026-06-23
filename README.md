@@ -1,6 +1,6 @@
 # HIDROMEDUSA 🪼
 
-> Fiestas en las profundidades del universo oceánico-intergaláctico. Tandil, AR.
+> Música en vivo desde las profundidades del universo oceánico-intergaláctico. Tandil, AR.
 
 ## Stack
 

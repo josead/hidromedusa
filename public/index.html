@@ -43,7 +43,7 @@
     --abyss: #060607;
     --bone: #ECE7DA;
     --bone-dim: #A8A399;
-    --muted: #6f6b63;
+    --muted: #948f85;
     --line: rgba(236,231,218,0.16);
     --line-strong: rgba(236,231,218,0.55);
     --acid: #C6FF1A;
@@ -64,12 +64,12 @@
 
   /* grain + photocopy texture */
   body::after {
-    content: ""; position: fixed; inset: 0; z-index: 9990; pointer-events: none; opacity: 0.09; mix-blend-mode: overlay;
+    content: ""; position: fixed; inset: 0; z-index: 9990; pointer-events: none; opacity: 0.05; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   /* faint scanlines */
   body::before {
-    content: ""; position: fixed; inset: 0; z-index: 9989; pointer-events: none; opacity: 0.04;
+    content: ""; position: fixed; inset: 0; z-index: 9989; pointer-events: none; opacity: 0.025;
     background: repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
   }
 
@@ -368,9 +368,8 @@
     <div class="wrap">
       <div class="hero-top">
         <span>Espécimen Nº001 — Hydromedusae</span>
-        <span>Synth-rock</span>
         <span>Tandil · Buenos Aires · AR</span>
-        <span>Banda + Fiesta</span>
+        <span>Música en vivo</span>
       </div>
       <div class="hero-main">
         <div>
@@ -378,9 +377,8 @@
         </div>
       </div>
       <div class="hero-bottom reveal">
-        <a class="btn btn-acid btn-lg" onclick="goTo('entradas')">Conseguir entrada <i data-lucide="arrow-right" width="16"></i></a>
+        <a class="btn btn-acid btn-lg" onclick="buy()">Pedir entrada para el 11 de Julio <i data-lucide="arrow-right" width="16"></i></a>
         <a class="btn btn-line btn-lg" onclick="openModal('m-redeem')">Reclamar tu palabra</a>
-        <span class="scroll-note">↓ Desplegá el catálogo</span>
       </div>
     </div>
   </header>
@@ -388,7 +386,7 @@
   <!-- ================= MARQUEE ================= -->
   <div class="marquee">
     <div class="marquee-track">
-      <span>BIENVENIDOS AL ABISMO</span><span class="alt">✦</span><span>11 JUL · 990 ESPACIO CULTURAL</span><span class="alt">✦</span><span>TANDIL · AR</span><span class="alt">✦</span><span>SYNTH-ROCK</span><span class="alt">✦</span>
+      <span>BIENVENIDOS AL ABISMO</span><span class="alt">✦</span><span>11 JUL · 990 ESPACIO CULTURAL</span><span class="alt">✦</span><span>TANDIL · AR</span><span class="alt">✦</span><span>MÚSICA EN VIVO</span><span class="alt">✦</span>
     </div>
   </div>
 
@@ -416,8 +414,8 @@
             <div class="price-n">ARS · sticker en la puerta</div>
           </div>
           <div style="margin-top:22px;display:flex;flex-direction:column;gap:8px">
-            <a class="btn btn-acid btn-block" onclick="openModal('m-redeem')">Reclamar tu palabra secreta</a>
-            <a class="btn btn-line btn-block" onclick="buy()">Pedir mi entrada</a>
+            <a class="btn btn-acid btn-block" onclick="buy()">Pedir mi entrada</a>
+            <a class="btn btn-line btn-block" onclick="openModal('m-redeem')">Reclamar tu palabra secreta</a>
             <a class="btn btn-line btn-block" onclick="addToCalendar()">Agregar a calendario 📅</a>
           </div>
         </div>
@@ -445,7 +443,7 @@
           </div>
         </div>
       </div>
-      <p class="sec-intro reveal" style="font-size:15px;max-width:640px;margin-top:24px">Pedís tu entrada por WhatsApp o Instagram. Cuando confirmás el pago, te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu palabra»</a> para confirmar tu lugar. En la puerta decís tus palabras clave y te damos tu entrada-sticker.</p>
+      <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">Pedís tu entrada por WhatsApp o Instagram. Cuando confirmás el pago, te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu palabra»</a> para confirmar tu lugar. En la puerta decís tus palabras clave y te damos tu entrada-sticker.</p>
     </div>
   </section>
 
@@ -477,7 +475,7 @@
       <div class="foot-grid">
         <div class="foot-brand">
           <span class="brand-name">HIDROMEDUSA</span>
-          <p>Banda y fiesta desde Tandil, Argentina.</p>
+          <p>Música en vivo desde Tandil, Argentina.</p>
           <div class="socials">
             <a href="https://www.instagram.com/hidromedusa" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 01-1.38-.9 3.7 3.7 0 01-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 1.62c-3.15 0-3.5.01-4.74.07-1.14.05-1.76.24-2.17.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.17-.06 1.24-.07 1.59-.07 4.74s.01 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.17.4 1.24.06 1.59.07 4.74.07s3.5-.01 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.17.06-1.24.07-1.59.07-4.74s-.01-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 00-.88-1.35 3.6 3.6 0 00-1.35-.88c-.41-.16-1.03-.35-2.17-.4-1.24-.06-1.59-.07-4.74-.07zm0 2.76a5.3 5.3 0 110 10.6 5.3 5.3 0 010-10.6zm0 8.74a3.44 3.44 0 100-6.88 3.44 3.44 0 000 6.88zm6.74-8.94a1.24 1.24 0 11-2.48 0 1.24 1.24 0 012.48 0z"/></svg></a>
           </div>
@@ -489,7 +487,7 @@
           <a onclick="openModal('m-redeem')">Reclamar tu palabra</a>
         </div>
         <div class="foot-col">
-          <h5>Banda</h5>
+          <h5>Info</h5>
           <a onclick="openLegal('terminos')">Términos</a>
           <a onclick="openLegal('privacidad')">Privacidad</a>
         </div>
@@ -798,7 +796,7 @@ function buildGoogleCalUrl(ev){
   const params=new URLSearchParams({
     action:'TEMPLATE', text:ev.title,
     dates:fmtICS(ev.start)+'/'+fmtICS(ev.end),
-    details:'Hidromedusa en vivo + fiesta. Entradas por WhatsApp.', location:ev.venue
+    details:'Hidromedusa en vivo. Entradas por WhatsApp.', location:ev.venue
   });
   return 'https://calendar.google.com/calendar/render?'+params;
 }
@@ -807,7 +805,7 @@ function buildICS(ev){
     'UID:'+ev.id+'@hidromedusa','DTSTAMP:'+fmtICS(Date.now()),
     'DTSTART:'+fmtICS(ev.start),'DTEND:'+fmtICS(ev.end),
     'SUMMARY:'+ev.title,'LOCATION:'+ev.venue,
-    'DESCRIPTION:Hidromedusa en vivo + fiesta. Entradas por WhatsApp.',
+    'DESCRIPTION:Hidromedusa en vivo. Entradas por WhatsApp.',
     'END:VEVENT','END:VCALENDAR'].join('\r\n');
 }
 async function addToCalendar(){
@@ -877,7 +875,7 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 (function(){
   const el=document.getElementById('hero-word');
   if(!el) return;
-  const WORDS=['MEDUSA','FEST','MAGIA','MÚSICA','AMIGOS','ABISMO','FIESTA'];
+  const WORDS=['MEDUSA','MAGIA','MÚSICA','AMIGOS','ABISMO'];
   let i=0;
   setInterval(function(){
     i=(i+1)%WORDS.length;
