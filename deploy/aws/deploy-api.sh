@@ -69,12 +69,27 @@ sleep 8   # propagación del rol antes de crear la función
 # ── 3) Empaquetar el código (SDK v3 lo da el runtime) ──────────────────────────
 echo "→ [3/6] Zip del código"
 ZIP="/tmp/hm-api.zip"; rm -f "${ZIP}"
-( cd "${HERE}/lambdas" && zip -qr "${ZIP}" aws-handler.js tickets newsletter lib )
+( cd "${HERE}/lambdas" && zip -qr "${ZIP}" aws-handler.js tickets newsletter lib jellyfish )
 echo "   $(du -h "${ZIP}" | cut -f1) → ${ZIP}"
 
 # ── 4) Crear/actualizar la función ─────────────────────────────────────────────
-STAFF_TOKEN="${STAFF_TOKEN:-$(openssl rand -hex 12)}"
-ENVVARS="Variables={DDB_TABLE_PREFIX=${PREFIX},STAFF_TOKEN=${STAFF_TOKEN}}"
+# Preserve existing STAFF_TOKEN on redeploy so the staff panel doesn't break.
+if [ -z "${STAFF_TOKEN:-}" ]; then
+  STAFF_TOKEN="$(aws lambda get-function-configuration --region "${REGION}" --function-name "${FN}" \
+    --query 'Environment.Variables.STAFF_TOKEN' --output text 2>/dev/null || true)"
+  [ -z "${STAFF_TOKEN}" ] || [ "${STAFF_TOKEN}" = "None" ] && STAFF_TOKEN="$(openssl rand -hex 12)"
+fi
+# JSON format handles special chars in SES_FROM (spaces, angle brackets).
+ENVVARS="$(python3 -c "
+import json, sys
+print(json.dumps({'Variables': {
+  'DDB_TABLE_PREFIX': '${PREFIX}',
+  'STAFF_TOKEN':      '${STAFF_TOKEN}',
+  'SES_ENABLED':      '1',
+  'SES_FROM':         'Hidromedusa <entrada@hidromedusa.com>',
+  'SES_REGION':       '${REGION}',
+  'API_BASE':         'https://p2vsvdihylfl6w4c6pfnnuwd4u0dwcvw.lambda-url.sa-east-1.on.aws',
+}}))")"
 echo "→ [4/6] Función Lambda ${FN}"
 if aws lambda get-function --region "${REGION}" --function-name "${FN}" >/dev/null 2>&1; then
   aws lambda update-function-code --region "${REGION}" --function-name "${FN}" --zip-file "fileb://${ZIP}" >/dev/null

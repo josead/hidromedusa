@@ -3,8 +3,9 @@
 // Storage: DynamoDB on-demand via lib/store.js, using the Lambda execution-role creds.
 // AWS SDK v3 is provided by the Node.js Lambda runtime — no node_modules to bundle.
 
-const tickets = require('./tickets/index');
+const tickets   = require('./tickets/index');
 const newsletter = require('./newsletter/index');
+const jellyfish  = require('./jellyfish/index');
 
 // path → handler. `params` names map regex capture groups onto req.params.
 const ROUTES = [
@@ -19,8 +20,9 @@ const ROUTES = [
   { m: 'POST', re: /^\/tickets\/([^/]+)\/delete$/, fn: tickets.remove,    params: ['id'] },
   { m: 'POST', re: /^\/tickets\/([^/]+)\/scan$/,   fn: tickets.scan,      params: ['id'] },
   { m: 'GET',  re: /^\/tickets\/([^/]+)$/,         fn: tickets.getTicket, params: ['id'] },
-  { m: 'POST', re: /^\/newsletter\/subscribe$/,   fn: newsletter.subscribe },
-  { m: 'GET',  re: /^\/newsletter\/list$/,        fn: newsletter.list },
+  { m: 'POST', re: /^\/newsletter\/subscribe$/,                    fn: newsletter.subscribe },
+  { m: 'GET',  re: /^\/newsletter\/list$/,                        fn: newsletter.list },
+  { m: 'GET',  re: /^\/jellyfish\/([^/]+)\/([^/]+)$/, fn: jellyfish.serve, params: ['noun', 'adjective'] },
 ];
 
 // CORS is handled by the Function URL CORS config (restricted to the site domain),

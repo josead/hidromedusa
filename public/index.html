@@ -285,6 +285,33 @@
   .task-pri { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border: 1px solid var(--muted); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; }
   .task-pri.high { border-color: var(--hot); color: var(--hot); }
 
+  /* ---------- Jellyfish display ---------- */
+  .jf-wrap { text-align: center; padding: 26px 16px 14px; background: var(--abyss); border: 2px solid var(--acid); border-bottom: none; }
+  .jf-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; color: var(--acid); text-transform: uppercase; margin-bottom: 14px; }
+  .jf-canvas-wrap { display: inline-block; position: relative; cursor: pointer; }
+  .jf-canvas-wrap canvas { image-rendering: pixelated; display: block;
+    filter: drop-shadow(0 0 14px rgba(198,255,26,0.35)) drop-shadow(0 0 40px rgba(198,255,26,0.12)); }
+  .jf-canvas-wrap:hover canvas { filter: drop-shadow(0 0 20px rgba(198,255,26,0.55)) drop-shadow(0 0 60px rgba(198,255,26,0.18)); }
+  .jf-hint { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; margin-top: 8px; }
+  .jf-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+
+  /* ---------- Jellyfish fullscreen ---------- */
+  #jf-fullscreen {
+    display: none; position: fixed; inset: 0; z-index: 500;
+    background: #000; flex-direction: column; align-items: center;
+    justify-content: center; cursor: pointer; user-select: none;
+  }
+  #jf-fullscreen.open { display: flex; }
+  #jf-fs-canvas { image-rendering: pixelated;
+    width: min(88vw, calc(88vh * 140 / 220)); height: auto;
+    filter: drop-shadow(0 0 30px rgba(198,255,26,0.5)) drop-shadow(0 0 80px rgba(198,255,26,0.2)); }
+  #jf-fs-phrase {
+    font-family: var(--display); font-size: clamp(28px,8vw,72px);
+    color: var(--acid); letter-spacing: 0.08em; text-transform: uppercase;
+    text-align: center; margin-top: 22px; line-height: 1; text-shadow: 0 0 30px rgba(198,255,26,0.4);
+  }
+  #jf-fs-hint { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 18px; letter-spacing: 0.12em; }
+
   /* ---------- Ticket card (redeem) ---------- */
   .tk-card { border: 2px solid var(--acid); background: var(--abyss); position: relative; }
   .tk-top { padding: 18px 20px; border-bottom: 2px dashed var(--acid); display: flex; justify-content: space-between; align-items: flex-start; }
@@ -355,7 +382,7 @@
     <div class="nav-links">
       <a onclick="goTo('entradas')">Entradas</a>
       <a onclick="goTo('fechas')">Fechas</a>
-      <a onclick="openModal('m-redeem')">Reclamar tu palabra</a>
+      <a onclick="openModal('m-redeem')">Reclamar tu hidromedusa</a>
     </div>
     <div class="nav-actions">
       <a class="btn btn-acid" onclick="goTo('entradas')">Entradas</a>
@@ -378,7 +405,7 @@
       </div>
       <div class="hero-bottom reveal">
         <a class="btn btn-acid btn-lg" onclick="buy()">Pedir entrada para el 11 de Julio <i data-lucide="arrow-right" width="16"></i></a>
-        <a class="btn btn-line btn-lg" onclick="openModal('m-redeem')">Reclamar tu palabra</a>
+        <a class="btn btn-line btn-lg" onclick="openModal('m-redeem')">Reclamar tu hidromedusa</a>
       </div>
     </div>
   </header>
@@ -415,7 +442,7 @@
           </div>
           <div style="margin-top:22px;display:flex;flex-direction:column;gap:8px">
             <a class="btn btn-acid btn-block" onclick="buy()">Pedir mi entrada</a>
-            <a class="btn btn-line btn-block" onclick="openModal('m-redeem')">Reclamar tu palabra secreta</a>
+            <a class="btn btn-line btn-block" onclick="openModal('m-redeem')">Reclamar tu hidromedusa</a>
             <a class="btn btn-line btn-block" onclick="addToCalendar()">Agregar a calendario 📅</a>
           </div>
         </div>
@@ -443,7 +470,7 @@
           </div>
         </div>
       </div>
-      <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">Pedís tu entrada por WhatsApp o Instagram. Cuando confirmás el pago, te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu palabra»</a> para confirmar tu lugar. En la puerta decís tus palabras clave y te damos tu entrada-sticker.</p>
+      <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">Pedís tu entrada por WhatsApp o Instagram. Cuando confirmás el pago, te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu hidromedusa»</a> para confirmar tu lugar. En la puerta decís tus palabras clave y te damos tu entrada-sticker.</p>
     </div>
   </section>
 
@@ -484,7 +511,7 @@
           <h5>Catálogo</h5>
           <a onclick="goTo('entradas')">Entradas</a>
           <a onclick="goTo('fechas')">Fechas</a>
-          <a onclick="openModal('m-redeem')">Reclamar tu palabra</a>
+          <a onclick="openModal('m-redeem')">Reclamar tu hidromedusa</a>
         </div>
         <div class="foot-col">
           <h5>Info</h5>
@@ -556,7 +583,7 @@
       <div class="modal-body">
         <button class="auth-btn" onclick="closeModal('m-menu');goTo('entradas')">Entradas</button>
         <button class="auth-btn" onclick="closeModal('m-menu');goTo('fechas')">Fechas</button>
-        <button class="auth-btn" onclick="closeModal('m-menu');openModal('m-redeem')">Reclamar tu palabra</button>
+        <button class="auth-btn" onclick="closeModal('m-menu');openModal('m-redeem')">Reclamar tu hidromedusa</button>
         <button class="auth-btn" onclick="closeModal('m-menu');addToCalendar()">Agregar a calendario</button>
       </div>
     </div>
@@ -565,11 +592,11 @@
   <!-- Redeem (Tengo un código) -->
   <div class="modal" id="m-redeem">
     <div class="modal-box">
-      <div class="modal-head"><h4>Reclamá tu palabra</h4><button class="modal-x" onclick="closeRedeem()">×</button></div>
+      <div class="modal-head"><h4>Tu hidromedusa 🪼</h4><button class="modal-x" onclick="closeRedeem()">×</button></div>
       <div class="modal-body">
         <div id="redeem-form">
-          <p style="color:var(--bone-dim);font-size:14px;line-height:1.5;margin-bottom:16px">Cargá tu <b style="color:var(--acid)">palabra icebreaker</b> (dos palabras). Se habilita después de que confirmes el pago por WhatsApp o Instagram.</p>
-          <label class="field-label">Tu palabra icebreaker</label>
+          <p style="color:var(--bone-dim);font-size:14px;line-height:1.5;margin-bottom:16px">Cargá tu <b style="color:var(--acid)">palabra icebreaker</b> (dos palabras). Se habilita cuando el staff confirme tu pago.</p>
+          <label class="field-label">Tus dos palabras</label>
           <input class="field" id="redeem-claim" placeholder="ej. medusa violeta" autocomplete="off" onkeydown="if(event.key==='Enter')redeem()" />
           <button class="btn btn-acid btn-block btn-lg" onclick="redeem()">Ver mi entrada</button>
           <p style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5">¿Todavía no pagaste tu entrada? <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Pedila acá →</a></p>
@@ -587,8 +614,16 @@
   </div>
 
 
+  <!-- Jellyfish fullscreen overlay -->
+  <div id="jf-fullscreen" role="dialog" aria-modal="true" onclick="closeJfFullscreen()">
+    <canvas id="jf-fs-canvas"></canvas>
+    <div id="jf-fs-phrase"></div>
+    <div id="jf-fs-hint">toca para salir</div>
+  </div>
+
   <div id="toast"></div>
 
+<script src="/js/jellyfish.js"></script>
 <script>
 /* ============================================================
    HIDROMEDUSA · rave underground — comportamientos
@@ -640,8 +675,27 @@ function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
 function goTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
 
 /* ---------- Modals ---------- */
-function openModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+  // Restore saved jellyfish when redeem modal opens
+  if(id==='m-redeem') restoreClaimedJf();
+}
 function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+
+// If the user already claimed, show their jellyfish immediately (no re-typing needed).
+function restoreClaimedJf(){
+  try {
+    const saved=JSON.parse(localStorage.getItem('hm_claimed')||'null');
+    if(!saved||!saved.claim) return;
+    // If result is already showing (re-opened modal), skip
+    if(document.getElementById('redeem-result').innerHTML.trim()) return;
+    const inp=document.getElementById('redeem-claim');
+    if(inp) inp.value=saved.claim.replace(/-/g,' ');
+    // Auto-run so they land straight on their jellyfish
+    redeem();
+  } catch(e){}
+}
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m){ m.classList.remove('open'); document.body.style.overflow=''; } }));
 
 /* ---------- Overlays ---------- */
@@ -748,12 +802,34 @@ async function redeem(){
   }
   renderTicketCard(data.ticket, data.event||HM_EVENT);
 }
+// Parse "medusa-violeta" or "medusa violeta" → {noun, adj}
+function parseClaim(claim){
+  const s=String(claim||'').toLowerCase().trim();
+  let parts=s.split('-'); if(parts.length<2) parts=s.split(' ');
+  return parts.length>=2 ? {noun:parts[0], adj:parts.slice(1).join('-')} : null;
+}
+
 function renderTicketCard(tk, ev){
   const typeLabel='ENTRADA';
   const statusMap={ freed:'Válida', pending:'Pendiente', used:'Usada', cancelled:'Cancelada' };
   const status=statusMap[tk.status]||'Válida';
   const box=document.getElementById('redeem-result');
+  const parsed=parseClaim(tk.claim);
+  const hasJf=parsed && window.JellyfishGen;
+
   box.innerHTML=`
+    ${hasJf?`
+    <div class="jf-wrap">
+      <div class="jf-label">Tu hidromedusa</div>
+      <div class="jf-canvas-wrap" onclick="openJfFullscreen()" title="Ver en pantalla completa">
+        <canvas id="jf-canvas"></canvas>
+        <div class="jf-hint">toca para pantalla completa</div>
+      </div>
+      <div class="jf-actions">
+        <button class="btn btn-acid" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();shareJf()">Compartir en Instagram 📸</button>
+        <button class="btn btn-line" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();openJfFullscreen()">Pantalla completa ↑</button>
+      </div>
+    </div>`:''}
     <div class="tk-card">
       <div class="tk-top">
         <div><div class="tk-type">${typeLabel}</div><div class="tk-ev">${(ev&&ev.title)||HM_EVENT.title}</div></div>
@@ -770,14 +846,161 @@ function renderTicketCard(tk, ev){
       </div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.5;border-top:1px dashed var(--line-strong);padding:14px 20px">🍹 Si compartís una palabra con otra persona en la fiesta, se presentan y ganan una consumición.</div>
     </div>
-    <button class="btn btn-line btn-block" style="margin-top:14px" onclick="closeRedeem()">Cerrar</button>`;
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-line" style="flex:1" onclick="closeRedeem()">Cerrar</button>
+      <button class="btn btn-line" style="flex:0;font-size:10px;color:var(--muted);border-color:var(--line)" onclick="forgetJf()">Olvidar 🌊</button>
+    </div>`;
+
   document.getElementById('redeem-form').style.display='none';
+
+  // Start jellyfish animation after DOM is ready
+  if(hasJf){
+    window._jfClaim=tk.claim;
+    window._jfParsed=parsed;
+    if(window._jfHandle) window._jfHandle.stop();
+    window._jfHandle=JellyfishGen.render(document.getElementById('jf-canvas'), parsed.noun, parsed.adj);
+
+    // Persist claimed jellyfish across sessions
+    try {
+      localStorage.setItem('hm_claimed', JSON.stringify({
+        claim: tk.claim, noun: parsed.noun, adj: parsed.adj,
+        ticketId: tk.id, status: tk.status,
+        claimedAt: new Date().toISOString(),
+      }));
+    } catch(e) {}
+  }
 }
+
 function closeRedeem(){
   closeModal('m-redeem');
   document.getElementById('redeem-form').style.display='';
   document.getElementById('redeem-result').innerHTML='';
   document.getElementById('redeem-claim').value='';
+  if(window._jfHandle){ window._jfHandle.stop(); window._jfHandle=null; }
+  window._jfClaim=null; window._jfParsed=null;
+  // Note: localStorage claim is intentionally kept so it auto-restores next visit.
+}
+function forgetJf(){
+  try { localStorage.removeItem('hm_claimed'); } catch(e){}
+  closeRedeem();
+  toast('Hidromedusa olvidada. Podés cargar una nueva. 🌊');
+}
+
+/* ---------- Jellyfish fullscreen ---------- */
+function openJfFullscreen(){
+  const p=window._jfParsed; if(!p) return;
+  const el=document.getElementById('jf-fullscreen');
+  const fsCanvas=document.getElementById('jf-fs-canvas');
+  document.getElementById('jf-fs-phrase').textContent=(window._jfClaim||'').replace(/-/g,' ');
+  if(window._jfFsHandle) window._jfFsHandle.stop();
+  window._jfFsHandle=JellyfishGen.render(fsCanvas, p.noun, p.adj);
+  el.classList.add('open');
+  document.body.style.overflow='hidden';
+  const req=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(req) req.call(el).catch(()=>{});
+}
+function closeJfFullscreen(){
+  const el=document.getElementById('jf-fullscreen');
+  el.classList.remove('open');
+  document.body.style.overflow='';
+  if(window._jfFsHandle){ window._jfFsHandle.stop(); window._jfFsHandle=null; }
+  const exit=document.exitFullscreen||document.webkitExitFullscreen;
+  if(exit && (document.fullscreenElement||document.webkitFullscreenElement)) exit.call(document).catch(()=>{});
+}
+document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement) closeJfFullscreen(); });
+document.addEventListener('webkitfullscreenchange',()=>{ if(!document.webkitFullscreenElement) closeJfFullscreen(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeJfFullscreen(); });
+
+/* ---------- Download jellyfish as PNG ---------- */
+function downloadJf(){
+  const p=window._jfParsed; const claim=window._jfClaim||'hidromedusa';
+  if(!p||!window.JellyfishGen) return;
+  const tmp=document.createElement('canvas');
+  JellyfishGen.preview(tmp, p.noun, p.adj);
+  const a=document.createElement('a');
+  a.href=tmp.toDataURL('image/png');
+  a.download='hidromedusa-'+claim+'.png';
+  a.click();
+  toast('Medusa guardada 🪼');
+}
+
+/* ---------- Share jellyfish (Instagram Stories format) ---------- */
+async function shareJf(){
+  const p=window._jfParsed; const claim=window._jfClaim||'hidromedusa';
+  if(!p||!window.JellyfishGen) return;
+
+  // Wait for web fonts so Anton renders correctly in canvas
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+
+  // 9:16 canvas for Instagram Stories (540×960)
+  const CW=540, CH=960;
+  const JF_SCALE=3;                      // 3× pixel-crisp upscale
+  const JFW=140*JF_SCALE;                // 420px
+  const JFH=220*JF_SCALE;               // 660px
+  const JFX=Math.round((CW-JFW)/2);     // 60px — horizontally centered
+  const JFY=70;
+
+  const share=document.createElement('canvas');
+  share.width=CW; share.height=CH;
+  const ctx=share.getContext('2d');
+
+  // Background
+  ctx.fillStyle='#060607';
+  ctx.fillRect(0,0,CW,CH);
+
+  // Radial glow centred on bell (~40% down the jellyfish)
+  const gx=CW/2, gy=JFY+JFH*0.38;
+  const grd=ctx.createRadialGradient(gx,gy,10,gx,gy,240);
+  grd.addColorStop(0,'rgba(198,255,26,0.14)');
+  grd.addColorStop(1,'rgba(198,255,26,0)');
+  ctx.fillStyle=grd; ctx.fillRect(0,0,CW,CH);
+
+  // Jellyfish — render frame-0 on a tmp canvas then drawImage upscaled
+  const tmp=document.createElement('canvas');
+  JellyfishGen.preview(tmp, p.noun, p.adj);  // 140×220
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(tmp, JFX, JFY, JFW, JFH);
+
+  // Thin acid divider
+  const TY=JFY+JFH+30;
+  ctx.strokeStyle='rgba(198,255,26,0.25)';
+  ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(40,TY); ctx.lineTo(CW-40,TY); ctx.stroke();
+
+  // Claim phrase — Anton (already loaded by the page)
+  const phrase=claim.replace(/-/g,' ').toUpperCase();
+  ctx.textAlign='center';
+  ctx.fillStyle='#C6FF1A';
+  ctx.font='bold 50px Anton,"Arial Narrow",Impact,sans-serif';
+  ctx.fillText(phrase, CW/2, TY+56);
+
+  // Event tag
+  ctx.font='13px "Space Mono","Courier New",monospace';
+  ctx.fillStyle='rgba(168,163,153,0.75)';
+  ctx.fillText('HIDROMEDUSA · 11 JUL · TANDIL', CW/2, TY+88);
+
+  // URL watermark
+  ctx.font='11px "Space Mono","Courier New",monospace';
+  ctx.fillStyle='rgba(198,255,26,0.35)';
+  ctx.fillText('hidromedusa.com', CW/2, TY+112);
+
+  // Convert to blob
+  const blob=await new Promise(res=>share.toBlob(res,'image/png'));
+  const file=new File([blob], 'hidromedusa-'+claim+'.png', {type:'image/png'});
+  const shareText='🪼 '+claim.replace(/-/g,' ')+' — Hidromedusa · 11 Jul · Tandil';
+
+  // Web Share API (mobile: opens native share sheet → Instagram, WhatsApp, etc.)
+  if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file], title:'Mi hidromedusa', text:shareText}); return; }
+    catch(e){ if(e.name==='AbortError') return; }  // user cancelled
+  }
+
+  // Fallback: trigger download + hint
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=file.name;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  toast('Imagen guardada — subila a tus stories 📸');
 }
 
 
@@ -888,6 +1111,23 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 /* nav bg already solid; ensure icons render after dynamic insertions */
 window.addEventListener('load',()=>lucide.createIcons());
+
+/* Auto-open claim from URL ?claim=noun-adjective (email deep-link) */
+(function(){
+  try {
+    const q=new URLSearchParams(window.location.search).get('claim');
+    if(!q) return;
+    // Remove param from URL bar without reloading
+    const clean=window.location.pathname+(window.location.hash||'');
+    history.replaceState(null,'',clean);
+    setTimeout(function(){
+      openModal('m-redeem');
+      const inp=document.getElementById('redeem-claim');
+      if(inp) inp.value=q.replace(/-/g,' ');
+      redeem();
+    }, 700);
+  } catch(e){}
+})();
 
 /* marquesina infinita sin huecos — repite el contenido hasta superar el viewport y ajusta la velocidad */
 (function(){

@@ -7,9 +7,10 @@
 //
 // Env: SES_FROM, SES_ENABLED ('1' para enviar), SES_REGION.
 
-const FROM    = process.env.SES_FROM || 'Hidromedusa <entrada@hidromedusa.com>';
-const ENABLED = process.env.SES_ENABLED === '1';
-const REGION  = process.env.SES_REGION || process.env.AWS_REGION || 'sa-east-1';
+const FROM     = process.env.SES_FROM || 'Hidromedusa <entrada@hidromedusa.com>';
+const ENABLED  = process.env.SES_ENABLED === '1';
+const REGION   = process.env.SES_REGION || process.env.AWS_REGION || 'sa-east-1';
+const API_BASE = (process.env.API_BASE || 'https://p2vsvdihylfl6w4c6pfnnuwd4u0dwcvw.lambda-url.sa-east-1.on.aws').replace(/\/$/, '');
 
 // ── Evento (espejo del HM_EVENT hardcodeado en public/index.html) ────────────
 const EVENT = {
@@ -60,17 +61,17 @@ const esc = (s) => String(s == null ? '' : s)
 
 // ── Bloques HTML reutilizables (email-safe: tablas + estilos inline) ─────────
 function pad(inner, top = 22) {
-  return `<tr><td style="padding:${top}px 34px 0;">${inner}</td></tr>`;
+  return `<tr><td bgcolor="${C.abyss}" style="padding:${top}px 34px 0;background-color:${C.abyss} !important;">${inner}</td></tr>`;
 }
 function text(html, top = 22) {
-  return pad(`<div style="font-family:${F.body};font-size:15px;line-height:1.55;color:${C.bone};">${html}</div>`, top);
+  return pad(`<div style="font-family:${F.body};font-size:15px;line-height:1.55;color:${C.bone} !important;">${html}</div>`, top);
 }
 function claimBox(label, claim, color = C.acid) {
   return pad(`
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.panel}" style="background:${C.panel};border:1px solid ${color};">
-      <tr><td style="padding:22px 26px;">
-        <div style="font-family:${F.mono};font-size:11px;letter-spacing:3px;color:${C.muted};text-transform:uppercase;">${label}</div>
-        <div style="font-family:${F.display};font-size:46px;line-height:1;letter-spacing:1px;color:${color};text-transform:uppercase;padding-top:10px;">${esc(prettyClaim(claim))}</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.panel}" style="background-color:${C.panel} !important;border:1px solid ${color};">
+      <tr><td bgcolor="${C.panel}" style="padding:22px 26px;background-color:${C.panel} !important;">
+        <div style="font-family:${F.mono};font-size:11px;letter-spacing:3px;color:${C.muted} !important;text-transform:uppercase;">${label}</div>
+        <div style="font-family:${F.display};font-size:46px;line-height:1;letter-spacing:1px;color:${color} !important;text-transform:uppercase;padding-top:10px;">${esc(prettyClaim(claim))}</div>
       </td></tr>
     </table>`, 24);
 }
@@ -101,6 +102,35 @@ function calButton(calUrl) {
 function divider() {
   return pad(`<div style="border-top:1px solid ${C.line};font-size:0;line-height:0;">&nbsp;</div>`, 24);
 }
+// Jellyfish pixel-art image + "Ver mi hidromedusa" button for the confirmation email.
+// The SVG is served by the Lambda itself; clicking the button opens the site with
+// ?claim=... pre-filled so the animated version loads automatically.
+function jellyfishBlock(claim) {
+  const parts = String(claim || '').split('-');
+  if (parts.length < 2) return '';
+  const noun = encodeURIComponent(parts[0]);
+  const adj  = encodeURIComponent(parts.slice(1).join('-'));
+  const svgUrl  = `${API_BASE}/jellyfish/${noun}/${adj}`;
+  const siteUrl = `https://hidromedusa.com/?claim=${encodeURIComponent(claim)}`;
+  // 140×220 = GRID_W*SCALE × GRID_H*SCALE
+  return pad(`
+    <div style="text-align:center;">
+      <div style="font-family:${F.mono};font-size:10px;letter-spacing:3px;color:${C.muted};text-transform:uppercase;margin-bottom:10px;">Tu hidromedusa única</div>
+      <img src="${esc(svgUrl)}" width="140" height="220" alt="Hidromedusa ${esc(claim)}"
+           style="image-rendering:pixelated;display:inline-block;border:1px solid ${C.line};" />
+      <div style="margin-top:14px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;">
+          <tr><td bgcolor="${C.acid}" style="background:${C.acid};">
+            <a href="${esc(siteUrl)}" target="_blank"
+               style="display:inline-block;padding:13px 26px;font-family:${F.mono};font-size:13px;font-weight:bold;letter-spacing:1px;color:${C.abyss};text-transform:uppercase;text-decoration:none;">
+              🪼 Ver mi hidromedusa animada
+            </a>
+          </td></tr>
+        </table>
+      </div>
+      <div style="font-family:${F.body};font-size:12px;color:${C.muted};padding-top:8px;">Se abre en el sitio con tu medusa animada lista.</div>
+    </div>`, 28);
+}
 // Fila clave/valor para el aviso interno de leads.
 function kv(label, val) {
   return `<tr>
@@ -125,34 +155,62 @@ const fmtWhen = (iso) => {
 // Shell: top label + wordmark + sub-label (accent) + filas + footer.
 function htmlDoc({ subLabel, accent = C.acid, rows }) {
   return `<!doctype html>
-<html lang="es"><head>
+<!-- "light dark" = "I've handled both modes, use my CSS" — prevents auto-inversion
+     on Apple Mail, iOS, Outlook 2019+, Samsung Mail, Thunderbird.
+     Gmail ignores all of this and always inverts — nothing can prevent it. -->
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml"
+      style="color-scheme:dark;background-color:${C.abyss};">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
 <title>Hidromedusa</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono&display=swap');
-  body{margin:0;padding:0;background:${C.abyss};}
-  a{text-decoration:none;}
-  @media (max-width:620px){ .wm{font-size:54px!important;} }
+  :root { color-scheme: dark; }
+  body { margin:0; padding:0; background-color:${C.abyss} !important; color:${C.bone} !important; }
+  a { color:${C.acid}; text-decoration:none; }
+  /* Reassert dark palette when dark mode fires — prevents auto-inversion
+     on clients that support prefers-color-scheme (Apple/iOS/Outlook/Samsung). */
+  @media (prefers-color-scheme: dark) {
+    body         { background-color:${C.abyss} !important; color:${C.bone} !important; }
+    .bg-abyss    { background-color:${C.abyss} !important; }
+    .bg-panel    { background-color:${C.panel} !important; }
+    .c-bone      { color:${C.bone}   !important; }
+    .c-acid      { color:${C.acid}   !important; }
+    .c-muted     { color:${C.muted}  !important; }
+  }
+  /* Outlook New App adds [data-ogsc] to <html> when applying dark mode. */
+  [data-ogsc] body      { background-color:${C.abyss} !important; color:${C.bone} !important; }
+  [data-ogsc] .bg-abyss { background-color:${C.abyss} !important; }
+  [data-ogsc] .bg-panel { background-color:${C.panel} !important; }
+  [data-ogsc] .c-bone   { color:${C.bone}  !important; }
+  [data-ogsc] .c-acid   { color:${C.acid}  !important; }
+  [data-ogsc] .c-muted  { color:${C.muted} !important; }
+  @media (max-width:620px) { .wm { font-size:54px !important; } }
 </style>
 </head>
-<body style="margin:0;padding:0;background:${C.abyss};">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.abyss}" style="background:${C.abyss};">
-<tr><td align="center" style="padding:28px 16px;">
-  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:${C.abyss};border:1px solid ${C.line};">
+<body style="margin:0;padding:0;background-color:${C.abyss} !important;" bgcolor="${C.abyss}">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+       bgcolor="${C.abyss}" class="bg-abyss"
+       style="background-color:${C.abyss} !important;width:100%;">
+<tr><td align="center" style="padding:28px 16px;background-color:${C.abyss} !important;" bgcolor="${C.abyss}" class="bg-abyss">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"
+         bgcolor="${C.abyss}" class="bg-abyss"
+         style="width:600px;max-width:600px;background-color:${C.abyss} !important;border:1px solid ${C.line};">
 
-    <tr><td style="padding:22px 34px 0;font-family:${F.mono};font-size:11px;letter-spacing:3px;color:${C.acid};text-transform:uppercase;">Espécimen Nº001 · Hydromedusae</td></tr>
-    <tr><td style="padding:6px 34px 0;">
-      <div class="wm" style="font-family:${F.display};font-size:74px;line-height:0.9;letter-spacing:1px;color:${C.bone};text-transform:uppercase;">HIDROMEDUSA</div>
-      <div style="font-family:${F.mono};font-size:12px;letter-spacing:4px;color:${accent};text-transform:uppercase;padding-top:8px;">${subLabel}</div>
+    <tr><td class="bg-abyss c-acid" bgcolor="${C.abyss}" style="padding:22px 34px 0;background-color:${C.abyss} !important;font-family:${F.mono};font-size:11px;letter-spacing:3px;color:${C.acid} !important;text-transform:uppercase;">Espécimen Nº001 · Hydromedusae</td></tr>
+    <tr><td class="bg-abyss" bgcolor="${C.abyss}" style="padding:6px 34px 0;background-color:${C.abyss} !important;">
+      <div class="wm c-bone" style="font-family:${F.display};font-size:74px;line-height:0.9;letter-spacing:1px;color:${C.bone} !important;text-transform:uppercase;">HIDROMEDUSA</div>
+      <div class="c-acid" style="font-family:${F.mono};font-size:12px;letter-spacing:4px;color:${accent} !important;text-transform:uppercase;padding-top:8px;">${subLabel}</div>
     </td></tr>
 
     ${rows}
 
     ${divider()}
-    <tr><td style="padding:16px 34px 30px;font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;">
-      <a href="${SITE}" target="_blank" style="color:${C.acid};">hidromedusa.com</a> &nbsp;·&nbsp; Música en vivo desde Tandil
+    <tr><td class="bg-abyss c-muted" bgcolor="${C.abyss}" style="padding:16px 34px 30px;background-color:${C.abyss} !important;font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted} !important;text-transform:uppercase;">
+      <a href="${SITE}" target="_blank" class="c-acid" style="color:${C.acid} !important;">hidromedusa.com</a> &nbsp;·&nbsp; Música en vivo desde Tandil
     </td></tr>
 
   </table>
@@ -166,6 +224,7 @@ function renderConfirmationHtml({ name, claim, calUrl }) {
   const rows =
     text(`¡Hola ${esc(name) || 'crack'}! Te esperamos en el fondo. 🪼<br>Tu entrada para <b>Hidromedusa</b> está confirmada.`, 26)
     + claimBox('Tu palabra icebreaker (dos palabras)', claim)
+    + jellyfishBlock(claim)
     + eventDetails()
     + calButton(calUrl)
     + text(`<b style="color:${C.acid};">En la puerta:</b> decí tu palabra y te damos tu entrada-sticker.<br><b style="color:${C.acid};">El juego:</b> si tu palabra matchea con la de otra persona, se presentan y ganan una consumición. 🍹`, 26);
@@ -210,8 +269,8 @@ function renderPalabraChangedText({ name, claim, oldClaim, calUrl }) {
 function renderCancelledHtml({ name }) {
   const rows =
     text(`¡Hola ${esc(name) || ''}! Te escribimos para avisarte que tu entrada para <b>Hidromedusa</b> fue <b style="color:${C.hot};">invalidada</b>. Tu palabra ya no sirve para ingresar.`, 26)
-    + pad(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.panel}" style="background:${C.panel};border:1px solid ${C.hot};">
-        <tr><td style="padding:20px 26px;font-family:${F.display};font-size:30px;letter-spacing:1px;color:${C.hot};text-transform:uppercase;">Entrada invalidada</td></tr>
+    + pad(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.panel}" style="background-color:${C.panel} !important;border:1px solid ${C.hot};">
+        <tr><td bgcolor="${C.panel}" style="padding:20px 26px;background-color:${C.panel} !important;font-family:${F.display};font-size:30px;letter-spacing:1px;color:${C.hot} !important;text-transform:uppercase;">Entrada invalidada</td></tr>
       </table>`, 24)
     + text(`¿Creés que es un error? Escribinos a <a href="mailto:${CONTACT}" style="color:${C.acid};">${CONTACT}</a> o por Instagram <a href="https://instagram.com/hidromedusa" style="color:${C.acid};">@hidromedusa</a> y lo vemos.`, 24);
   return htmlDoc({ subLabel: 'Entrada invalidada', accent: C.hot, rows });

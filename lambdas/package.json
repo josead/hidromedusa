@@ -9,5 +9,8 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.600.0",
     "@aws-sdk/lib-dynamodb": "^3.600.0"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-ses": "^3.1075.0"
   }
 }

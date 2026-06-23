@@ -6,7 +6,8 @@
     "tickets/index.js",
     "calendar/index.js",
     "staff/index.js",
-    "newsletter/index.js"
+    "newsletter/index.js",
+    "jellyfish/index.js"
   ],
   "endpoints": [
     { "path": "/auth/exchange",            "method": "POST", "module": "auth/index",       "fn": "exchange"    },
@@ -31,6 +32,8 @@
     { "path": "/staff/overview",           "method": "GET",  "module": "staff/index",      "fn": "getOverview" },
 
     { "path": "/newsletter/subscribe",     "method": "POST", "module": "newsletter/index", "fn": "subscribe"   },
-    { "path": "/newsletter/list",          "method": "GET",  "module": "newsletter/index", "fn": "list"        }
+    { "path": "/newsletter/list",          "method": "GET",  "module": "newsletter/index", "fn": "list"        },
+
+    { "path": "/jellyfish/:noun/:adjective", "method": "GET", "module": "jellyfish/index", "fn": "serve" }
   ]
 }
