@@ -110,13 +110,13 @@ const tickets = {
 // normalized: t -> label, pri -> priority.
 const TASK_SEED = {
   arte: [
-    { id:'art-1', label:'Flyer próxima fecha (11/7)',     done:false, priority:'high' },
+    { id:'art-1', label:'Flyer próxima fecha',            done:false, priority:'high' },
     { id:'art-2', label:'Templates de Instagram Stories', done:false, priority:'med'  },
     { id:'art-3', label:'Diseño merch secreto VIP',       done:false, priority:'high' },
     { id:'art-4', label:'Visuales para el vivo',          done:false, priority:'med'  },
   ],
   finanzas: [
-    { id:'fin-1', label:'Break-even de la fecha 11/7',    done:false, priority:'high' },
+    { id:'fin-1', label:'Break-even del evento',          done:false, priority:'high' },
     { id:'fin-2', label:'Cotizar sonido + luces',         done:false, priority:'high' },
     { id:'fin-3', label:'Revisar comisión Mercado Pago',  done:false, priority:'med'  },
   ],
@@ -141,7 +141,7 @@ const TASK_SEED = {
     { id:'cos-2', label:'Wristbands de la fecha',         done:false, priority:'med'  },
   ],
   redes: [
-    { id:'red-1', label:'Post anuncio fecha 11/7',        done:false, priority:'high' },
+    { id:'red-1', label:'Post anuncio del evento',        done:false, priority:'high' },
     { id:'red-2', label:'Stories countdown',              done:false, priority:'med'  },
     { id:'red-3', label:'Reels post-evento',              done:false, priority:'med'  },
   ],

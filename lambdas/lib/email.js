@@ -15,11 +15,11 @@ const API_BASE = (process.env.API_BASE || 'https://p2vsvdihylfl6w4c6pfnnuwd4u0dw
 // ── Evento (espejo del HM_EVENT hardcodeado en public/index.html) ────────────
 const EVENT = {
   title:    'Hidromedusa · 990 Espacio Cultural',
-  start:    '2026-07-11T21:00:00-03:00',
-  end:      '2026-07-12T03:00:00-03:00',
+  start:    '',
+  end:      '',
   venue:    '990 Espacio Cultural, Tandil, Buenos Aires, AR',
-  dateLabel:'Sáb 11 Jul 2026',
-  timeLabel:'21:00 a 03:00',
+  dateLabel:'Septiembre 2026',
+  timeLabel:'',
 };
 const SITE      = 'https://hidromedusa.com';
 const CONTACT   = 'hola@hidromedusa.com';
@@ -78,16 +78,10 @@ function claimBox(label, claim, color = C.acid) {
 function eventDetails() {
   return pad(`
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr>
-        <td style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding-bottom:4px;">Fecha</td>
-        <td style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding-bottom:4px;">Horario</td>
-      </tr>
-      <tr>
-        <td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;padding-bottom:14px;">${EVENT.dateLabel}</td>
-        <td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;padding-bottom:14px;">${EVENT.timeLabel}</td>
-      </tr>
-      <tr><td colspan="2" style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding-bottom:4px;">Lugar</td></tr>
-      <tr><td colspan="2" style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;">990 Espacio Cultural · Tandil, BA</td></tr>
+      <tr><td style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding-bottom:4px;">Fecha</td></tr>
+      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;padding-bottom:14px;">${EVENT.dateLabel} · <span style="color:${C.muted};font-weight:normal;">día exacto a confirmar</span></td></tr>
+      <tr><td style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding-bottom:4px;">Lugar</td></tr>
+      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;">990 Espacio Cultural · Tandil, BA</td></tr>
     </table>`);
 }
 function calButton(calUrl) {
@@ -226,17 +220,16 @@ function renderConfirmationHtml({ name, claim, calUrl }) {
     + claimBox('Tu palabra icebreaker (dos palabras)', claim)
     + jellyfishBlock(claim)
     + eventDetails()
-    + calButton(calUrl)
     + text(`<b style="color:${C.acid};">En la puerta:</b> decí tu palabra y te damos tu entrada-sticker.<br><b style="color:${C.acid};">El juego:</b> si tu palabra matchea con la de otra persona, se presentan y ganan una consumición. 🍹`, 26);
   return htmlDoc({ subLabel: 'Entrada confirmada', accent: C.acid, rows });
 }
 function renderConfirmationText({ name, claim, calUrl }) {
   return [
     `¡Hola ${name || ''}!`.trim(), '',
-    `Confirmamos tu entrada para Hidromedusa · 990 Espacio Cultural (${EVENT.dateLabel}, ${EVENT.timeLabel}).`, '',
+    `Confirmamos tu entrada para Hidromedusa · 990 Espacio Cultural (${EVENT.dateLabel} · día exacto a confirmar).`, '',
     `Tu palabra icebreaker (dos palabras): ${claim}`, '',
     'Decila en la puerta y te damos tu entrada-sticker. Si matchea con la de otra persona, se presentan y ganan una consumición.', '',
-    `Agendá la fecha: ${calUrl}`, '', `— Hidromedusa · ${SITE}`,
+    `— Hidromedusa · ${SITE}`,
   ].join('\n');
 }
 
@@ -250,7 +243,6 @@ function renderPalabraChangedHtml({ name, claim, oldClaim, calUrl }) {
     + claimBox('Tu nueva palabra (dos palabras)', claim)
     + oldNote
     + eventDetails()
-    + calButton(calUrl)
     + text(`<b style="color:${C.acid};">En la puerta:</b> decí tu <b>nueva</b> palabra y te damos tu entrada-sticker. 🪼`, 26);
   return htmlDoc({ subLabel: 'Palabra actualizada', accent: C.acid, rows });
 }
@@ -261,7 +253,7 @@ function renderPalabraChangedText({ name, claim, oldClaim, calUrl }) {
     oldClaim ? `Tu palabra anterior (${oldClaim}) ya no sirve.` : '', '',
     `Tu nueva palabra (dos palabras): ${claim}`, '',
     'Decí la nueva en la puerta y te damos tu entrada-sticker.', '',
-    `Agendá la fecha: ${calUrl}`, '', `— Hidromedusa · ${SITE}`,
+    `— Hidromedusa · ${SITE}`,
   ].filter((l, i, a) => !(l === '' && a[i - 1] === '')).join('\n');
 }
 

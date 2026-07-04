@@ -12,13 +12,13 @@ const STAFF_MEMBERS = {
 
 const STAFF_PANELS = {
   arte:            { title: 'Arte', sub: 'Flyers, identidad, visuales de cada fecha.', tasks: [
-    { id:'art-1', t:'Flyer próxima fecha (11/7)',     done:false, pri:'high' },
+    { id:'art-1', t:'Flyer próxima fecha',            done:false, pri:'high' },
     { id:'art-2', t:'Templates de Instagram Stories', done:false, pri:'med'  },
     { id:'art-3', t:'Diseño merch secreto VIP',       done:false, pri:'high' },
     { id:'art-4', t:'Visuales para el vivo',          done:false, pri:'med'  },
   ]},
   finanzas:        { title: '¿Cómo pagamos esto?', sub: 'Costos, ingresos y cómo cuadran los números.', tasks: [
-    { id:'fin-1', t:'Break-even de la fecha 11/7',    done:false, pri:'high' },
+    { id:'fin-1', t:'Break-even del evento',          done:false, pri:'high' },
     { id:'fin-2', t:'Cotizar sonido + luces',         done:false, pri:'high' },
     { id:'fin-3', t:'Definir precios y cupos',        done:false, pri:'med'  },
   ]},
@@ -43,7 +43,7 @@ const STAFF_PANELS = {
     { id:'cos-2', t:'Wristbands de la fecha',         done:false, pri:'med'  },
   ]},
   redes:           { title: 'Redes', sub: 'Instagram, TikTok, comunidad.', tasks: [
-    { id:'red-1', t:'Post anuncio fecha 11/7',        done:false, pri:'high' },
+    { id:'red-1', t:'Post anuncio del evento',        done:false, pri:'high' },
     { id:'red-2', t:'Stories countdown',              done:false, pri:'med'  },
     { id:'red-3', t:'Reels post-evento',              done:false, pri:'med'  },
   ]},
