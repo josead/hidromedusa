@@ -438,7 +438,7 @@
           <div>
             <div class="price-k">Entrada</div>
             <div class="price-v">GRATIS</div>
-            <div class="price-n">libre y gratuita · sticker en la puerta</div>
+            <div class="price-n">libre y gratuita · sin reserva obligatoria</div>
           </div>
           <div style="margin-top:22px;display:flex;flex-direction:column;gap:8px">
             <a class="btn btn-acid btn-block" onclick="buy()">Reservar mi lugar</a>
@@ -454,22 +454,18 @@
           <ul class="incluye-list">
             <li>Acceso a la tocada</li>
             <li>Barra habilitada</li>
-            <li>Entrada-sticker (te la dan en la puerta)</li>
+            <li>Tu hidromedusa digital para compartir</li>
             <li>Tu palabra icebreaker</li>
           </ul>
         </div>
         <div>
-          <div class="secret">
-            <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--acid);flex-shrink:0;margin-top:2px"></i>
-            <div><b>Palabra icebreaker</b><p>Tu entrada trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
-          </div>
           <div class="secret" style="margin-bottom:0">
-            <i data-lucide="gift" style="width:18px;height:18px;color:var(--hot);flex-shrink:0;margin-top:2px"></i>
-            <div><b>Primeras 10: merch secreto</b><p>Las primeras 10 reservas vienen con merch — qué es, es secreto. Se revela en la fiesta. 🤫</p></div>
+            <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--acid);flex-shrink:0;margin-top:2px"></i>
+            <div><b>Palabra icebreaker</b><p>Tu reserva trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
           </div>
         </div>
       </div>
-      <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">La entrada es gratis. Si querés tu hidromedusa, avisá que venís por WhatsApp o Instagram y te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu hidromedusa»</a> para confirmar tu lugar. En la puerta decís tus palabras clave y te damos tu entrada-sticker.</p>
+      <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">La entrada es gratis. Si querés tu hidromedusa, avisá que venís por WhatsApp o Instagram y te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu hidromedusa»</a> y aparece tu hidromedusa. En la fiesta compartí tu palabra: si coincide con la de otra persona, ganan una consumición.</p>
     </div>
   </section>
 
@@ -814,7 +810,7 @@ function renderTicketCard(tk, ev){
       <div class="tk-pass">
         <div class="k">Tus palabras clave</div>
         <div class="v">${tk.claim||'—'}</div>
-        <div class="n">Decí estas palabras en la puerta y te damos tu entrada-sticker.</div>
+        <div class="n">No hace falta entrada: la tocada es gratis. Decí tu palabra en la fiesta y buscá tu match.</div>
       </div>
       <div class="tk-meta">
         <div><div class="k">Fecha</div><div class="v">${(ev&&ev.dateLabel)||HM_EVENT.dateLabel}</div></div>
@@ -1039,12 +1035,11 @@ function enableNotif(){
 /* ---------- Legal ---------- */
 const LEGAL={
   terminos:{ title:'Términos y Condiciones', html:`
-    <h4>1. Entradas y reservas</h4><p>La entrada puede ser gratuita o paga según la fecha; se informa en el sitio. La reserva se hace por WhatsApp o por mensaje directo de Instagram. El staff confirma el cupo y te entrega tus palabras clave (dos palabras). En la puerta decís tus palabras clave y te damos tu entrada-sticker. La entrada es intransferible.</p>
+    <h4>1. Entradas y reservas</h4><p>La entrada puede ser gratuita o paga según la fecha; se informa en el sitio. La reserva se hace por WhatsApp o por mensaje directo de Instagram. El staff confirma el cupo y te entrega tus palabras clave (dos palabras). Las palabras clave son personales e intransferibles.</p>
     <h4>2. Reembolsos</h4><p>No se realizan reembolsos salvo cancelación del evento por parte de Hidromedusa. En ese caso se informa por los canales oficiales.</p>
-    <h4>3. Entrada VIP y merch secreto</h4><p>La entrada VIP incluye merch sorpresa que se revela el día de la fiesta. El tipo de merch puede variar entre fechas. Las ideas de merch enviadas al pedir son sugerencias y no garantizan un producto específico.</p>
-    <h4>4. Acceso</h4><p>Podés venir con quien quieras. Hidromedusa se reserva el derecho de admisión.</p>
-    <h4>5. Notificaciones</h4><p>Podés optar por recibir avisos antes de las tocadas y novedades. Te podés dar de baja cuando quieras.</p>
-    <h4>6. Conducta</h4><p>El respeto entre asistentes es fundamental. Cualquier conducta que atente contra la seguridad de otros es motivo de expulsión sin reembolso.</p>` },
+    <h4>3. Acceso</h4><p>Podés venir con quien quieras. Hidromedusa se reserva el derecho de admisión.</p>
+    <h4>4. Notificaciones</h4><p>Podés optar por recibir avisos antes de las tocadas y novedades. Te podés dar de baja cuando quieras.</p>
+    <h4>5. Conducta</h4><p>El respeto entre asistentes es fundamental. Cualquier conducta que atente contra la seguridad de otros es motivo de expulsión sin reembolso.</p>` },
   privacidad:{ title:'Política de Privacidad', html:`
     <h4>Qué datos recopilamos</h4><p>Nombre y, si los dejás, email y WhatsApp para gestionar tu entrada. Si iniciás sesión (opcional), los datos básicos del proveedor que elijas (Google, Apple o Instagram) y tus preferencias de notificación.</p>
     <h4>Para qué los usamos</h4><p>Para <b>contar con vos para la diversión</b>: confirmar tu entrada por WhatsApp o Instagram, recordatorios antes de las tocadas y novedades. Nunca vendemos tus datos.</p>

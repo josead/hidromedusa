@@ -12,7 +12,7 @@ conform to this. Read this fully before editing any file.
 - **Claim by secret phrase.** When staff frees a ticket the system mints a
   **two-word Spanish phrase** (e.g. `medusa-violeta`). The buyer enters that
   phrase on the site to pull up their **ticket card** — the palabras clave shown
-  as the door pass (NO QR; physical entrada-sticker handed over at the door).
+  for the icebreaker game (NO QR; no physical sticker for the current free date).
 - **Membership is hidden** for this pass (no MP, no billing).
 - **OAuth login stays optional** and env-gated (demo fallback when no creds).
 
@@ -154,9 +154,8 @@ Default panel/task seed = the set already in `public/js/staff-panel.js`
   WhatsApp" opens `https://wa.me/<WHATSAPP_NUMBER>?text=<prefilled>` AND
   best-effort `POST /tickets/request`. No payment UI.
 - Retrieve: "Reclamar tu palabra" → input phrase → `POST /tickets/redeem` → render
-  a **ticket card showing the palabras clave** as the door pass (NO QR). Works
-  without login. The physical entrada-sticker is handed over at the door when the
-  buyer says their palabras clave.
+  a **ticket card showing the palabras clave** for the icebreaker game (NO QR). Works
+  without login. No physical sticker for the current free date.
 - Staff portal (`public/js/staff-panel.js`): call `/staff/*` (fallback to
   localStorage). Add an **Entradas** management view: list pending requests +
   freed tickets, "Liberar" button → `/tickets/:id/free`, show/copy claim phrase.
