@@ -14,11 +14,11 @@ const API_BASE = (process.env.API_BASE || 'https://p2vsvdihylfl6w4c6pfnnuwd4u0dw
 
 // ── Evento (espejo del HM_EVENT hardcodeado en public/index.html) ────────────
 const EVENT = {
-  title:    'Hidromedusa · 990 Espacio Cultural',
+  title:    'Hidromedusa · Los Rojos',
   start:    '',
   end:      '',
-  venue:    '990 Espacio Cultural, Tandil, Buenos Aires, AR',
-  dateLabel:'Septiembre 2026',
+  venue:    'Los Rojos, Pinto 35, Tandil, Buenos Aires, AR',
+  dateLabel:'Sábado 19 de septiembre 2026',
   timeLabel:'',
 };
 const SITE      = 'https://hidromedusa.com';
@@ -79,9 +79,9 @@ function eventDetails() {
   return pad(`
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding-bottom:4px;">Fecha</td></tr>
-      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;padding-bottom:14px;">${EVENT.dateLabel} · <span style="color:${C.muted};font-weight:normal;">día exacto a confirmar</span></td></tr>
+      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;padding-bottom:14px;">${EVENT.dateLabel} · <span style="color:${C.muted};font-weight:normal;">hora a confirmar · entrada gratis</span></td></tr>
       <tr><td style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding-bottom:4px;">Lugar</td></tr>
-      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;">990 Espacio Cultural · Tandil, BA</td></tr>
+      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;">Los Rojos · Pinto 35 · Tandil, BA</td></tr>
     </table>`);
 }
 function calButton(calUrl) {
@@ -226,7 +226,7 @@ function renderConfirmationHtml({ name, claim, calUrl }) {
 function renderConfirmationText({ name, claim, calUrl }) {
   return [
     `¡Hola ${name || ''}!`.trim(), '',
-    `Confirmamos tu entrada para Hidromedusa · 990 Espacio Cultural (${EVENT.dateLabel} · día exacto a confirmar).`, '',
+    `Confirmamos tu lugar para Hidromedusa · Los Rojos, Pinto 35 (${EVENT.dateLabel} · hora a confirmar · entrada gratis).`, '',
     `Tu palabra icebreaker (dos palabras): ${claim}`, '',
     'Decila en la puerta y te damos tu entrada-sticker. Si matchea con la de otra persona, se presentan y ganan una consumición.', '',
     `— Hidromedusa · ${SITE}`,

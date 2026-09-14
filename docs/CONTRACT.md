@@ -20,10 +20,10 @@ conform to this. Read this fully before editing any file.
 
 ```
 id: ev-1
-title: Hidromedusa · 990 Espacio Cultural
-date: 2026-07-11  time: 23:00 (-03:00)  +18
-venue: 990 Espacio Cultural, Tandil, Buenos Aires, AR
-tickets: general $10.000 ARS · vip $20.000 ARS (vip includes secret merch)
+title: Hidromedusa · Los Rojos
+date: 2026-09-19 (sábado)  time: a confirmar
+venue: Los Rojos, Pinto 35, Tandil, Buenos Aires, AR
+tickets: entrada libre y gratuita · palabra icebreaker opcional (reserva por WhatsApp/IG)
 ```
 
 ## Config (env + window)

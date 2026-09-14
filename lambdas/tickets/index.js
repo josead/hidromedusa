@@ -22,10 +22,10 @@ const rank = (s) => (s in STATUS_RANK ? STATUS_RANK[s] : -1);
 const EVENTS = {
   'ev-1': {
     id: 'ev-1',
-    name: 'Hidromedusa · 11 Jul',
-    date: '2026-07-11',
-    time: '21:00 a 03:00',
-    venue: '990 Espacio Cultural, Tandil',
+    name: 'Hidromedusa · Los Rojos',
+    date: '2026-09-19',
+    time: '',   // hora a confirmar
+    venue: 'Los Rojos (Pinto 35), Tandil',
   },
 };
 

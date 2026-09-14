@@ -10,11 +10,11 @@ const CALENDAR_API_KEY = process.env.GOOGLE_CALENDAR_API_KEY;
 const HIDROMEDUSA_EVENTS = [
   {
     id: 'ev-1',
-    title: 'Hidromedusa · 990 Espacio Cultural',
-    description: 'Próxima tocada en 990 Espacio Cultural, Tandil. 21:00 a 03:00.',
-    start: '2026-07-11T21:00:00-03:00',
-    end:   '2026-07-12T03:00:00-03:00',
-    location: '990 Espacio Cultural, Tandil, Buenos Aires, AR',
+    title: 'Hidromedusa · Los Rojos',
+    description: 'Próxima tocada en Los Rojos (Pinto 35), Tandil. Sábado 19 de septiembre 2026, entrada gratis. Hora a confirmar.',
+    start: '',   // hora a confirmar
+    end:   '',
+    location: 'Los Rojos, Pinto 35, Tandil, Buenos Aires, AR',
     url: 'https://hidromedusa.com/#entradas',
     tags: [],
   },
