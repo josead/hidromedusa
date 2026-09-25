@@ -6,6 +6,7 @@
 const tickets   = require('./tickets/index');
 const newsletter = require('./newsletter/index');
 const jellyfish  = require('./jellyfish/index');
+const booking    = require('./booking/index');
 
 // path → handler. `params` names map regex capture groups onto req.params.
 const ROUTES = [
@@ -22,6 +23,7 @@ const ROUTES = [
   { m: 'GET',  re: /^\/tickets\/([^/]+)$/,         fn: tickets.getTicket, params: ['id'] },
   { m: 'POST', re: /^\/newsletter\/subscribe$/,                    fn: newsletter.subscribe },
   { m: 'GET',  re: /^\/newsletter\/list$/,                        fn: newsletter.list },
+  { m: 'POST', re: /^\/booking\/request$/,                     fn: booking.request },
   { m: 'GET',  re: /^\/jellyfish\/([^/]+)\/([^/]+)$/, fn: jellyfish.serve, params: ['noun', 'adjective'] },
 ];
 

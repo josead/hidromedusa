@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Hidromedusa — Música en vivo de Tandil</title>
-<meta name="description" content="Hidromedusa — música en vivo de Tandil. Sábado 19 de septiembre en Los Rojos (Pinto 35) · entrada gratis." />
+<meta name="description" content="Hidromedusa — música electrónica en vivo desde Tandil. Escuchamos todo, tocamos poco. Vení a vernos o proponenos una fecha." />
 <link rel="canonical" href="https://hidromedusa.com/" />
 <meta name="theme-color" content="#0a0a0b" />
 
@@ -19,7 +19,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Hidromedusa" />
 <meta property="og:title" content="Hidromedusa" />
-<meta property="og:description" content="Música en vivo de Tandil. Sáb 19 de septiembre · Los Rojos, Pinto 35 · Entrada gratis." />
+<meta property="og:description" content="Música electrónica en vivo desde Tandil. Escuchamos todo, tocamos poco. Vení a vernos o proponenos una fecha." />
 <meta property="og:url" content="https://hidromedusa.com/" />
 <meta property="og:image" content="https://hidromedusa.com/og.png" />
 <meta property="og:image:width" content="1200" />
@@ -28,7 +28,7 @@
 <meta property="og:locale" content="es_AR" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Hidromedusa" />
-<meta name="twitter:description" content="Música en vivo de Tandil. Sáb 19 de septiembre · Los Rojos, Pinto 35 · Entrada gratis." />
+<meta name="twitter:description" content="Música electrónica en vivo desde Tandil. Escuchamos todo, tocamos poco. Vení a vernos o proponenos una fecha." />
 <meta name="twitter:image" content="https://hidromedusa.com/og.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,6 +36,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira+Stencil+One&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }</script>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" crossorigin />
 <style>
   :root {
     --bg: #0a0a0b;
@@ -338,6 +340,118 @@
   /* ---------- Toast ---------- */
   #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 300; display: none; background: var(--acid); color: var(--ink); font-family: var(--mono); font-size: 13px; font-weight: 700; padding: 13px 22px; border: 2px solid var(--ink); letter-spacing: 0.03em; }
 
+
+  /* =====================================================================
+     ABISMO — capa WebGL + contratación + el tamiz
+     ===================================================================== */
+  #abismo { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; pointer-events: none; }
+  html.no-gl #abismo { display: none; }
+  html.no-gl body { background: radial-gradient(120% 70% at 70% 0%, #0b2a30 0%, #06090b 45%, #030405 100%) fixed; }
+  main { position: relative; z-index: 1; }
+  nav { background: rgba(5,6,7,0.72); }
+  .blip { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--acid); box-shadow: 0 0 10px var(--acid); animation: blink 1.6s infinite; vertical-align: middle; }
+
+  /* profundímetro */
+  .gauge { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); z-index: 90; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); pointer-events: none; }
+  .gauge .g-bar { width: 2px; height: 150px; background: var(--line); position: relative; }
+  .gauge .g-bar i { position: absolute; right: -4px; width: 10px; height: 2px; background: var(--acid); top: 0; box-shadow: 0 0 8px var(--acid); }
+  .gauge .g-m { color: var(--acid); font-size: 12px; letter-spacing: .06em; text-transform: none; }
+  .gauge .g-z { writing-mode: vertical-rl; transform: rotate(180deg); }
+
+  /* hero: la elección primero */
+  .hero { min-height: 100vh; min-height: 100svh; padding: 100px 0 44px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, rgba(4,5,6,0) 55%, rgba(4,5,6,.55)); }
+  .hero h1 { font-size: clamp(64px, 13.2vw, 205px); margin-top: 26px; }
+  .hero-lede { font-family: var(--serif); font-size: clamp(21px, 2.4vw, 32px); line-height: 1.2; max-width: 640px; margin-top: 18px; color: var(--bone); }
+  .hero-lede em { color: var(--acid); }
+  .choice-q { font-family: var(--mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--bone); margin: 34px 0 12px; display: flex; align-items: center; gap: 10px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--line-strong); background: rgba(5,6,7,.62); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .choice { position: relative; overflow: hidden; display: grid; grid-template-columns: 1fr auto; gap: 8px 18px; align-items: end; padding: 24px 26px 22px; text-align: left; cursor: pointer; color: var(--bone); background: transparent; border: none; border-right: 2px solid var(--line-strong); font: inherit; transition: color .25s; isolation: isolate; }
+  .choice:last-child { border-right: none; }
+  .choice::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--acid); transform: translateY(101%); transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+  .choice.b::before { background: var(--hot); }
+  .choice:hover::before, .choice:focus-visible::before { transform: translateY(0); }
+  .choice:hover, .choice:focus-visible { color: var(--ink); outline: none; }
+  .choice .ch-k { grid-column: 1 / -1; font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--acid); transition: color .25s; }
+  .choice.b .ch-k { color: var(--hot); }
+  .choice:hover .ch-k, .choice:hover .ch-s, .choice:focus-visible .ch-k, .choice:focus-visible .ch-s { color: var(--ink); }
+  .choice .ch-t { font-family: var(--display); font-size: clamp(34px, 4.3vw, 60px); line-height: .88; text-transform: uppercase; }
+  .choice .ch-s { grid-column: 1; font-size: 14px; line-height: 1.4; color: var(--bone-dim); max-width: 360px; transition: color .25s; }
+  .choice .ch-arrow { grid-column: 2; grid-row: 2 / 4; align-self: center; width: 56px; height: 56px; border: 2px solid currentColor; display: grid; place-items: center; transition: transform .35s; }
+  .choice:hover .ch-arrow { transform: rotate(-45deg); }
+
+  /* secciones translúcidas: se ve el abismo detrás */
+  .deep { background: rgba(3,4,5,.62); }
+  .cta { background: rgba(3,4,5,.4); }
+  footer { background: rgba(5,6,7,.9); }
+  .stub { background: rgba(18,19,22,.86); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .stub-side { background: rgba(4,5,6,.8); }
+  .stub-side::before, .stub-side::after { background: #070809; }
+  .stub-flag.calm { background: var(--bone); }
+  .stub-p { font-family: var(--serif); font-style: italic; font-size: 21px; line-height: 1.3; color: var(--bone-dim); margin-top: 16px; max-width: 520px; }
+  .cat-status.open { border-color: var(--acid); color: var(--acid); }
+  [hidden] { display: none !important; }
+
+  /* contratación */
+  .book { display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.25fr); border: 2px solid var(--line-strong); margin-top: 34px; background: rgba(14,15,17,.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .book-pitch { padding: 34px 32px; border-right: 2px solid var(--line-strong); display: flex; flex-direction: column; gap: 26px; }
+  .book-pitch h3 { font-family: var(--display); font-size: clamp(38px, 4vw, 54px); line-height: .9; text-transform: uppercase; }
+  .book-direct { margin-top: auto; border-top: 1.5px solid var(--line); padding-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .book-direct a { font-family: var(--mono); font-size: 13px; color: var(--bone); text-decoration: none; cursor: pointer; }
+  .book-direct a:hover { color: var(--acid); }
+  .book-form { padding: 30px 32px 28px; }
+  .q { margin-bottom: 20px; }
+  .q .field { margin-bottom: 0; }
+  .q textarea.field { margin-top: 10px; }
+  .q-l { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--bone-dim); margin-bottom: 10px; }
+  .q-l b { color: var(--acid); margin-right: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; padding: 9px 12px; border: 1.5px solid var(--line-strong); background: transparent; color: var(--bone); cursor: pointer; transition: all .15s; }
+  .chip:hover { border-color: var(--acid); color: var(--acid); }
+  .chip[aria-pressed="true"] { background: var(--acid); border-color: var(--acid); color: var(--ink); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center; }
+  input[type="date"].field { color-scheme: dark; }
+  .field.bad { border-color: var(--hot); }
+  .book-send { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .book-note { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 14px; line-height: 1.5; }
+  .book-ok { padding: 40px 32px; display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+  .book-ok h3 { font-family: var(--display); font-size: 48px; line-height: .9; text-transform: uppercase; color: var(--acid); }
+  .book-ok p { color: var(--bone-dim); line-height: 1.55; }
+
+  /* el tamiz */
+  .tamiz { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(0,1fr); gap: 48px; margin-top: 40px; align-items: start; }
+  .tz-visual { position: sticky; top: 82px; height: calc(100vh - 106px); max-height: 860px; min-height: 520px; border: 2px solid var(--line-strong); background: rgba(3,4,5,.78); display: flex; flex-direction: column; }
+  .tz-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1.5px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .tz-head b { color: var(--acid); font-weight: 700; }
+  #tz-stage-gl { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+  #tz-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .tz-label { position: absolute; left: 0; top: 0; margin: -8px 0 0 -6px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; pointer-events: none; transition: color .3s; opacity: 0; }
+  .gl-on .tz-label { opacity: 1; }
+  .tz-label.on { color: var(--acid); }
+  .tz-set { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--bone-dim); }
+  .tz-foot { border-top: 1.5px solid var(--line); padding: 10px 12px 12px; }
+  .tz-foot-h { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .tz-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tz-chip { font-family: var(--mono); font-size: 11px; padding: 5px 8px; border: 1.5px solid var(--line); background: transparent; color: var(--bone); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; }
+  .tz-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px var(--c); }
+  .tz-chip .n { color: var(--muted); }
+  .tz-chip:hover { border-color: var(--c); }
+  .tz-chip.on { border-color: var(--c); background: rgba(255,255,255,.06); }
+  .tz-stage { min-height: 64vh; display: flex; flex-direction: column; justify-content: center; padding: 24px 0; border-top: 1.5px solid var(--line); opacity: .32; transition: opacity .45s; }
+  .tz-stage:first-child { border-top: none; }
+  .tz-stage.on { opacity: 1; }
+  .tz-stage .n { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--acid); }
+  .tz-stage h3 { font-family: var(--display); font-size: clamp(52px, 6.4vw, 92px); line-height: .86; text-transform: uppercase; margin: 10px 0 14px; }
+  .tz-stage .big { font-family: var(--serif); font-style: italic; font-size: clamp(22px, 2.3vw, 30px); line-height: 1.22; color: var(--bone); margin-bottom: 10px; max-width: 520px; }
+  .tz-stage p { font-size: 16px; line-height: 1.6; color: var(--bone-dim); max-width: 480px; }
+  html.no-gl .tz-visual { display: none; }
+  html.no-gl .tamiz { grid-template-columns: 1fr; }
+  html.no-gl .tz-stage { opacity: 1; min-height: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .choice::before, .choice .ch-arrow, .tz-stage { transition: none; }
+    .marquee-track { animation-duration: 120s !important; }
+  }
+
   @media (max-width: 900px) {
     .nav-links { display: none; }
     .menu-toggle { display: block; }
@@ -355,9 +469,36 @@
     .foot-grid { grid-template-columns: 1fr 1fr; }
     .staff-wrap { grid-template-columns: 1fr; }
     .staff-side { border-right: none; border-bottom: 2px solid var(--line-strong); }
+    .choices, .book, .row2 { grid-template-columns: 1fr; }
+    .choice { border-right: none; border-bottom: 2px solid var(--line-strong); padding: 20px 18px 18px; }
+    .choice:last-child { border-bottom: none; }
+    .choice .ch-arrow { width: 44px; height: 44px; }
+    .book-pitch { border-right: none; border-bottom: 2px solid var(--line-strong); padding: 26px 20px; }
+    .book-form { padding: 24px 20px; }
+    .gauge { top: auto; bottom: 12px; right: 12px; transform: none; flex-direction: row; align-items: center; gap: 8px; background: rgba(5,6,7,.75); border: 1.5px solid var(--line); padding: 5px 8px; }
+    .gauge .g-bar { display: none; }
+    .gauge .g-z { writing-mode: horizontal-tb; transform: none; font-size: 9px; }
+    .gauge .g-m { font-size: 11px; }
+    .tamiz { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .tamiz > *, .tz-foot, .tz-chips { min-width: 0; max-width: 100%; }
+    .tz-visual { top: 62px; height: 50vh; height: 50svh; min-height: 0; z-index: 3; }
+    .tz-visual { height: 60vh; height: 60svh; }
+    .tz-head { flex-wrap: nowrap; padding: 8px 12px; font-size: 10px; }
+    .tz-head > span:first-child { display: none; }
+    .tz-foot-h { display: none; }
+    .tz-foot { padding: 8px 10px; }
+    .tz-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .tz-chips::-webkit-scrollbar { display: none; }
+    .tz-chip { font-size: 10px; padding: 4px 6px; flex: none; }
+    .nav-actions .btn-acid { padding: 10px 12px; font-size: 10px; white-space: nowrap; }
+    section[id], header[id] { scroll-margin-top: 70px; }
+    .tz-stage { min-height: 46vh; padding: 28px 0; }
+    .tz-stage h3 { font-size: 48px; }
   }
   /* ---- legibilidad en celular ---- */
   @media (max-width: 600px) {
+    .gauge { display: none; }
+    .nav-actions .btn-acid { display: none; }
     /* el wordmark hueco (outline) se engrosa para que no se pierda en pantalla chica */
     .hero h1 .hl { -webkit-text-stroke-width: 2.5px; }
     .cta h2 { -webkit-text-stroke-width: 2.5px; }
@@ -374,38 +515,58 @@
 </head>
 <body>
 
+  <canvas id="abismo" aria-hidden="true"></canvas>
+
+  <!-- profundímetro: el scroll es un descenso -->
+  <div class="gauge" aria-hidden="true">
+    <span class="g-z" id="g-z">Epipelágica</span>
+    <div class="g-bar"><i id="g-i"></i></div>
+    <span class="g-m" id="g-m">−0000 m</span>
+  </div>
+
   <!-- ================= NAV ================= -->
   <nav>
     <div class="brand" onclick="scrollToTop()">
       <span class="brand-name">HIDROMEDUSA</span>
     </div>
     <div class="nav-links">
-      <a onclick="goTo('entradas')">Entradas</a>
+      <a onclick="goTo('vernos')">Ir a vernos</a>
+      <a onclick="goTo('proponer')">Contratar</a>
+      <a onclick="goTo('criterio')">Cómo elegimos</a>
       <a onclick="goTo('fechas')">Fechas</a>
-      <a onclick="openModal('m-redeem')">Reclamar tu hidromedusa</a>
     </div>
     <div class="nav-actions">
-      <a class="btn btn-acid" onclick="goTo('entradas')">Entradas</a>
+      <a class="btn btn-acid" onclick="choose('proponer')">Proponer fecha</a>
       <button class="menu-toggle" onclick="openModal('m-menu')" aria-label="menú"><i data-lucide="menu"></i></button>
     </div>
   </nav>
 
+  <main id="contenido">
   <!-- ================= HERO ================= -->
-  <header class="hero" id="home">
+  <header class="hero" id="home" data-jf="right">
     <div class="wrap">
       <div class="hero-top">
         <span>Espécimen Nº001 — Hydromedusae</span>
         <span>Tandil · Buenos Aires · AR</span>
-        <span>Música en vivo</span>
+        <span>Electrónica en vivo</span>
       </div>
-      <div class="hero-main">
-        <div>
-          <h1 class="reveal">HIDRO<br /><span class="hl" id="hero-word">MEDUSA</span></h1>
-        </div>
-      </div>
-      <div class="hero-bottom reveal">
-        <a class="btn btn-acid btn-lg" onclick="buy()">Reservar mi lugar · Sáb 19/9 <i data-lucide="arrow-right" width="16"></i></a>
-        <a class="btn btn-line btn-lg" onclick="openModal('m-redeem')">Reclamar tu hidromedusa</a>
+      <h1 class="reveal">HIDRO<br /><span class="hl" id="hero-word">MEDUSA</span></h1>
+      <p class="hero-lede reveal">Música electrónica en vivo desde el fondo de Tandil.<br /><em>Escuchamos todo. Tocamos poco.</em></p>
+
+      <div class="choice-q reveal"><span class="blip"></span> ¿Cómo nos querés encontrar?</div>
+      <div class="choices reveal" role="group" aria-label="Elegí cómo encontrarnos">
+        <button class="choice a" onclick="choose('vernos')">
+          <span class="ch-k">A — Ir a vernos</span>
+          <span class="ch-t">Ir a<br />vernos</span>
+          <span class="ch-s">Próximas fechas, cómo entrar y tu hidromedusa.</span>
+          <span class="ch-arrow"><i data-lucide="arrow-down-right"></i></span>
+        </button>
+        <button class="choice b" onclick="choose('proponer')">
+          <span class="ch-k">B — Contratar</span>
+          <span class="ch-t">Proponernos<br />una fecha</span>
+          <span class="ch-s">Fiesta, club, festival o espacio: armamos el recorrido para tu noche.</span>
+          <span class="ch-arrow"><i data-lucide="arrow-down-right"></i></span>
+        </button>
       </div>
     </div>
   </header>
@@ -413,18 +574,18 @@
   <!-- ================= MARQUEE ================= -->
   <div class="marquee">
     <div class="marquee-track">
-      <span>BIENVENIDOS AL ABISMO</span><span class="alt">✦</span><span>SÁB 19 SEP · LOS ROJOS · PINTO 35</span><span class="alt">✦</span><span>ENTRADA GRATIS</span><span class="alt">✦</span><span>TANDIL · AR</span><span class="alt">✦</span><span>MÚSICA EN VIVO</span><span class="alt">✦</span>
+      <span>BIENVENIDOS AL ABISMO</span><span class="alt">✦</span><span>ESCUCHAMOS TODO · TOCAMOS POCO</span><span class="alt">✦</span><span>ELECTRÓNICA EN VIVO</span><span class="alt">✦</span><span>CONTRATACIONES ABIERTAS</span><span class="alt">✦</span><span>TANDIL · AR</span><span class="alt">✦</span>
     </div>
   </div>
 
-  <!-- ================= ENTRADAS ================= -->
-  <section class="block" id="entradas">
+  <!-- ================= A · IR A VERNOS ================= -->
+  <section class="block" id="vernos" data-jf="left">
     <div class="wrap">
-      <div class="sec-row reveal"><span class="sec-num">[ 01 ]</span><span class="sec-kicker">Próxima tocada</span></div>
-      <h2 class="sec-h reveal">ENTRADAS</h2>
+      <div class="sec-row reveal"><span class="sec-num">[ A ]</span><span class="sec-kicker">Ir a vernos</span></div>
+      <h2 class="sec-h reveal">IR A VERNOS</h2>
 
-      <!-- ticket stub -->
-      <div class="stub reveal">
+      <!-- fecha vigente: se muestra hasta el día del evento (data-until) -->
+      <div class="stub reveal" data-until="2026-09-19">
         <div class="stub-main">
           <span class="stub-flag"><span class="dot"></span> Live · próxima fecha</span>
           <h3>Los Rojos<br />Pinto 35</h3>
@@ -447,69 +608,284 @@
         </div>
       </div>
 
-      <!-- tiers -->
-      <div class="incluye reveal">
-        <div>
-          <div class="incluye-h">Qué incluye</div>
-          <ul class="incluye-list">
-            <li>Acceso a la tocada</li>
-            <li>Barra habilitada</li>
-            <li>Tu hidromedusa digital para compartir</li>
-            <li>Tu palabra icebreaker</li>
-          </ul>
+      <!-- entre fechas: se muestra cuando la última ya pasó (data-after) -->
+      <div class="stub reveal" data-after="2026-09-19">
+        <div class="stub-main">
+          <span class="stub-flag calm"><span class="dot"></span> Entre avistamientos</span>
+          <h3>Próxima fecha<br />en camino</h3>
+          <p class="stub-p">La última fue el sábado 19 de septiembre en Los Rojos. La próxima se anuncia primero acá, por mail y en Instagram.</p>
+          <div class="stub-meta">
+            <div><div class="k">Última</div><div class="v">Los Rojos · 19/9</div></div>
+            <div><div class="k">Próxima</div><div class="v">A anunciar</div></div>
+            <div><div class="k">¿Fuiste?</div><div class="v"><a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer">Reclamá tu hidromedusa →</a></div></div>
+          </div>
         </div>
-        <div>
-          <div class="secret" style="margin-bottom:0">
-            <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--acid);flex-shrink:0;margin-top:2px"></i>
-            <div><b>Palabra icebreaker</b><p>Tu reserva trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
+        <div class="stub-side">
+          <div>
+            <div class="price-k">Señales</div>
+            <div class="price-v">AVISAME</div>
+            <div class="price-n">te escribimos antes de la próxima</div>
+          </div>
+          <div style="margin-top:22px;display:flex;flex-direction:column;gap:8px">
+            <input class="field" id="next-email" type="email" placeholder="tu@correo.com" style="margin:0" onkeydown="if(event.key==='Enter')subscribeNext()" />
+            <a class="btn btn-acid btn-block" onclick="subscribeNext()">Avisame de la próxima</a>
+            <a class="btn btn-line btn-block" href="https://www.instagram.com/hidromedusa" target="_blank" rel="noopener">Seguinos en Instagram ↗</a>
           </div>
         </div>
       </div>
-      <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">La entrada es gratis. Si querés tu hidromedusa, avisá que venís por WhatsApp o Instagram y te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu hidromedusa»</a> y aparece tu hidromedusa. En la fiesta compartí tu palabra: si coincide con la de otra persona, ganan una consumición.</p>
+
+      <div data-until="2026-09-19">
+        <div class="incluye reveal">
+          <div>
+            <div class="incluye-h">Qué incluye</div>
+            <ul class="incluye-list">
+              <li>Acceso a la tocada</li>
+              <li>Barra habilitada</li>
+              <li>Tu hidromedusa digital para compartir</li>
+              <li>Tu palabra icebreaker</li>
+            </ul>
+          </div>
+          <div>
+            <div class="secret" style="margin-bottom:0">
+              <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--acid);flex-shrink:0;margin-top:2px"></i>
+              <div><b>Palabra icebreaker</b><p>Tu reserva trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
+            </div>
+          </div>
+        </div>
+        <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">La entrada es gratis. Si querés tu hidromedusa, avisá que venís por WhatsApp o Instagram y te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu hidromedusa»</a> y aparece tu hidromedusa. En la fiesta compartí tu palabra: si coincide con la de otra persona, ganan una consumición.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= B · PROPONER FECHA (contratación) ================= -->
+  <section class="block deep" id="proponer" data-jf="right">
+    <div class="wrap">
+      <div class="sec-row reveal"><span class="sec-num">[ B ]</span><span class="sec-kicker">Contratar a la hidromedusa</span></div>
+      <h2 class="sec-h reveal">PROPONENOS<br />UNA FECHA</h2>
+      <p class="sec-intro reveal">Si tu noche tiene lugar para algo que no suena a playlist, hablemos.</p>
+
+      <div class="book reveal">
+        <div class="book-pitch">
+          <h3>Llevamos el abismo a tu noche</h3>
+          <ul class="incluye-list">
+            <li>Un recorrido pensado para tu lugar, tu gente y tu horario — no un set enlatado.</li>
+            <li>Del warm-up al cierre: sabemos cuándo esperar y cuándo soltar.</li>
+            <li>Coordinamos la técnica con tu equipo antes de la fecha.</li>
+            <li>Tandil, la zona, y lo que se anime a quedar más lejos.</li>
+          </ul>
+          <div class="book-direct">
+            <div class="incluye-h" style="margin-bottom:10px">¿Preferís escribir directo?</div>
+            <a onclick="openExternal('https://wa.me/'+HM_CONFIG.WHATSAPP_NUMBER+'?text='+encodeURIComponent('¡Hola Hidromedusa! Quiero proponerles una fecha 🪼'))">WhatsApp ↗</a>
+            <a href="https://ig.me/m/hidromedusa" target="_blank" rel="noopener">Instagram ↗</a>
+            <a href="mailto:hola@hidromedusa.com?subject=Propuesta%20de%20fecha">hola@hidromedusa.com</a>
+          </div>
+        </div>
+
+        <form class="book-form" id="book-form" onsubmit="event.preventDefault();sendBooking('whatsapp')">
+          <div class="q">
+            <div class="q-l"><b>01</b> Qué tipo de noche</div>
+            <div class="chips" data-k="tipo">
+              <button type="button" class="chip">Fiesta privada</button>
+              <button type="button" class="chip">Club / boliche</button>
+              <button type="button" class="chip">Bar / espacio cultural</button>
+              <button type="button" class="chip">Festival / aire libre</button>
+              <button type="button" class="chip">Evento de marca</button>
+              <button type="button" class="chip">Otra</button>
+            </div>
+          </div>
+          <div class="q">
+            <div class="q-l"><b>02</b> Cuándo</div>
+            <div class="row2">
+              <input class="field" id="bk-fecha" type="date" aria-label="Fecha tentativa" />
+              <div class="chips" data-k="flex" data-multi="1"><button type="button" class="chip">Fecha flexible</button></div>
+            </div>
+          </div>
+          <div class="q">
+            <div class="q-l"><b>03</b> Dónde</div>
+            <input class="field" id="bk-lugar" placeholder="Ciudad y lugar (ej. Tandil, un galpón en la sierra)" maxlength="160" />
+          </div>
+          <div class="q">
+            <div class="q-l"><b>04</b> Cuánta gente</div>
+            <div class="chips" data-k="gente">
+              <button type="button" class="chip">Hasta 100</button>
+              <button type="button" class="chip">100–300</button>
+              <button type="button" class="chip">300–800</button>
+              <button type="button" class="chip">Más de 800</button>
+            </div>
+          </div>
+          <div class="q">
+            <div class="q-l"><b>05</b> Qué momento de la noche</div>
+            <div class="chips" data-k="momento">
+              <button type="button" class="chip">Apertura</button>
+              <button type="button" class="chip">Pico</button>
+              <button type="button" class="chip">Cierre</button>
+              <button type="button" class="chip">Toda la noche</button>
+              <button type="button" class="chip">A definir</button>
+            </div>
+          </div>
+          <div class="q">
+            <div class="q-l"><b>06</b> Sonido</div>
+            <div class="chips" data-k="sonido">
+              <button type="button" class="chip">Hay equipo completo</button>
+              <button type="button" class="chip">Hay algo</button>
+              <button type="button" class="chip">Hay que conseguir</button>
+            </div>
+          </div>
+          <div class="q">
+            <div class="q-l"><b>07</b> Vos</div>
+            <div class="row2">
+              <input class="field" id="bk-nombre" placeholder="Tu nombre" maxlength="80" autocomplete="name" />
+              <input class="field" id="bk-contacto" placeholder="WhatsApp o email" maxlength="120" autocomplete="email" />
+            </div>
+            <textarea class="field" id="bk-msg" rows="3" maxlength="1200" placeholder="Contanos la noche: qué se escucha, qué querés que pase."></textarea>
+          </div>
+          <div class="book-send">
+            <button type="submit" class="btn btn-acid btn-lg">Enviar por WhatsApp <i data-lucide="arrow-right" width="16"></i></button>
+            <button type="button" class="btn btn-line btn-lg" onclick="sendBooking('email')">Enviar por email</button>
+          </div>
+          <p class="book-note">No hace falta tener todo definido: con el tipo de noche y una fecha tentativa arrancamos.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EL TAMIZ (cómo elegimos) ================= -->
+  <section class="block" id="criterio" data-jf="off">
+    <div class="wrap">
+      <div class="sec-row reveal"><span class="sec-num">[ 03 ]</span><span class="sec-kicker">Cómo elegimos</span></div>
+      <h2 class="sec-h reveal">EL TAMIZ</h2>
+      <p class="sec-intro reveal">Gusto amplio, filtro estricto. Escuchamos de todo; a la pista llega muy poco — y llega cambiado.</p>
+
+      <div class="tamiz">
+        <div class="tz-visual">
+          <div class="tz-head">
+            <span><span class="blip"></span> Simulación en vivo</span>
+            <span>entraron <b id="tz-in">0</b></span>
+            <span>al set <b id="tz-out">0</b></span>
+          </div>
+          <div id="tz-stage-gl">
+            <canvas id="tz-canvas" aria-label="Simulación: temas de muchos géneros caen por cinco filtros; muy pocos llegan al set"></canvas>
+            <span class="tz-label" data-m="0">01 cuerpo · <span class="pct">—</span></span>
+            <span class="tz-label" data-m="1">02 profundidad · <span class="pct">—</span></span>
+            <span class="tz-label" data-m="2">03 paciencia · <span class="pct">—</span></span>
+            <span class="tz-label" data-m="3">04 lugar · <span class="pct">—</span></span>
+            <span class="tz-label" data-m="4">05 mutación · <span class="pct">—</span></span>
+            <span class="tz-set">el set</span>
+          </div>
+          <div class="tz-foot">
+            <div class="tz-foot-h">El espectro · tocá un género para seguirlo · <span style="opacity:.7">en el set</span></div>
+            <div class="tz-chips">
+              <button class="tz-chip" data-g="techno" style="--c:#C6FF1A">Techno <span class="n">0</span></button>
+              <button class="tz-chip" data-g="house" style="--c:#5EF2D6">House profundo <span class="n">0</span></button>
+              <button class="tz-chip" data-g="dub" style="--c:#3D8BFF">Dub techno <span class="n">0</span></button>
+              <button class="tz-chip" data-g="breaks" style="--c:#FF2E88">Breaks / electro <span class="n">0</span></button>
+              <button class="tz-chip" data-g="ambient" style="--c:#B7A6FF">Ambient <span class="n">0</span></button>
+              <button class="tz-chip" data-g="idm" style="--c:#FFB347">IDM / leftfield <span class="n">0</span></button>
+              <button class="tz-chip" data-g="latin" style="--c:#FF6B4A">Afro / cumbia digital <span class="n">0</span></button>
+              <button class="tz-chip" data-g="jungle" style="--c:#ECE7DA">Jungle <span class="n">0</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tz-steps">
+          <article class="tz-stage" data-stage="0">
+            <span class="n">00 · la entrada</span>
+            <h3>Entra todo</h3>
+            <p class="big">Techno de sótano, house que respira, dub con eco de barco hundido, breaks, electro, ambient, IDM, cumbia digital, jungle.</p>
+            <p>No hay género prohibido. Hay temas que no llegan.</p>
+          </article>
+          <article class="tz-stage" data-stage="1">
+            <span class="n">01 · primera membrana</span>
+            <h3>Cuerpo</h3>
+            <p class="big">¿Mueve sin pedir permiso?</p>
+            <p>Primero el cuerpo, después la cabeza. Si hay que explicar por qué se baila, no pasa.</p>
+          </article>
+          <article class="tz-stage" data-stage="2">
+            <span class="n">02 · segunda membrana</span>
+            <h3>Profundidad</h3>
+            <p class="big">¿Tiene algo más en la tercera escucha?</p>
+            <p>Buscamos sonido con agua adentro: espacio, textura, aire. Lo que en la primera pasada parece simple y después no se termina nunca.</p>
+          </article>
+          <article class="tz-stage" data-stage="3">
+            <span class="n">03 · tercera membrana</span>
+            <h3>Paciencia</h3>
+            <p class="big">¿Sabe esperar?</p>
+            <p>Nos quedamos con lo que construye tensión y la suelta en el momento justo. Lo que explota por explotar, rebota.</p>
+          </article>
+          <article class="tz-stage" data-stage="4">
+            <span class="n">04 · cuarta membrana</span>
+            <h3>Lugar</h3>
+            <p class="big">¿Dónde vive en la noche?</p>
+            <p>Un tema perfecto en el minuto equivocado no pasa. Cada elección depende de la anterior y prepara la siguiente.</p>
+          </article>
+          <article class="tz-stage" data-stage="5">
+            <span class="n">05 · quinta membrana</span>
+            <h3>Mutación</h3>
+            <p class="big">¿Se deja deformar?</p>
+            <p>Lo que sobrevive no se toca igual: se estira, se corta, se mezcla en vivo. Como una medusa, nunca la misma forma dos veces.</p>
+          </article>
+          <article class="tz-stage" data-stage="6">
+            <span class="n">06 · abajo de todo</span>
+            <h3>El set</h3>
+            <p class="big">Lo que queda tiene forma de medusa.</p>
+            <p>Es poco, viene de todos lados, y es lo que vas a escuchar.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:22px">
+              <a class="btn btn-acid" onclick="choose('vernos')">Ir a vernos</a>
+              <a class="btn btn-line" onclick="choose('proponer')">Proponer una fecha</a>
+            </div>
+          </article>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ================= FECHAS ================= -->
-  <section class="block deep" id="fechas">
+  <section class="block deep" id="fechas" data-jf="left">
     <div class="wrap">
-      <div class="sec-row reveal"><span class="sec-num">[ 02 ]</span><span class="sec-kicker">Avistamientos 2026</span></div>
+      <div class="sec-row reveal"><span class="sec-num">[ 04 ]</span><span class="sec-kicker">Bitácora 2026</span></div>
       <h2 class="sec-h reveal">FECHAS</h2>
-      <p class="sec-intro reveal">Activá las notificaciones y te avisamos antes de cada fecha.</p>
+      <p class="sec-intro reveal">Cada avistamiento queda registrado. El próximo puede ser en tu lugar.</p>
       <div style="margin-top:36px" class="reveal">
-        <a class="cat-row" onclick="goTo('entradas')"><span class="cat-n">001</span><span class="cat-date">SÁB 19 SEP</span><span class="cat-venue">Los Rojos <small>Pinto 35 · Tandil, BA</small></span><span class="cat-status hot">Gratis</span><span class="cat-arrow"><i data-lucide="arrow-up-right"></i></span></a>
+        <a class="cat-row" onclick="goTo('vernos')"><span class="cat-n">001</span><span class="cat-date">SÁB 19 SEP</span><span class="cat-venue">Los Rojos <small>Pinto 35 · Tandil, BA</small></span><span class="cat-status hot" data-until="2026-09-19">Gratis</span><span class="cat-status" data-after="2026-09-19">Hecho</span><span class="cat-arrow"><i data-lucide="arrow-up-right"></i></span></a>
         <div class="cat-row" style="cursor:default;opacity:.5"><span class="cat-n">002</span><span class="cat-date">— — —</span><span class="cat-venue">Próximo avistamiento <small>se anuncia pronto</small></span><span class="cat-status">Pronto</span><span class="cat-arrow"><i data-lucide="more-horizontal"></i></span></div>
+        <a class="cat-row" onclick="choose('proponer')"><span class="cat-n">003</span><span class="cat-date">¿TU FECHA?</span><span class="cat-venue">Proponela vos <small>fiesta · club · festival · espacio</small></span><span class="cat-status open">Abierta</span><span class="cat-arrow"><i data-lucide="arrow-up-right"></i></span></a>
       </div>
     </div>
   </section>
 
   <!-- ================= CTA ================= -->
-  <section class="cta">
+  <section class="cta" data-jf="center">
     <div class="wrap">
-      <h2 class="reveal">SÁBADO 19.</h2>
-      <p class="reveal">19 de septiembre en Los Rojos, Pinto 35, Tandil. Entrada libre y gratuita — activá las señales y te avisamos antes de la tocada.</p>
-      <a class="btn btn-acid btn-lg reveal" onclick="openModal('m-notif')">Avisame antes <i data-lucide="bell" width="16"></i></a>
+      <h2 class="reveal">BAJÁ.</h2>
+      <p class="reveal">Al fondo se escucha mejor. Vení a vernos o traenos a tu noche.</p>
+      <div class="reveal" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative">
+        <a class="btn btn-acid btn-lg" onclick="choose('proponer')">Proponer una fecha <i data-lucide="arrow-right" width="16"></i></a>
+        <a class="btn btn-line btn-lg" onclick="openModal('m-notif')">Avisame antes <i data-lucide="bell" width="16"></i></a>
+      </div>
     </div>
   </section>
 
   <!-- ================= FOOTER ================= -->
-  <footer>
+  <footer data-jf="center">
     <div class="wrap">
       <div class="foot-grid">
         <div class="foot-brand">
           <span class="brand-name">HIDROMEDUSA</span>
-          <p>Música en vivo desde Tandil, Argentina.</p>
+          <p>Música electrónica en vivo desde Tandil, Argentina. Escuchamos todo, tocamos poco.</p>
           <div class="socials">
             <a href="https://www.instagram.com/hidromedusa" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 01-1.38-.9 3.7 3.7 0 01-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 1.62c-3.15 0-3.5.01-4.74.07-1.14.05-1.76.24-2.17.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.17-.06 1.24-.07 1.59-.07 4.74s.01 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.17.4 1.24.06 1.59.07 4.74.07s3.5-.01 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.17.06-1.24.07-1.59.07-4.74s-.01-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 00-.88-1.35 3.6 3.6 0 00-1.35-.88c-.41-.16-1.03-.35-2.17-.4-1.24-.06-1.59-.07-4.74-.07zm0 2.76a5.3 5.3 0 110 10.6 5.3 5.3 0 010-10.6zm0 8.74a3.44 3.44 0 100-6.88 3.44 3.44 0 000 6.88zm6.74-8.94a1.24 1.24 0 11-2.48 0 1.24 1.24 0 012.48 0z"/></svg></a>
           </div>
         </div>
         <div class="foot-col">
           <h5>Catálogo</h5>
-          <a onclick="goTo('entradas')">Entradas</a>
-          <a onclick="goTo('fechas')">Fechas</a>
+          <a onclick="goTo('vernos')">Ir a vernos</a>
+          <a onclick="goTo('proponer')">Contratar</a>
+          <a onclick="goTo('criterio')">Cómo elegimos</a>
           <a onclick="openModal('m-redeem')">Reclamar tu hidromedusa</a>
         </div>
         <div class="foot-col">
           <h5>Info</h5>
+          <a href="mailto:hola@hidromedusa.com">hola@hidromedusa.com</a>
           <a onclick="openLegal('terminos')">Términos</a>
           <a onclick="openLegal('privacidad')">Privacidad</a>
         </div>
@@ -526,6 +902,7 @@
       </div>
     </div>
   </footer>
+  </main>
 
   <!-- ================= MODALS ================= -->
   <!-- Buy -->
@@ -569,7 +946,9 @@
     <div class="modal-box">
       <div class="modal-head"><h4>Menú</h4><button class="modal-x" onclick="closeModal('m-menu')">×</button></div>
       <div class="modal-body">
-        <button class="auth-btn" onclick="closeModal('m-menu');goTo('entradas')">Entradas</button>
+        <button class="auth-btn" onclick="closeModal('m-menu');choose('vernos')">A · Ir a vernos</button>
+        <button class="auth-btn" onclick="closeModal('m-menu');choose('proponer')">B · Proponer una fecha</button>
+        <button class="auth-btn" onclick="closeModal('m-menu');goTo('criterio')">Cómo elegimos</button>
         <button class="auth-btn" onclick="closeModal('m-menu');goTo('fechas')">Fechas</button>
         <button class="auth-btn" onclick="closeModal('m-menu');openModal('m-redeem')">Reclamar tu hidromedusa</button>
       </div>
@@ -611,6 +990,8 @@
   <div id="toast"></div>
 
 <script src="/js/jellyfish.js"></script>
+<script type="module" src="/js/abismo.js"></script>
+<script type="module" src="/js/tamiz.js"></script>
 <script>
 /* ============================================================
    HIDROMEDUSA · rave underground — comportamientos
@@ -1053,6 +1434,125 @@ function openLegal(which){
   document.getElementById('legal-content').innerHTML=l.html;
   openOverlay('o-legal');
 }
+
+
+/* ---------- Fechas con vencimiento: data-until / data-after (YYYY-MM-DD, hora AR) ---------- */
+// data-until="D" se ve hasta el día D inclusive; data-after="D" desde el día siguiente.
+// Así la web pasa sola de "próxima fecha" a "entre avistamientos" sin tocar el HTML.
+(function(){
+  const today=new Date(Date.now()-3*3600e3).toISOString().slice(0,10);   // UTC-3
+  document.querySelectorAll('[data-until]').forEach(el=>{ el.hidden = today > el.dataset.until; });
+  document.querySelectorAll('[data-after]').forEach(el=>{ el.hidden = today <= el.dataset.after; });
+})();
+
+/* ---------- La elección (hero): ir a vernos / proponer fecha ---------- */
+function choose(where){
+  if(window.HM_ABISMO) HM_ABISMO.pulse();
+  goTo(where);
+  if(where==='proponer'){
+    // foco en la primera pregunta cuando termina el scroll (sin saltar la página)
+    setTimeout(()=>{ const c=document.querySelector('#book-form .chip'); if(c) c.focus({preventScroll:true}); }, 900);
+  }
+}
+
+/* ---------- Proponer fecha (contratación) ---------- */
+document.querySelectorAll('#book-form .chips').forEach(group=>{
+  const multi=group.dataset.multi==='1';
+  group.querySelectorAll('.chip').forEach(ch=>{
+    ch.setAttribute('aria-pressed','false');
+    ch.addEventListener('click',()=>{
+      const on=ch.getAttribute('aria-pressed')!=='true';
+      if(!multi) group.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed','false'));
+      ch.setAttribute('aria-pressed', on?'true':'false');
+    });
+  });
+});
+(function(){ const d=document.getElementById('bk-fecha'); if(d) d.min=new Date().toISOString().slice(0,10); })();
+
+function bookingData(){
+  const pick=k=>{ const c=document.querySelector('#book-form .chips[data-k="'+k+'"] .chip[aria-pressed="true"]'); return c?c.textContent.trim():''; };
+  const val=id=>(document.getElementById(id).value||'').trim();
+  return {
+    tipo:pick('tipo'), fecha:val('bk-fecha'), flexible:!!pick('flex'), lugar:val('bk-lugar'),
+    gente:pick('gente'), momento:pick('momento'), sonido:pick('sonido'),
+    nombre:val('bk-nombre'), contacto:val('bk-contacto'), mensaje:val('bk-msg'),
+  };
+}
+function fmtFecha(iso){
+  if(!iso) return '';
+  const d=new Date(iso+'T12:00:00');
+  return d.toLocaleDateString('es-AR',{ weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+function bookingText(b){
+  const L=['¡Hola Hidromedusa! Quiero proponerles una fecha 🪼',''];
+  if(b.tipo) L.push('• Noche: '+b.tipo);
+  if(b.fecha||b.flexible) L.push('• Cuándo: '+(b.fecha?fmtFecha(b.fecha):'a definir')+(b.flexible?' (flexible)':''));
+  if(b.lugar) L.push('• Dónde: '+b.lugar);
+  if(b.gente) L.push('• Gente: '+b.gente);
+  if(b.momento) L.push('• Momento: '+b.momento);
+  if(b.sonido) L.push('• Sonido: '+b.sonido);
+  if(b.mensaje){ L.push(''); L.push(b.mensaje); }
+  L.push(''); L.push('Soy '+b.nombre+(b.contacto?' · '+b.contacto:''));
+  return L.join('\n');
+}
+function sendBooking(channel){
+  const b=bookingData();
+  const need=[['bk-nombre',b.nombre],['bk-contacto',b.contacto]];
+  let bad=false;
+  need.forEach(([id,v])=>{ document.getElementById(id).classList.toggle('bad',!v); if(!v) bad=true; });
+  if(!b.tipo){ toast('Elegí qué tipo de noche es'); return; }
+  if(bad){ toast('Dejanos tu nombre y cómo contactarte'); return; }
+  const text=bookingText(b);
+  // aviso interno al staff (best-effort: si el API falla, el mensaje sale igual)
+  api('/booking/request',{ method:'POST', body:{ ...b, channel, leadId:leadId() } }).catch(()=>{});
+  if(channel==='email'){
+    openExternal('mailto:hola@hidromedusa.com?subject='+encodeURIComponent('Propuesta de fecha — '+(b.tipo||'Hidromedusa'))+'&body='+encodeURIComponent(text));
+  } else {
+    openExternal('https://wa.me/'+window.HM_CONFIG.WHATSAPP_NUMBER+'?text='+encodeURIComponent(text));
+  }
+  if(window.HM_ABISMO) HM_ABISMO.pulse();
+  const form=document.getElementById('book-form');
+  const ok=document.createElement('div');
+  ok.className='book-ok';
+  ok.innerHTML='<div class="q-l"><b>✦</b> Propuesta en camino</div><h3>La señal<br/>bajó al fondo.</h3>'
+    +'<p>Te abrimos '+(channel==='email'?'tu correo':'WhatsApp')+' con todo armado — solo falta mandarlo. Te respondemos por ese mismo canal.</p>'
+    +'<div class="book-send"><button class="btn btn-line" type="button" onclick="resetBooking()">Proponer otra fecha</button></div>';
+  form.hidden=true; form.after(ok);
+}
+function resetBooking(){
+  const form=document.getElementById('book-form');
+  const ok=form.parentNode.querySelector('.book-ok'); if(ok) ok.remove();
+  form.hidden=false;
+}
+
+/* ---------- Avisame de la próxima (entre fechas) ---------- */
+function subscribeNext(){
+  const inp=document.getElementById('next-email'); const e=(inp.value||'').trim();
+  if(!e||!e.includes('@')){ toast('Dejanos un email válido'); inp.classList.add('bad'); return; }
+  inp.classList.remove('bad');
+  api('/newsletter/subscribe',{ method:'POST', body:{ email:e } }).catch(()=>{});
+  inp.value='';
+  toast('¡Listo! Te avisamos antes de la próxima 📡');
+}
+
+/* ---------- Profundímetro: el scroll es un descenso (0 → 4000 m) ---------- */
+(function(){
+  const m=document.getElementById('g-m'), z=document.getElementById('g-z'), i=document.getElementById('g-i');
+  if(!m) return;
+  const ZONES=[[200,'Epipelágica'],[1000,'Mesopelágica'],[4000,'Batipelágica'],[1e9,'Abisal']];
+  let raf=0;
+  function upd(){
+    raf=0;
+    const max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+    const f=Math.min(1,Math.max(0,scrollY/max));
+    const meters=Math.round(f*4200);
+    m.textContent='−'+String(meters).padStart(4,'0')+' m';
+    z.textContent=ZONES.find(zz=>meters<zz[0])[1];
+    i.style.top=(f*100)+'%';
+  }
+  addEventListener('scroll',()=>{ if(!raf) raf=requestAnimationFrame(upd); },{passive:true});
+  upd();
+})();
 
 /* ---------- Reveal animations (AnimeJS) ---------- */
 const io=new IntersectionObserver(es=>es.forEach(e=>{

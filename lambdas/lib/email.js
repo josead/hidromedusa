@@ -315,6 +315,45 @@ function renderLeadNotifyText({ ticket, kind }) {
   ].join('\n');
 }
 
+// ── Aviso interno: propuesta de fecha (contratación) ─────────────────────────
+function renderBookingNotifyHtml({ booking: b }) {
+  const rows =
+    text(`Alguien quiere <b style="color:${C.hot};">contratar a la hidromedusa</b>. Ya le abrimos ${b.channel === 'email' ? 'su correo' : 'WhatsApp'} con la propuesta armada; si no llega, escribile vos. 🪼`, 26)
+    + pad(`
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.panel}" style="background:${C.panel};border:1px solid ${C.hot};">
+        <tr><td style="padding:18px 24px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            ${kv('Nombre', esc(b.nombre) || '—')}
+            ${kv('Contacto', esc(b.contacto) || '—')}
+            ${kv('Noche', esc(b.tipo) || '—')}
+            ${kv('Fecha', (esc(b.fecha) || 'a definir') + (b.flexible ? ' (flexible)' : ''))}
+            ${kv('Dónde', esc(b.lugar) || '—')}
+            ${kv('Gente', esc(b.gente) || '—')}
+            ${kv('Momento', esc(b.momento) || '—')}
+            ${kv('Sonido', esc(b.sonido) || '—')}
+            ${kv('Canal', esc(b.channel) || '—')}
+            ${kv('Mensaje', esc(b.mensaje) || '—')}
+          </table>
+        </td></tr>
+      </table>`, 22);
+  return htmlDoc({ subLabel: 'Propuesta de fecha', accent: C.hot, rows });
+}
+function renderBookingNotifyText({ booking: b }) {
+  return [
+    'Propuesta de fecha — Hidromedusa', '',
+    `Nombre:   ${b.nombre || '—'}`,
+    `Contacto: ${b.contacto || '—'}`,
+    `Noche:    ${b.tipo || '—'}`,
+    `Fecha:    ${b.fecha || 'a definir'}${b.flexible ? ' (flexible)' : ''}`,
+    `Dónde:    ${b.lugar || '—'}`,
+    `Gente:    ${b.gente || '—'}`,
+    `Momento:  ${b.momento || '—'}`,
+    `Sonido:   ${b.sonido || '—'}`,
+    `Canal:    ${b.channel || '—'}`, '',
+    b.mensaje || '',
+  ].join('\n');
+}
+
 // ── Envío genérico ───────────────────────────────────────────────────────────
 async function send({ to, subject, html, text: txt, tag }) {
   if (!to) return { skipped: true, reason: 'no-recipient' };
@@ -379,8 +418,18 @@ async function sendLeadNotification({ ticket, kind }) {
   });
 }
 
+// Aviso interno al staff cuando alguien propone una fecha desde la web.
+async function sendBookingNotification({ booking }) {
+  return send({
+    to: ADMIN_EMAIL, tag: 'booking-notify',
+    subject: '🪼 Propuesta de fecha: ' + (booking.tipo || 'sin tipo') + ' · ' + (booking.nombre || booking.contacto),
+    html: renderBookingNotifyHtml({ booking }),
+    text: renderBookingNotifyText({ booking }),
+  });
+}
+
 module.exports = {
-  sendTicketConfirmation, sendPalabraChanged, sendTicketCancelled, sendLeadNotification,
-  renderConfirmationHtml, renderPalabraChangedHtml, renderCancelledHtml, renderLeadNotifyHtml,
+  sendTicketConfirmation, sendPalabraChanged, sendTicketCancelled, sendLeadNotification, sendBookingNotification,
+  renderConfirmationHtml, renderPalabraChangedHtml, renderCancelledHtml, renderLeadNotifyHtml, renderBookingNotifyHtml,
   googleCalUrl,
 };

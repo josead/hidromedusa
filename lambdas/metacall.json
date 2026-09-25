@@ -7,7 +7,8 @@
     "calendar/index.js",
     "staff/index.js",
     "newsletter/index.js",
-    "jellyfish/index.js"
+    "jellyfish/index.js",
+    "booking/index.js"
   ],
   "endpoints": [
     { "path": "/auth/exchange",            "method": "POST", "module": "auth/index",       "fn": "exchange"    },
@@ -20,6 +21,8 @@
     { "path": "/tickets/:id/free",         "method": "POST", "module": "tickets/index",    "fn": "free"        },
     { "path": "/tickets/:id/scan",         "method": "POST", "module": "tickets/index",    "fn": "scan"        },
     { "path": "/tickets/:id",              "method": "GET",  "module": "tickets/index",    "fn": "getTicket"   },
+
+    { "path": "/booking/request",          "method": "POST", "module": "booking/index",    "fn": "request"     },
 
     { "path": "/calendar/events",          "method": "GET",  "module": "calendar/index",   "fn": "getEvents"   },
     { "path": "/calendar/subscribe",       "method": "POST", "module": "calendar/index",   "fn": "subscribe"   },

@@ -69,7 +69,7 @@ sleep 8   # propagación del rol antes de crear la función
 # ── 3) Empaquetar el código (SDK v3 lo da el runtime) ──────────────────────────
 echo "→ [3/6] Zip del código"
 ZIP="/tmp/hm-api.zip"; rm -f "${ZIP}"
-( cd "${HERE}/lambdas" && zip -qr "${ZIP}" aws-handler.js tickets newsletter lib jellyfish )
+( cd "${HERE}/lambdas" && zip -qr "${ZIP}" aws-handler.js tickets newsletter lib jellyfish booking )
 echo "   $(du -h "${ZIP}" | cut -f1) → ${ZIP}"
 
 # ── 4) Crear/actualizar la función ─────────────────────────────────────────────
