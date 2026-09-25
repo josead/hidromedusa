@@ -342,7 +342,7 @@
 
 
   /* =====================================================================
-     ABISMO — capa WebGL + contratación + el tamiz
+     ABISMO — capa WebGL + contratación
      ===================================================================== */
   #abismo { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; pointer-events: none; }
   html.no-gl #abismo { display: none; }
@@ -417,38 +417,9 @@
   .book-ok h3 { font-family: var(--display); font-size: 48px; line-height: .9; text-transform: uppercase; color: var(--acid); }
   .book-ok p { color: var(--bone-dim); line-height: 1.55; }
 
-  /* el tamiz */
-  .tamiz { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(0,1fr); gap: 48px; margin-top: 40px; align-items: start; }
-  .tz-visual { position: sticky; top: 82px; height: calc(100vh - 106px); max-height: 860px; min-height: 520px; border: 2px solid var(--line-strong); background: rgba(3,4,5,.78); display: flex; flex-direction: column; }
-  .tz-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1.5px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-  .tz-head b { color: var(--acid); font-weight: 700; }
-  #tz-stage-gl { position: relative; flex: 1; min-height: 0; overflow: hidden; }
-  #tz-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  .tz-label { position: absolute; left: 0; top: 0; margin: -8px 0 0 -6px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; pointer-events: none; transition: color .3s; opacity: 0; }
-  .gl-on .tz-label { opacity: 1; }
-  .tz-label.on { color: var(--acid); }
-  .tz-set { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--bone-dim); }
-  .tz-foot { border-top: 1.5px solid var(--line); padding: 10px 12px 12px; }
-  .tz-foot-h { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-  .tz-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-  .tz-chip { font-family: var(--mono); font-size: 11px; padding: 5px 8px; border: 1.5px solid var(--line); background: transparent; color: var(--bone); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; }
-  .tz-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px var(--c); }
-  .tz-chip .n { color: var(--muted); }
-  .tz-chip:hover { border-color: var(--c); }
-  .tz-chip.on { border-color: var(--c); background: rgba(255,255,255,.06); }
-  .tz-stage { min-height: 64vh; display: flex; flex-direction: column; justify-content: center; padding: 24px 0; border-top: 1.5px solid var(--line); opacity: .32; transition: opacity .45s; }
-  .tz-stage:first-child { border-top: none; }
-  .tz-stage.on { opacity: 1; }
-  .tz-stage .n { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--acid); }
-  .tz-stage h3 { font-family: var(--display); font-size: clamp(52px, 6.4vw, 92px); line-height: .86; text-transform: uppercase; margin: 10px 0 14px; }
-  .tz-stage .big { font-family: var(--serif); font-style: italic; font-size: clamp(22px, 2.3vw, 30px); line-height: 1.22; color: var(--bone); margin-bottom: 10px; max-width: 520px; }
-  .tz-stage p { font-size: 16px; line-height: 1.6; color: var(--bone-dim); max-width: 480px; }
-  html.no-gl .tz-visual { display: none; }
-  html.no-gl .tamiz { grid-template-columns: 1fr; }
-  html.no-gl .tz-stage { opacity: 1; min-height: 0; }
 
   @media (prefers-reduced-motion: reduce) {
-    .choice::before, .choice .ch-arrow, .tz-stage { transition: none; }
+    .choice::before, .choice .ch-arrow { transition: none; }
     .marquee-track { animation-duration: 120s !important; }
   }
 
@@ -479,21 +450,8 @@
     .gauge .g-bar { display: none; }
     .gauge .g-z { writing-mode: horizontal-tb; transform: none; font-size: 9px; }
     .gauge .g-m { font-size: 11px; }
-    .tamiz { grid-template-columns: minmax(0, 1fr); gap: 0; }
-    .tamiz > *, .tz-foot, .tz-chips { min-width: 0; max-width: 100%; }
-    .tz-visual { top: 62px; height: 50vh; height: 50svh; min-height: 0; z-index: 3; }
-    .tz-visual { height: 60vh; height: 60svh; }
-    .tz-head { flex-wrap: nowrap; padding: 8px 12px; font-size: 10px; }
-    .tz-head > span:first-child { display: none; }
-    .tz-foot-h { display: none; }
-    .tz-foot { padding: 8px 10px; }
-    .tz-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-    .tz-chips::-webkit-scrollbar { display: none; }
-    .tz-chip { font-size: 10px; padding: 4px 6px; flex: none; }
     .nav-actions .btn-acid { padding: 10px 12px; font-size: 10px; white-space: nowrap; }
     section[id], header[id] { scroll-margin-top: 70px; }
-    .tz-stage { min-height: 46vh; padding: 28px 0; }
-    .tz-stage h3 { font-size: 48px; }
   }
   /* ---- legibilidad en celular ---- */
   @media (max-width: 600px) {
@@ -532,7 +490,6 @@
     <div class="nav-links">
       <a onclick="goTo('vernos')">Ir a vernos</a>
       <a onclick="goTo('proponer')">Contratar</a>
-      <a onclick="goTo('criterio')">Cómo elegimos</a>
       <a onclick="goTo('fechas')">Fechas</a>
     </div>
     <div class="nav-actions">
@@ -749,100 +706,10 @@
     </div>
   </section>
 
-  <!-- ================= EL TAMIZ (cómo elegimos) ================= -->
-  <section class="block" id="criterio" data-jf="off">
-    <div class="wrap">
-      <div class="sec-row reveal"><span class="sec-num">[ 03 ]</span><span class="sec-kicker">Cómo elegimos</span></div>
-      <h2 class="sec-h reveal">EL TAMIZ</h2>
-      <p class="sec-intro reveal">Gusto amplio, filtro estricto. Escuchamos de todo; a la pista llega muy poco — y llega cambiado.</p>
-
-      <div class="tamiz">
-        <div class="tz-visual">
-          <div class="tz-head">
-            <span><span class="blip"></span> Simulación en vivo</span>
-            <span>entraron <b id="tz-in">0</b></span>
-            <span>al set <b id="tz-out">0</b></span>
-          </div>
-          <div id="tz-stage-gl">
-            <canvas id="tz-canvas" aria-label="Simulación: temas de muchos géneros caen por cinco filtros; muy pocos llegan al set"></canvas>
-            <span class="tz-label" data-m="0">01 cuerpo · <span class="pct">—</span></span>
-            <span class="tz-label" data-m="1">02 profundidad · <span class="pct">—</span></span>
-            <span class="tz-label" data-m="2">03 paciencia · <span class="pct">—</span></span>
-            <span class="tz-label" data-m="3">04 lugar · <span class="pct">—</span></span>
-            <span class="tz-label" data-m="4">05 mutación · <span class="pct">—</span></span>
-            <span class="tz-set">el set</span>
-          </div>
-          <div class="tz-foot">
-            <div class="tz-foot-h">El espectro · tocá un género para seguirlo · <span style="opacity:.7">en el set</span></div>
-            <div class="tz-chips">
-              <button class="tz-chip" data-g="techno" style="--c:#C6FF1A">Techno <span class="n">0</span></button>
-              <button class="tz-chip" data-g="house" style="--c:#5EF2D6">House profundo <span class="n">0</span></button>
-              <button class="tz-chip" data-g="dub" style="--c:#3D8BFF">Dub techno <span class="n">0</span></button>
-              <button class="tz-chip" data-g="breaks" style="--c:#FF2E88">Breaks / electro <span class="n">0</span></button>
-              <button class="tz-chip" data-g="ambient" style="--c:#B7A6FF">Ambient <span class="n">0</span></button>
-              <button class="tz-chip" data-g="idm" style="--c:#FFB347">IDM / leftfield <span class="n">0</span></button>
-              <button class="tz-chip" data-g="latin" style="--c:#FF6B4A">Afro / cumbia digital <span class="n">0</span></button>
-              <button class="tz-chip" data-g="jungle" style="--c:#ECE7DA">Jungle <span class="n">0</span></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="tz-steps">
-          <article class="tz-stage" data-stage="0">
-            <span class="n">00 · la entrada</span>
-            <h3>Entra todo</h3>
-            <p class="big">Techno de sótano, house que respira, dub con eco de barco hundido, breaks, electro, ambient, IDM, cumbia digital, jungle.</p>
-            <p>No hay género prohibido. Hay temas que no llegan.</p>
-          </article>
-          <article class="tz-stage" data-stage="1">
-            <span class="n">01 · primera membrana</span>
-            <h3>Cuerpo</h3>
-            <p class="big">¿Mueve sin pedir permiso?</p>
-            <p>Primero el cuerpo, después la cabeza. Si hay que explicar por qué se baila, no pasa.</p>
-          </article>
-          <article class="tz-stage" data-stage="2">
-            <span class="n">02 · segunda membrana</span>
-            <h3>Profundidad</h3>
-            <p class="big">¿Tiene algo más en la tercera escucha?</p>
-            <p>Buscamos sonido con agua adentro: espacio, textura, aire. Lo que en la primera pasada parece simple y después no se termina nunca.</p>
-          </article>
-          <article class="tz-stage" data-stage="3">
-            <span class="n">03 · tercera membrana</span>
-            <h3>Paciencia</h3>
-            <p class="big">¿Sabe esperar?</p>
-            <p>Nos quedamos con lo que construye tensión y la suelta en el momento justo. Lo que explota por explotar, rebota.</p>
-          </article>
-          <article class="tz-stage" data-stage="4">
-            <span class="n">04 · cuarta membrana</span>
-            <h3>Lugar</h3>
-            <p class="big">¿Dónde vive en la noche?</p>
-            <p>Un tema perfecto en el minuto equivocado no pasa. Cada elección depende de la anterior y prepara la siguiente.</p>
-          </article>
-          <article class="tz-stage" data-stage="5">
-            <span class="n">05 · quinta membrana</span>
-            <h3>Mutación</h3>
-            <p class="big">¿Se deja deformar?</p>
-            <p>Lo que sobrevive no se toca igual: se estira, se corta, se mezcla en vivo. Como una medusa, nunca la misma forma dos veces.</p>
-          </article>
-          <article class="tz-stage" data-stage="6">
-            <span class="n">06 · abajo de todo</span>
-            <h3>El set</h3>
-            <p class="big">Lo que queda tiene forma de medusa.</p>
-            <p>Es poco, viene de todos lados, y es lo que vas a escuchar.</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:22px">
-              <a class="btn btn-acid" onclick="choose('vernos')">Ir a vernos</a>
-              <a class="btn btn-line" onclick="choose('proponer')">Proponer una fecha</a>
-            </div>
-          </article>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ================= FECHAS ================= -->
   <section class="block deep" id="fechas" data-jf="left">
     <div class="wrap">
-      <div class="sec-row reveal"><span class="sec-num">[ 04 ]</span><span class="sec-kicker">Bitácora 2026</span></div>
+      <div class="sec-row reveal"><span class="sec-num">[ 03 ]</span><span class="sec-kicker">Bitácora 2026</span></div>
       <h2 class="sec-h reveal">FECHAS</h2>
       <p class="sec-intro reveal">Cada avistamiento queda registrado. El próximo puede ser en tu lugar.</p>
       <div style="margin-top:36px" class="reveal">
@@ -880,7 +747,6 @@
           <h5>Catálogo</h5>
           <a onclick="goTo('vernos')">Ir a vernos</a>
           <a onclick="goTo('proponer')">Contratar</a>
-          <a onclick="goTo('criterio')">Cómo elegimos</a>
           <a onclick="openModal('m-redeem')">Reclamar tu hidromedusa</a>
         </div>
         <div class="foot-col">
@@ -948,7 +814,6 @@
       <div class="modal-body">
         <button class="auth-btn" onclick="closeModal('m-menu');choose('vernos')">A · Ir a vernos</button>
         <button class="auth-btn" onclick="closeModal('m-menu');choose('proponer')">B · Proponer una fecha</button>
-        <button class="auth-btn" onclick="closeModal('m-menu');goTo('criterio')">Cómo elegimos</button>
         <button class="auth-btn" onclick="closeModal('m-menu');goTo('fechas')">Fechas</button>
         <button class="auth-btn" onclick="closeModal('m-menu');openModal('m-redeem')">Reclamar tu hidromedusa</button>
       </div>
@@ -991,7 +856,6 @@
 
 <script src="/js/jellyfish.js"></script>
 <script type="module" src="/js/abismo.js"></script>
-<script type="module" src="/js/tamiz.js"></script>
 <script>
 /* ============================================================
    HIDROMEDUSA · rave underground — comportamientos
