@@ -43,6 +43,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Saira+Stencil+One&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<!-- analytics: Umami Cloud (sin cookies). -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="ebbeb174-f573-4e9e-834a-dd92edcbfc0d"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }</script>
@@ -950,6 +952,9 @@ const HM = {
   }
 };
 
+/* ---------- Métricas (Umami): eventos propios, no-op si el script no cargó ---------- */
+function track(name,data){ try { if(window.umami && umami.track) umami.track(name,data); } catch(e){} }
+
 /* ---------- Nav helpers ---------- */
 function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
 function goTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
@@ -989,6 +994,7 @@ function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg
 /* ---------- Buy flow (WhatsApp) ---------- */
 const TICKET={ name:'Entrada', price:'$10.000', type:'general' };
 function buy(){
+  track('comprar-abrir');
   document.getElementById('buy-title').textContent='Pedir entrada';
   document.getElementById('buy-name').textContent=TICKET.name;
   document.getElementById('buy-price').textContent=TICKET.price;
@@ -1041,6 +1047,7 @@ function openExternal(url){
 }
 function payWhatsApp(){
   const msg=collectOrder('whatsapp'); if(msg===null) return;
+  track('comprar-captura',{canal:'whatsapp'});
   openExternal('https://wa.me/'+window.HM_CONFIG.WHATSAPP_NUMBER+'?text='+encodeURIComponent(msg));
   closeModal('m-buy');
   toast('Te abrimos WhatsApp con tu pedido 🟢');
@@ -1049,6 +1056,7 @@ function payInstagram(){
   const msg=collectOrder('instagram'); if(msg===null) return;
   // Instagram no permite prellenar el texto del DM: lo copiamos al portapapeles.
   try { navigator.clipboard && navigator.clipboard.writeText(msg); } catch(e){}
+  track('comprar-captura',{canal:'instagram'});
   const handle=(window.HM_CONFIG.INSTAGRAM_HANDLE||'hidromedusa').replace(/^@/,'');
   openExternal('https://ig.me/m/'+handle);
   closeModal('m-buy');
@@ -1056,6 +1064,7 @@ function payInstagram(){
 }
 
 function copyAlias(){
+  track('copiar-alias');
   const alias=window.HM_CONFIG.ALIAS||'hidromedusa.tandil';
   const done=function(){ toast('Alias copiado: '+alias+' 📋'); };
   try {
@@ -1375,6 +1384,7 @@ function openLegal(which){
 
 /* ---------- La elección (hero): ir a vernos / proponer fecha ---------- */
 function choose(where){
+  track('eleccion',{opcion:where});
   if(window.HM_ABISMO) HM_ABISMO.pulse();
   goTo(where);
   if(where==='proponer'){
@@ -1424,6 +1434,7 @@ function bookingText(b){
   return L.join('\n');
 }
 function sendBooking(channel){
+  track('contratar-enviar',{canal:channel});
   const b=bookingData();
   const need=[['bk-nombre',b.nombre],['bk-contacto',b.contacto]];
   let bad=false;
