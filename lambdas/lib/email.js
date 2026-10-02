@@ -14,12 +14,12 @@ const API_BASE = (process.env.API_BASE || 'https://p2vsvdihylfl6w4c6pfnnuwd4u0dw
 
 // ── Evento (espejo del HM_EVENT hardcodeado en public/index.html) ────────────
 const EVENT = {
-  title:    'Hidromedusa · Los Rojos',
-  start:    '',
-  end:      '',
-  venue:    'Los Rojos, Pinto 35, Tandil, Buenos Aires, AR',
-  dateLabel:'Sábado 19 de septiembre 2026',
-  timeLabel:'',
+  title:    'Hidromedusa · Fechón estelar en 990',
+  start:    '2026-10-31T21:00:00-03:00',
+  end:      '2026-11-01T03:00:00-03:00',
+  venue:    '990 Espacio Cultural, Tandil, Buenos Aires, AR',
+  dateLabel:'Sábado 31 de octubre 2026',
+  timeLabel:'21hs',
 };
 const SITE      = 'https://hidromedusa.com';
 const CONTACT   = 'hola@hidromedusa.com';
@@ -79,9 +79,9 @@ function eventDetails() {
   return pad(`
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding-bottom:4px;">Fecha</td></tr>
-      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;padding-bottom:14px;">${EVENT.dateLabel} · <span style="color:${C.muted};font-weight:normal;">hora a confirmar · entrada gratis</span></td></tr>
+      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;padding-bottom:14px;">${EVENT.dateLabel} · <span style="color:${C.muted};font-weight:normal;">21hs · con VHS y Marcos Acosta</span></td></tr>
       <tr><td style="font-family:${F.mono};font-size:11px;letter-spacing:2px;color:${C.muted};text-transform:uppercase;padding-bottom:4px;">Lugar</td></tr>
-      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;">Los Rojos · Pinto 35 · Tandil, BA</td></tr>
+      <tr><td style="font-family:${F.body};font-size:16px;color:${C.bone};font-weight:bold;">990 Espacio Cultural · Tandil, BA</td></tr>
     </table>`);
 }
 function calButton(calUrl) {
@@ -216,19 +216,19 @@ function htmlDoc({ subLabel, accent = C.acid, rows }) {
 // ── 1) Confirmación ──────────────────────────────────────────────────────────
 function renderConfirmationHtml({ name, claim, calUrl }) {
   const rows =
-    text(`¡Hola ${esc(name) || 'crack'}! Te esperamos en el fondo. 🪼<br>Tu lugar para <b>Hidromedusa</b> está confirmado.`, 26)
+    text(`¡Hola ${esc(name) || 'crack'}! Te esperamos en el fondo. 🪼<br>Tu entrada para <b>Hidromedusa</b> está confirmada.`, 26)
     + claimBox('Tu palabra icebreaker (dos palabras)', claim)
     + jellyfishBlock(claim)
     + eventDetails()
-    + text(`<b style="color:${C.acid};">Entrada libre:</b> no hace falta entrada, venís y listo.<br><b style="color:${C.acid};">El juego:</b> si tu palabra matchea con la de otra persona, se presentan y ganan una consumición. 🍹`, 26);
-  return htmlDoc({ subLabel: 'Lugar confirmado', accent: C.acid, rows });
+    + text(`<b style="color:${C.acid};">En la puerta:</b> decí tu palabra y te damos tu entrada-sticker.<br><b style="color:${C.acid};">El juego:</b> si tu palabra matchea con la de otra persona, se presentan y ganan una consumición. 🍹`, 26);
+  return htmlDoc({ subLabel: 'Entrada confirmada', accent: C.acid, rows });
 }
 function renderConfirmationText({ name, claim, calUrl }) {
   return [
     `¡Hola ${name || ''}!`.trim(), '',
-    `Confirmamos tu lugar para Hidromedusa · Los Rojos, Pinto 35 (${EVENT.dateLabel} · hora a confirmar · entrada gratis).`, '',
+    `Confirmamos tu entrada para Hidromedusa · 990 Espacio Cultural (${EVENT.dateLabel} · 21hs).`, '',
     `Tu palabra icebreaker (dos palabras): ${claim}`, '',
-    'Entrada libre, no hace falta entrada. Decí tu palabra en la fiesta: si matchea con la de otra persona, se presentan y ganan una consumición.', '',
+    'Decila en la puerta y te damos tu entrada-sticker. Si matchea con la de otra persona, se presentan y ganan una consumición.', '',
     `— Hidromedusa · ${SITE}`,
   ].join('\n');
 }
@@ -243,7 +243,7 @@ function renderPalabraChangedHtml({ name, claim, oldClaim, calUrl }) {
     + claimBox('Tu nueva palabra (dos palabras)', claim)
     + oldNote
     + eventDetails()
-    + text(`<b style="color:${C.acid};">En la fiesta:</b> usá tu <b>nueva</b> palabra para el juego del match. 🪼`, 26);
+    + text(`<b style="color:${C.acid};">En la puerta:</b> decí tu <b>nueva</b> palabra y te damos tu entrada-sticker. 🪼`, 26);
   return htmlDoc({ subLabel: 'Palabra actualizada', accent: C.acid, rows });
 }
 function renderPalabraChangedText({ name, claim, oldClaim, calUrl }) {
@@ -252,7 +252,7 @@ function renderPalabraChangedText({ name, claim, oldClaim, calUrl }) {
     'Actualizamos tu palabra para Hidromedusa.',
     oldClaim ? `Tu palabra anterior (${oldClaim}) ya no sirve.` : '', '',
     `Tu nueva palabra (dos palabras): ${claim}`, '',
-    'Usá la nueva en la fiesta para el juego del match.', '',
+    'Decí la nueva en la puerta y te damos tu entrada-sticker.', '',
     `— Hidromedusa · ${SITE}`,
   ].filter((l, i, a) => !(l === '' && a[i - 1] === '')).join('\n');
 }

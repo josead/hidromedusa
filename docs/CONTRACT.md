@@ -20,10 +20,10 @@ conform to this. Read this fully before editing any file.
 
 ```
 id: ev-1
-title: Hidromedusa · Los Rojos
-date: 2026-09-19 (sábado)  time: a confirmar
-venue: Los Rojos, Pinto 35, Tandil, Buenos Aires, AR
-tickets: entrada libre y gratuita · palabra icebreaker opcional (reserva por WhatsApp/IG)
+title: Hidromedusa · Fechón estelar en 990
+date: 2026-10-31 (sábado)  time: 21:00 (-03:00)  · DJ invitados: VHS, Marcos Acosta
+venue: 990 Espacio Cultural, Tandil, Buenos Aires, AR
+tickets: general $10.000 ARS · pago por transferencia al alias, captura por WhatsApp/IG
 ```
 
 ## Config (env + window)

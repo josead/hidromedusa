@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Hidromedusa — Música en vivo de Tandil</title>
-<meta name="description" content="Hidromedusa — música electrónica en vivo desde Tandil. Escuchamos todo, tocamos poco. Vení a vernos o proponenos una fecha." />
+<meta name="description" content="Hidromedusa — música electrónica en vivo desde Tandil. Próxima fecha: sáb 31 de octubre, 21hs, 990 Espacio Cultural, con VHS y Marcos Acosta. Entrada $10.000." />
 <link rel="canonical" href="https://hidromedusa.com/" />
 <meta name="theme-color" content="#0a0a0b" />
 
@@ -19,7 +19,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Hidromedusa" />
 <meta property="og:title" content="Hidromedusa" />
-<meta property="og:description" content="Música electrónica en vivo desde Tandil. Escuchamos todo, tocamos poco. Vení a vernos o proponenos una fecha." />
+<meta property="og:description" content="Música electrónica en vivo desde Tandil. Sáb 31 de octubre · 21hs · 990 Espacio Cultural · con VHS y Marcos Acosta · Entrada $10.000." />
 <meta property="og:url" content="https://hidromedusa.com/" />
 <meta property="og:image" content="https://hidromedusa.com/og.png" />
 <meta property="og:image:width" content="1200" />
@@ -28,7 +28,7 @@
 <meta property="og:locale" content="es_AR" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Hidromedusa" />
-<meta name="twitter:description" content="Música electrónica en vivo desde Tandil. Escuchamos todo, tocamos poco. Vení a vernos o proponenos una fecha." />
+<meta name="twitter:description" content="Música electrónica en vivo desde Tandil. Sáb 31 de octubre · 21hs · 990 Espacio Cultural · con VHS y Marcos Acosta · Entrada $10.000." />
 <meta name="twitter:image" content="https://hidromedusa.com/og.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -379,6 +379,21 @@
   .choice .ch-arrow { grid-column: 2; grid-row: 2 / 4; align-self: center; width: 56px; height: 56px; border: 2px solid currentColor; display: grid; place-items: center; transition: transform .35s; }
   .choice:hover .ch-arrow { transform: rotate(-45deg); }
 
+  /* hero: próxima fecha destacada */
+  .hero-next { display: grid; grid-template-columns: 132px 1fr auto; gap: 22px; align-items: center; margin-top: 26px; padding: 14px 22px 14px 14px; border: 2px solid var(--acid); background: rgba(5,6,7,.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); max-width: 860px; }
+  .hero-next img { width: 132px; height: 176px; object-fit: cover; display: block; border: 1.5px solid var(--line-strong); }
+  .hero-next .hn-k { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--acid); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .hero-next .hn-t { font-family: var(--display); font-size: clamp(30px, 4vw, 52px); line-height: .9; text-transform: uppercase; }
+  .hero-next .hn-s { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--bone-dim); margin-top: 10px; line-height: 1.5; }
+  .hero-next .hn-s b { color: var(--bone); font-weight: 700; }
+  .hero-next .hn-cta { display: flex; flex-direction: column; gap: 8px; align-items: stretch; text-align: center; }
+  .hero-next .hn-price { font-family: var(--display); font-size: 34px; line-height: 1; color: var(--acid); }
+  @media (max-width: 720px) {
+    .hero-next { grid-template-columns: 96px 1fr; gap: 14px; padding: 12px; }
+    .hero-next img { width: 96px; height: 128px; }
+    .hero-next .hn-cta { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; }
+  }
+
   /* secciones translúcidas: se ve el abismo detrás */
   .deep { background: rgba(3,4,5,.62); }
   .cta { background: rgba(3,4,5,.4); }
@@ -510,6 +525,20 @@
       <h1 class="reveal">HIDRO<br /><span class="hl" id="hero-word">MEDUSA</span></h1>
       <p class="hero-lede reveal">Música electrónica en vivo desde el fondo de Tandil.<br /><em>Escuchamos todo. Tocamos poco.</em></p>
 
+      <!-- próxima fecha destacada: se muestra hasta el día del evento -->
+      <a class="hero-next reveal" data-until="2026-10-31" onclick="buy()" style="cursor:pointer;text-decoration:none;color:inherit">
+        <img src="fechon.jpg" alt="Estelar Hidromedusa — 31 de octubre en 990" width="132" height="176" />
+        <div>
+          <div class="hn-k"><span class="blip"></span> Próxima fecha · Fechón estelar</div>
+          <div class="hn-t">Sáb 31 Oct · 21hs<br />990 Espacio Cultural</div>
+          <div class="hn-s">Invitados: <b>VHS</b> + <b>Marcos Acosta</b> · Tandil</div>
+        </div>
+        <div class="hn-cta">
+          <div class="hn-price">$10.000</div>
+          <span class="btn btn-acid">Comprar entrada <i data-lucide="arrow-right" width="16"></i></span>
+        </div>
+      </a>
+
       <div class="choice-q reveal"><span class="blip"></span> ¿Cómo nos querés encontrar?</div>
       <div class="choices reveal" role="group" aria-label="Elegí cómo encontrarnos">
         <button class="choice a" onclick="choose('vernos')">
@@ -542,37 +571,38 @@
       <h2 class="sec-h reveal">IR A VERNOS</h2>
 
       <!-- fecha vigente: se muestra hasta el día del evento (data-until) -->
-      <div class="stub reveal" data-until="2026-09-19">
+      <div class="stub reveal" data-until="2026-10-31">
         <div class="stub-main">
           <span class="stub-flag"><span class="dot"></span> Live · próxima fecha</span>
-          <h3>Los Rojos<br />Pinto 35</h3>
+          <h3>990<br />Espacio Cultural</h3>
           <div class="stub-meta">
-            <div><div class="k">Fecha</div><div class="v">Sábado 19 de septiembre</div></div>
-            <div><div class="k">Hora</div><div class="v">A confirmar</div></div>
-            <div><div class="k">Lugar</div><div class="v"><a href="https://maps.google.com/?q=Pinto+35,+Tandil,+Buenos+Aires" target="_blank" rel="noopener" style="color:var(--acid)">Pinto 35 · Tandil ↗</a></div></div>
+            <div><div class="k">Fecha</div><div class="v">Sábado 31 de octubre</div></div>
+            <div><div class="k">Hora</div><div class="v">21hs</div></div>
+            <div><div class="k">Lugar</div><div class="v"><a href="https://www.instagram.com/990.espaciocultural/" target="_blank" rel="noopener" style="color:var(--acid)">990 · Tandil ↗</a></div></div>
+            <div><div class="k">Invitados</div><div class="v">VHS · Marcos Acosta</div></div>
           </div>
         </div>
         <div class="stub-side">
           <div>
-            <div class="price-k">Entrada</div>
-            <div class="price-v">GRATIS</div>
-            <div class="price-n">libre y gratuita · sin reserva obligatoria</div>
+            <div class="price-k">Entrada única</div>
+            <div class="price-v">$10.000</div>
+            <div class="price-n">ARS · pago por transferencia</div>
           </div>
           <div style="margin-top:22px;display:flex;flex-direction:column;gap:8px">
-            <a class="btn btn-acid btn-block" onclick="buy()">Reservar mi lugar</a>
+            <a class="btn btn-acid btn-block" onclick="buy()">Comprar mi entrada</a>
             <a class="btn btn-line btn-block" onclick="openModal('m-redeem')">Reclamar tu hidromedusa</a>
           </div>
         </div>
       </div>
 
       <!-- entre fechas: se muestra cuando la última ya pasó (data-after) -->
-      <div class="stub reveal" data-after="2026-09-19">
+      <div class="stub reveal" data-after="2026-10-31">
         <div class="stub-main">
           <span class="stub-flag calm"><span class="dot"></span> Entre avistamientos</span>
           <h3>Próxima fecha<br />en camino</h3>
-          <p class="stub-p">La última fue el sábado 19 de septiembre en Los Rojos. La próxima se anuncia primero acá, por mail y en Instagram.</p>
+          <p class="stub-p">La última fue el sábado 31 de octubre en 990 Espacio Cultural. La próxima se anuncia primero acá, por mail y en Instagram.</p>
           <div class="stub-meta">
-            <div><div class="k">Última</div><div class="v">Los Rojos · 19/9</div></div>
+            <div><div class="k">Última</div><div class="v">990 · 31/10</div></div>
             <div><div class="k">Próxima</div><div class="v">A anunciar</div></div>
             <div><div class="k">¿Fuiste?</div><div class="v"><a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer">Reclamá tu hidromedusa →</a></div></div>
           </div>
@@ -591,12 +621,13 @@
         </div>
       </div>
 
-      <div data-until="2026-09-19">
+      <div data-until="2026-10-31">
         <div class="incluye reveal">
           <div>
             <div class="incluye-h">Qué incluye</div>
             <ul class="incluye-list">
-              <li>Acceso a la tocada</li>
+              <li>Acceso a la fecha estelar</li>
+              <li>2 DJ invitados: VHS y Marcos Acosta</li>
               <li>Barra habilitada</li>
               <li>Tu hidromedusa digital para compartir</li>
               <li>Tu palabra icebreaker</li>
@@ -605,11 +636,11 @@
           <div>
             <div class="secret" style="margin-bottom:0">
               <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--acid);flex-shrink:0;margin-top:2px"></i>
-              <div><b>Palabra icebreaker</b><p>Tu reserva trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
+              <div><b>Palabra icebreaker</b><p>Tu entrada trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
             </div>
           </div>
         </div>
-        <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">La entrada es gratis. Si querés tu hidromedusa, avisá que venís por WhatsApp o Instagram y te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu hidromedusa»</a> y aparece tu hidromedusa. En la fiesta compartí tu palabra: si coincide con la de otra persona, ganan una consumición.</p>
+        <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">Pedís tu entrada por WhatsApp o Instagram, transferís y, cuando el staff confirma el pago, te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu hidromedusa»</a> y aparece tu hidromedusa. En la fiesta compartí tu palabra: si coincide con la de otra persona, ganan una consumición.</p>
       </div>
     </div>
   </section>
@@ -713,9 +744,10 @@
       <h2 class="sec-h reveal">FECHAS</h2>
       <p class="sec-intro reveal">Cada avistamiento queda registrado. El próximo puede ser en tu lugar.</p>
       <div style="margin-top:36px" class="reveal">
-        <a class="cat-row" onclick="goTo('vernos')"><span class="cat-n">001</span><span class="cat-date">SÁB 19 SEP</span><span class="cat-venue">Los Rojos <small>Pinto 35 · Tandil, BA</small></span><span class="cat-status hot" data-until="2026-09-19">Gratis</span><span class="cat-status" data-after="2026-09-19">Hecho</span><span class="cat-arrow"><i data-lucide="arrow-up-right"></i></span></a>
-        <div class="cat-row" style="cursor:default;opacity:.5"><span class="cat-n">002</span><span class="cat-date">— — —</span><span class="cat-venue">Próximo avistamiento <small>se anuncia pronto</small></span><span class="cat-status">Pronto</span><span class="cat-arrow"><i data-lucide="more-horizontal"></i></span></div>
-        <a class="cat-row" onclick="choose('proponer')"><span class="cat-n">003</span><span class="cat-date">¿TU FECHA?</span><span class="cat-venue">Proponela vos <small>fiesta · club · festival · espacio</small></span><span class="cat-status open">Abierta</span><span class="cat-arrow"><i data-lucide="arrow-up-right"></i></span></a>
+        <a class="cat-row" onclick="goTo('vernos')"><span class="cat-n">001</span><span class="cat-date">SÁB 19 SEP</span><span class="cat-venue">Los Rojos <small>Pinto 35 · Tandil, BA</small></span><span class="cat-status">Hecho</span><span class="cat-arrow"><i data-lucide="arrow-up-right"></i></span></a>
+        <a class="cat-row" onclick="goTo('vernos')"><span class="cat-n">002</span><span class="cat-date">SÁB 31 OCT · 21HS</span><span class="cat-venue">990 Espacio Cultural <small>VHS + Marcos Acosta · Tandil, BA</small></span><span class="cat-status hot" data-until="2026-10-31">$10.000</span><span class="cat-status" data-after="2026-10-31">Hecho</span><span class="cat-arrow"><i data-lucide="arrow-up-right"></i></span></a>
+        <div class="cat-row" style="cursor:default;opacity:.5"><span class="cat-n">003</span><span class="cat-date">— — —</span><span class="cat-venue">Próximo avistamiento <small>se anuncia pronto</small></span><span class="cat-status">Pronto</span><span class="cat-arrow"><i data-lucide="more-horizontal"></i></span></div>
+        <a class="cat-row" onclick="choose('proponer')"><span class="cat-n">004</span><span class="cat-date">¿TU FECHA?</span><span class="cat-venue">Proponela vos <small>fiesta · club · festival · espacio</small></span><span class="cat-status open">Abierta</span><span class="cat-arrow"><i data-lucide="arrow-up-right"></i></span></a>
       </div>
     </div>
   </section>
@@ -777,8 +809,8 @@
       <div class="modal-head"><h4 id="buy-title">Pedir entrada</h4><button class="modal-x" onclick="closeModal('m-buy')">×</button></div>
       <div class="modal-body">
         <div style="border:2px solid var(--line-strong);padding:14px 16px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center">
-          <div><div style="font-family:var(--display);font-size:24px;text-transform:uppercase" id="buy-name">Entrada</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted)" id="buy-sub">Los Rojos · Sáb 19/9 · entrada gratis</div></div>
-          <div style="font-family:var(--display);font-size:30px;color:var(--acid)" id="buy-price">GRATIS</div>
+          <div><div style="font-family:var(--display);font-size:24px;text-transform:uppercase" id="buy-name">Entrada</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted)" id="buy-sub">990 Espacio Cultural · Sáb 31/10 · 21hs</div></div>
+          <div style="font-family:var(--display);font-size:30px;color:var(--acid)" id="buy-price">$10.000</div>
         </div>
         <label class="field-label">Nombre completo</label>
         <input class="field" id="buy-buyer" placeholder="Ej. Gustavo Cerati" onblur="scheduleLead()" />
@@ -786,10 +818,17 @@
         <input class="field" id="buy-email" type="email" placeholder="cerati@correo.com" onblur="scheduleLead()" />
         <label class="field-label">WhatsApp</label>
         <input class="field" id="buy-phone" type="tel" placeholder="Ej. 2494 123456" onblur="scheduleLead()" />
-        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin:6px 0 16px;line-height:1.5">Entrada libre y gratuita. Avisanos que venís 👇 y te pasamos tus palabras clave para reclamar tu hidromedusa 🪼</p>
-        <button class="btn btn-acid btn-block btn-lg" onclick="payWhatsApp()">Avisar por WhatsApp 🟢</button>
-        <button class="btn btn-line btn-block btn-lg" style="margin-top:8px" onclick="payInstagram()">Avisar por Instagram 📸</button>
-        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">La entrada es gratis. El staff confirma tu lugar y te habilita tus palabras clave (dos palabras) para reclamar tu hidromedusa.</p>
+        <div style="border:2px dashed var(--line-strong);padding:14px 16px;margin:6px 0 16px">
+          <div class="field-label" style="margin-bottom:8px">1 · Transferí al alias 🧾</div>
+          <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
+            <span id="alias-text" style="font-family:var(--mono);font-size:18px;color:var(--acid);letter-spacing:.02em">hidromedusa.tandil</span>
+            <button type="button" class="btn btn-line" style="padding:7px 16px;white-space:nowrap" onclick="copyAlias()">Copiar</button>
+          </div>
+          <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:10px;line-height:1.5">Transferí $10.000 al alias y sacá captura del comprobante. 2 · Mandala por WhatsApp o Instagram 👇 y te pasamos tus palabras clave.</p>
+        </div>
+        <button class="btn btn-acid btn-block btn-lg" onclick="payWhatsApp()">Mandar captura por WhatsApp 🟢</button>
+        <button class="btn btn-line btn-block btn-lg" style="margin-top:8px" onclick="payInstagram()">Mandar captura por Instagram 📸</button>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">El staff confirma el pago y te habilita tus palabras clave (dos palabras) para reclamar tu entrada.</p>
       </div>
     </div>
   </div>
@@ -826,11 +865,11 @@
       <div class="modal-head"><h4>Tu hidromedusa 🪼</h4><button class="modal-x" onclick="closeRedeem()">×</button></div>
       <div class="modal-body">
         <div id="redeem-form">
-          <p style="color:var(--bone-dim);font-size:14px;line-height:1.5;margin-bottom:16px">Cargá tu <b style="color:var(--acid)">palabra icebreaker</b> (dos palabras). Se habilita cuando el staff confirme tu lugar.</p>
+          <p style="color:var(--bone-dim);font-size:14px;line-height:1.5;margin-bottom:16px">Cargá tu <b style="color:var(--acid)">palabra icebreaker</b> (dos palabras). Se habilita cuando el staff confirme tu pago.</p>
           <label class="field-label">Tus dos palabras</label>
           <input class="field" id="redeem-claim" placeholder="ej. medusa violeta" autocomplete="off" onkeydown="if(event.key==='Enter')redeem()" />
           <button class="btn btn-acid btn-block btn-lg" onclick="redeem()">Ver mi entrada</button>
-          <p style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5">¿Todavía no tenés tu palabra? <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Reservá tu lugar acá →</a></p>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5">¿Todavía no pagaste tu entrada? <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Pedila acá →</a></p>
         </div>
         <div id="redeem-result"></div>
       </div>
@@ -867,16 +906,16 @@ window.HM_CONFIG = window.HM_CONFIG || {
   API_BASE:        'https://p2vsvdihylfl6w4c6pfnnuwd4u0dwcvw.lambda-url.sa-east-1.on.aws',  // backend AWS Lambda
   WHATSAPP_NUMBER: '5492494481699',    // E.164 sin '+'
   INSTAGRAM_HANDLE: 'hidromedusa',     // usuario de IG para el DM (ig.me/m/<handle>)
+  ALIAS: 'hidromedusa.tandil',          // alias para transferir el pago
 };
 try { localStorage.setItem('hm_api_base', window.HM_CONFIG.API_BASE || ''); } catch(e){}
 
 /* ---------- Event (fallback hardcodeado) ---------- */
 const HM_EVENT = {
-  id:'ev-1', title:'Hidromedusa · Los Rojos',
-  start:'', end:'',   // hora a confirmar
-  venue:'Los Rojos, Pinto 35, Tandil, Buenos Aires, AR',
-  dateLabel:'Sábado 19 de septiembre 2026', shortLabel:'sábado 19/9 en Los Rojos (Pinto 35)',
-  free:true
+  id:'ev-1', title:'Hidromedusa · Fechón estelar en 990',
+  start:'2026-10-31T21:00:00-03:00', end:'2026-11-01T03:00:00-03:00',
+  venue:'990 Espacio Cultural, Tandil, Buenos Aires, AR',
+  dateLabel:'Sábado 31 de octubre 2026 · 21hs', shortLabel:'sábado 31/10 en 990 Espacio Cultural (21hs)'
 };
 
 /* ---------- API helper (lanza si falla o si API_BASE vacío) ---------- */
@@ -939,9 +978,9 @@ let toastT;
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',3200); }
 
 /* ---------- Buy flow (WhatsApp) ---------- */
-const TICKET={ name:'Entrada', price:'GRATIS', type:'general' };
+const TICKET={ name:'Entrada', price:'$10.000', type:'general' };
 function buy(){
-  document.getElementById('buy-title').textContent='Reservar mi lugar';
+  document.getElementById('buy-title').textContent='Pedir entrada';
   document.getElementById('buy-name').textContent=TICKET.name;
   document.getElementById('buy-price').textContent=TICKET.price;
   openModal('m-buy');
@@ -979,7 +1018,8 @@ function collectOrder(channel){
   const name=document.getElementById('buy-buyer').value.trim();
   if(!name){ toast('Decinos tu nombre'); return null; }
   captureLead('pending', channel);
-  return '¡Hola Hidromedusa! Voy a la tocada del '+HM_EVENT.shortLabel+'. Soy '+name+'. ¿Me pasan mi palabra icebreaker? 🪼';
+  const alias=window.HM_CONFIG.ALIAS||'hidromedusa.tandil';
+  return '¡Hola Hidromedusa! Quiero una entrada ('+TICKET.price+') para '+HM_EVENT.shortLabel+'. Soy '+name+'. Te paso la captura del pago al alias '+alias+'.';
 }
 // Abre un link externo en otra pestaña SIN dejar una pestaña en blanco: un
 // <a target="_blank"> navega directo al destino, mientras que window.open crea
@@ -1004,6 +1044,21 @@ function payInstagram(){
   openExternal('https://ig.me/m/'+handle);
   closeModal('m-buy');
   toast('Te abrimos el DM de Instagram — pegá el mensaje que copiamos 📋');
+}
+
+function copyAlias(){
+  const alias=window.HM_CONFIG.ALIAS||'hidromedusa.tandil';
+  const done=function(){ toast('Alias copiado: '+alias+' 📋'); };
+  try {
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(alias).then(done).catch(function(){ fallbackCopy(alias,done); }); }
+    else fallbackCopy(alias,done);
+  } catch(e){ fallbackCopy(alias,done); }
+}
+function fallbackCopy(text,done){
+  const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); done(); } catch(e){ toast('Copiá el alias: '+text); }
+  document.body.removeChild(ta);
 }
 
 /* ---------- Redeem (frase secreta) ---------- */
@@ -1055,7 +1110,7 @@ function renderTicketCard(tk, ev){
       <div class="tk-pass">
         <div class="k">Tus palabras clave</div>
         <div class="v">${tk.claim||'—'}</div>
-        <div class="n">No hace falta entrada: la tocada es gratis. Decí tu palabra en la fiesta y buscá tu match.</div>
+        <div class="n">En la puerta decí tus palabras clave y te damos tu entrada-sticker. En la fiesta buscá tu match.</div>
       </div>
       <div class="tk-meta">
         <div><div class="k">Fecha</div><div class="v">${(ev&&ev.dateLabel)||HM_EVENT.dateLabel}</div></div>
@@ -1194,7 +1249,7 @@ async function shareJf(){
   // Event tag
   ctx.font='13px "Space Mono","Courier New",monospace';
   ctx.fillStyle='rgba(168,163,153,0.75)';
-  ctx.fillText('HIDROMEDUSA · SÁB 19 SEP · LOS ROJOS · TANDIL', CW/2, TY+88);
+  ctx.fillText('HIDROMEDUSA · SÁB 31 OCT · 990 · TANDIL', CW/2, TY+88);
 
   // URL watermark
   ctx.font='11px "Space Mono","Courier New",monospace';
@@ -1204,7 +1259,7 @@ async function shareJf(){
   // Convert to blob
   const blob=await new Promise(res=>share.toBlob(res,'image/png'));
   const file=new File([blob], 'hidromedusa-'+claim+'.png', {type:'image/png'});
-  const shareText='🪼 '+claim.replace(/-/g,' ')+' — Hidromedusa · 19/9 · Los Rojos · Tandil';
+  const shareText='🪼 '+claim.replace(/-/g,' ')+' — Hidromedusa · 31/10 · 990 · Tandil';
 
   // Web Share API (mobile: opens native share sheet → Instagram, WhatsApp, etc.)
   if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
@@ -1236,7 +1291,7 @@ function buildGoogleCalUrl(ev){
   const params=new URLSearchParams({
     action:'TEMPLATE', text:ev.title,
     dates:fmtICS(ev.start)+'/'+fmtICS(ev.end),
-    details:'Hidromedusa en vivo. Entrada gratis.', location:ev.venue
+    details:'Hidromedusa en vivo con VHS y Marcos Acosta. Entradas por WhatsApp.', location:ev.venue
   });
   return 'https://calendar.google.com/calendar/render?'+params;
 }
@@ -1245,7 +1300,7 @@ function buildICS(ev){
     'UID:'+ev.id+'@hidromedusa','DTSTAMP:'+fmtICS(Date.now()),
     'DTSTART:'+fmtICS(ev.start),'DTEND:'+fmtICS(ev.end),
     'SUMMARY:'+ev.title,'LOCATION:'+ev.venue,
-    'DESCRIPTION:Hidromedusa en vivo. Entrada gratis.',
+    'DESCRIPTION:Hidromedusa en vivo con VHS y Marcos Acosta. Entradas por WhatsApp.',
     'END:VEVENT','END:VCALENDAR'].join('\r\n');
 }
 async function addToCalendar(){
