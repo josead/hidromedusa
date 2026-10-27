@@ -34,6 +34,7 @@
   .btn-hot{border-color:var(--hot);color:var(--hot);}
   .btn-hot:hover{background:var(--hot);color:#fff;border-color:var(--hot);}
   .btn-sm{padding:6px 11px;font-size:11px;}
+  a.btn{display:inline-block;text-decoration:none;}
   .row-actions{display:flex;gap:6px;flex-wrap:wrap;}
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
   .stat{border:2px solid var(--line-strong);padding:14px 16px;}
@@ -128,7 +129,7 @@
       <input class="field" id="i-email" type="email" placeholder="Email (opcional)" />
     </div>
     <button class="btn btn-acid" onclick="issueDirect()">Generar palabra ahora</button>
-    <div class="todo">Email (AWS SES, en vivo desde <b>entrada@hidromedusa.com</b>): al <b>generar</b> o <b>cambiar</b> palabra se manda la confirmación; al <b>invalidar</b> se avisa que la entrada dejó de servir. <b>Eliminar</b> NO envía email (borra el registro).</div>
+    <div class="todo">Email (AWS SES, en vivo desde <b>entrada@hidromedusa.com</b>): al <b>generar</b> o <b>cambiar</b> palabra se manda la confirmación; al <b>invalidar</b> se avisa que la entrada dejó de servir. <b>Eliminar</b> NO envía email (borra el registro).<br><b>Link directo:</b> cada palabra tiene <b>Copiar link 🔗</b> y <b>WhatsApp ↗</b> → abre su hidromedusa en la web (para verla y compartirla). Si el mail no llega, mandá el link.</div>
   </section>
 </div>
 
@@ -185,7 +186,35 @@ function contact(t){
 function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function copyClaim(c){ try{ navigator.clipboard.writeText(c); toast('Palabra copiada: '+c+' 📋'); }catch(e){ toast(c); } }
 
+// Link directo a su hidromedusa: la web abre ?claim= sola (modal + medusa + compartir en IG).
+const SITE='https://hidromedusa.com';
+let BY_ID={};
+function claimLink(c){ return SITE+'/?claim='+encodeURIComponent(c); }
+function shareMsg(t){
+  const first=String(t.buyerName||'').trim().split(/\s+/)[0];
+  return '¡Hola'+(first?' '+first:'')+'! 🪼 Ya tenés tu entrada para Hidromedusa.\n'
+    +'Tu palabra: '+String(t.claim).replace(/-/g,' ').toUpperCase()+'\n'
+    +'Tu hidromedusa (la podés compartir): '+claimLink(t.claim)+'\n'
+    +'En la puerta decí tu palabra y te damos tu entrada-sticker.';
+}
+// "2494658203" → "5492494658203" (wa.me pide 549 + área + número). Si no se entiende, '' → elegís el contacto.
+function waNumber(p){
+  let d=String(p||'').replace(/\D/g,'').replace(/^0+/,'');
+  if(d.length===10) return '549'+d;
+  if(d.length===12 && d.startsWith('54')) return '549'+d.slice(2);
+  if(d.length===13 && d.startsWith('549')) return d;
+  return '';
+}
+function waHref(t){ return 'https://wa.me/'+waNumber(t.buyerPhone)+'?text='+encodeURIComponent(shareMsg(t)); }
+function copyText(txt,msg){
+  const done=()=>toast(msg);
+  try{ navigator.clipboard.writeText(txt).then(done,()=>prompt('Copiá el link:',txt)); }
+  catch(e){ prompt('Copiá el link:',txt); }
+}
+function copyLink(id){ const t=BY_ID[id]; if(t&&t.claim) copyText(claimLink(t.claim),'Link copiado 🔗 '+t.claim); }
+
 function render(tickets){
+  BY_ID={}; tickets.forEach(t=>{ BY_ID[t.id]=t; });
   const pend=tickets.filter(t=>t.status==='lead'||t.status==='pending')
     .sort((a,b)=>(b.updatedAt||b.createdAt||'').localeCompare(a.updatedAt||a.createdAt||''));
   const words=tickets.filter(t=>t.status==='freed'||t.status==='used'||t.status==='cancelled')
@@ -232,10 +261,12 @@ function wordActions(t){
   const id=esc(t.id), nm=esc(t.buyerName||'');
   const del=`<button class="btn btn-hot btn-sm" onclick="deleteTicket('${id}','${nm}')">Eliminar</button>`;
   if(t.status==='cancelled') return `<div class="row-actions">${del}</div>`;
+  const link=`<button class="btn btn-acid btn-sm" onclick="copyLink('${id}')">Copiar link 🔗</button>`;
+  const wa=`<a class="btn btn-sm" href="${esc(waHref(t))}" target="_blank" rel="noopener">WhatsApp ↗</a>`;
   const change=`<button class="btn btn-sm" onclick="rewordTicket('${id}','${nm}')">Cambiar palabra</button>`;
   const cancel=`<button class="btn btn-hot btn-sm" onclick="cancelTicket('${id}','${nm}')">Invalidar</button>`;
   // 'freed' = válida (cambiar + invalidar + eliminar); 'used' = ya entró (solo invalidar/eliminar)
-  return `<div class="row-actions">${t.status==='freed'?change:''}${cancel}${del}</div>`;
+  return `<div class="row-actions">${link}${wa}${t.status==='freed'?change:''}${cancel}${del}</div>`;
 }
 
 async function load(){
@@ -253,8 +284,8 @@ async function freeTicket(id,btn){
   try{
     const data=await api('/tickets/'+encodeURIComponent(id)+'/free',{method:'POST',body:{}});
     const claim=data.ticket&&data.ticket.claim;
-    toast('Palabra generada: '+claim+' 📋');
-    try{ navigator.clipboard.writeText(claim); }catch(e){}
+    toast('Palabra generada: '+claim+' · link copiado 🔗');
+    try{ navigator.clipboard.writeText(claimLink(claim)); }catch(e){}
     load();
   }catch(e){
     toast('Error: '+e.message);
@@ -270,8 +301,8 @@ async function issueDirect(){
   try{
     const data=await api('/tickets/issue',{method:'POST',body:{type:'general',buyerName:name,buyerPhone:phone||null,buyerEmail:email||null}});
     const claim=data.ticket&&data.ticket.claim;
-    toast('Generada: '+claim+' 📋');
-    try{ navigator.clipboard.writeText(claim); }catch(e){}
+    toast('Generada: '+claim+' · link copiado 🔗');
+    try{ navigator.clipboard.writeText(claimLink(claim)); }catch(e){}
     document.getElementById('i-name').value='';document.getElementById('i-phone').value='';document.getElementById('i-email').value='';
     load();
   }catch(e){ toast('Error: '+e.message); }
@@ -284,8 +315,8 @@ async function rewordTicket(id,name){
   try{
     const data=await api('/tickets/'+encodeURIComponent(id)+'/reword',{method:'POST',body:{claim:custom.trim()}});
     const claim=data.ticket&&data.ticket.claim;
-    toast('Palabra actualizada: '+claim+(data.ticket&&data.ticket.buyerEmail?' · email enviado 📧':' 📋'));
-    try{ navigator.clipboard.writeText(claim); }catch(e){}
+    toast('Palabra actualizada: '+claim+' · link copiado 🔗');
+    try{ navigator.clipboard.writeText(claimLink(claim)); }catch(e){}
     load();
   }catch(e){
     toast(e.message==='http-409'?'Esa palabra ya está en uso':'Error: '+e.message);

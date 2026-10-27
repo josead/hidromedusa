@@ -819,16 +819,17 @@
     <div class="modal-box">
       <div class="modal-head"><h4 id="buy-title">Pedir entrada</h4><button class="modal-x" onclick="closeModal('m-buy')">×</button></div>
       <div class="modal-body">
+        <div id="buy-resume" style="display:none;border:2px solid var(--acid);padding:14px 16px;margin-bottom:18px;font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--bone)"></div>
         <div style="border:2px solid var(--line-strong);padding:14px 16px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center">
           <div><div style="font-family:var(--display);font-size:24px;text-transform:uppercase" id="buy-name">Entrada</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted)" id="buy-sub">990 Espacio Cultural · Sáb 31/10 · 21hs</div></div>
           <div style="font-family:var(--display);font-size:30px;color:var(--acid)" id="buy-price">$10.000</div>
         </div>
         <label class="field-label">Nombre completo</label>
-        <input class="field" id="buy-buyer" placeholder="Ej. Gustavo Cerati" onblur="scheduleLead()" />
+        <input class="field" id="buy-buyer" oninput="saveCheckout()" placeholder="Ej. Gustavo Cerati" onblur="scheduleLead()" />
         <label class="field-label">Email <span style="color:var(--muted)">(opcional)</span></label>
-        <input class="field" id="buy-email" type="email" placeholder="cerati@correo.com" onblur="scheduleLead()" />
+        <input class="field" id="buy-email" oninput="saveCheckout()" type="email" placeholder="cerati@correo.com" onblur="scheduleLead()" />
         <label class="field-label">WhatsApp</label>
-        <input class="field" id="buy-phone" type="tel" placeholder="Ej. 2494 123456" onblur="scheduleLead()" />
+        <input class="field" id="buy-phone" oninput="saveCheckout()" type="tel" placeholder="Ej. 2494 123456" onblur="scheduleLead()" />
         <div style="border:2px dashed var(--line-strong);padding:14px 16px;margin:6px 0 16px">
           <div class="field-label" style="margin-bottom:8px">1 · Transferí al alias 🧾</div>
           <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
@@ -960,13 +961,39 @@ function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
 function goTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
 
 /* ---------- Modals ---------- */
+// "Atrás" del celu = cerrar el modal, no salir de la web. En el navegador de Instagram
+// la web suele ser la única entrada del historial: sin esto, atrás cierra todo y se
+// pierde el pedido. Una sola entrada para los modales abiertos; se saca al cerrar el último.
+let _modalHist=false, _ignorePop=false;
 function openModal(id){
   document.getElementById(id).classList.add('open');
   document.body.style.overflow='hidden';
+  if(!_modalHist){
+    _modalHist=true;
+    // Tras recargar, la entrada del modal ya está (history.state): no apilar otra.
+    try { if(!(history.state && history.state.hmModal)) history.pushState({hmModal:1},''); } catch(e){}
+  }
   // Restore saved jellyfish when redeem modal opens
   if(id==='m-redeem') restoreClaimedJf();
 }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeModal(id){
+  document.getElementById(id).classList.remove('open'); document.body.style.overflow='';
+  if(id==='m-buy') ckSave({ open:false });
+  // Diferido: si se cierra uno para abrir otro (menú → comprar), se reusa la entrada.
+  setTimeout(function(){
+    if(_modalHist && !document.querySelector('.modal.open')){
+      _modalHist=false; _ignorePop=true;
+      try { history.back(); } catch(e){ _ignorePop=false; }
+    }
+  },0);
+}
+function dismissModal(id){ if(id==='m-redeem') closeRedeem(); else closeModal(id); }
+window.addEventListener('popstate',function(){
+  if(_ignorePop){ _ignorePop=false; return; }
+  if(!_modalHist) return;
+  _modalHist=false;
+  document.querySelectorAll('.modal.open').forEach(function(m){ dismissModal(m.id); });
+});
 
 // If the user already claimed, show their jellyfish immediately (no re-typing needed).
 function restoreClaimedJf(){
@@ -981,7 +1008,7 @@ function restoreClaimedJf(){
     redeem();
   } catch(e){}
 }
-document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m){ m.classList.remove('open'); document.body.style.overflow=''; } }));
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) dismissModal(m.id); }));
 
 /* ---------- Overlays ---------- */
 function openOverlay(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
@@ -993,12 +1020,50 @@ function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg
 
 /* ---------- Buy flow (WhatsApp) ---------- */
 const TICKET={ name:'Entrada', price:'$10.000', type:'general' };
-function buy(){
-  track('comprar-abrir');
+function buy(resume){
+  track(resume ? 'comprar-retomar' : 'comprar-abrir');
   document.getElementById('buy-title').textContent='Pedir entrada';
   document.getElementById('buy-name').textContent=TICKET.name;
   document.getElementById('buy-price').textContent=TICKET.price;
+  // Rellena con lo que ya habían escrito (no pisa lo que está en pantalla).
+  const c=ckLoad()||{};
+  [['buy-buyer','name'],['buy-email','email'],['buy-phone','phone']].forEach(function(f){
+    const el=document.getElementById(f[0]); if(el && !el.value && c[f[1]]) el.value=c[f[1]];
+  });
+  renderBuyResume(c);
   openModal('m-buy');
+  ckSave({ open:true });
+}
+
+/* Pedido en curso (localStorage): sobrevive a "atrás", recargas y a volver de WhatsApp/IG.
+   open=true → al volver a la web se reabre el modal con los datos. sentAt → ya apretó
+   WhatsApp/Instagram: se muestra "¿ya lo mandaste?" para reintentar o cerrar. */
+const CK_KEY='hm_checkout', CK_TTL=6*3600e3;
+function ckLoad(){ try { return JSON.parse(localStorage.getItem(CK_KEY)||'null'); } catch(e){ return null; } }
+function ckSave(patch){
+  try { localStorage.setItem(CK_KEY, JSON.stringify(Object.assign(ckLoad()||{}, patch, { ts:Date.now() }))); } catch(e){}
+}
+function saveCheckout(){
+  ckSave({
+    name:(document.getElementById('buy-buyer').value||'').trim(),
+    email:(document.getElementById('buy-email').value||'').trim(),
+    phone:(document.getElementById('buy-phone').value||'').trim(),
+  });
+}
+function renderBuyResume(c){
+  const box=document.getElementById('buy-resume');
+  if(!(c && c.sentAt && Date.now()-c.sentAt < CK_TTL)){ box.style.display='none'; return; }
+  const canal=c.channel==='instagram' ? 'Instagram 📸' : 'WhatsApp 🟢';
+  box.innerHTML='<b style="color:var(--acid)">Ya abriste tu pedido por '+canal+'.</b> Si no se abrió o todavía te falta mandar la captura, mandalo de nuevo 👇'
+    +'<button type="button" class="btn btn-line btn-block" style="margin-top:10px" onclick="doneCheckout()">Listo, ya lo mandé ✓</button>';
+  box.style.display='';
+  try { box.scrollIntoView({ block:'nearest' }); } catch(e){}
+}
+function doneCheckout(){
+  track('comprar-listo');
+  ckSave({ open:false });
+  closeModal('m-buy');
+  toast('¡Gracias! Cuando confirmemos el pago te pasamos tus palabras clave 🪼');
 }
 // leadId estable por navegador: dedup del lead (mismo id => merge sin pisar).
 function leadId(){
@@ -1048,8 +1113,9 @@ function openExternal(url){
 function payWhatsApp(){
   const msg=collectOrder('whatsapp'); if(msg===null) return;
   track('comprar-captura',{canal:'whatsapp'});
+  ckSave({ open:true, sentAt:Date.now(), channel:'whatsapp' });
   openExternal('https://wa.me/'+window.HM_CONFIG.WHATSAPP_NUMBER+'?text='+encodeURIComponent(msg));
-  closeModal('m-buy');
+  renderBuyResume(ckLoad());
   toast('Te abrimos WhatsApp con tu pedido 🟢');
 }
 function payInstagram(){
@@ -1058,8 +1124,9 @@ function payInstagram(){
   try { navigator.clipboard && navigator.clipboard.writeText(msg); } catch(e){}
   track('comprar-captura',{canal:'instagram'});
   const handle=(window.HM_CONFIG.INSTAGRAM_HANDLE||'hidromedusa').replace(/^@/,'');
+  ckSave({ open:true, sentAt:Date.now(), channel:'instagram' });
   openExternal('https://ig.me/m/'+handle);
-  closeModal('m-buy');
+  renderBuyResume(ckLoad());
   toast('Te abrimos el DM de Instagram — pegá el mensaje que copiamos 📋');
 }
 
@@ -1534,6 +1601,16 @@ window.addEventListener('load',()=>lucide.createIcons());
       if(inp) inp.value=q.replace(/-/g,' ');
       redeem();
     }, 700);
+  } catch(e){}
+})();
+
+/* Retomar el pedido si quedó a medias (recarga del navegador de IG, volver de WhatsApp, etc.) */
+(function(){
+  try {
+    if(new URLSearchParams(window.location.search).get('claim')) return;
+    const c=ckLoad(); if(!c || !c.open) return;
+    if(Date.now()-(c.ts||0) > CK_TTL || Date.now() > new Date(HM_EVENT.end).getTime()) return;
+    setTimeout(function(){ if(!document.querySelector('.modal.open')) buy(true); }, 600);
   } catch(e){}
 })();
 
