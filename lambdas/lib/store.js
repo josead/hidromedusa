@@ -3,7 +3,7 @@
 // Every call rethrows a clear error on failure — callers handle fallback.
 //
 // Exports:
-//   tickets.{put,get,byClaim,list,update}
+//   tickets.{put,get,byClaim,list,update,updateIf,remove}
 //   tasks.{getAll,getPanel,putPanel}
 //   newsletter.{add,list}
 //   sessions.{put,get,del}
@@ -43,8 +43,21 @@ async function run(label, cmd) {
     return await ddb.send(cmd);
   } catch (err) {
     console.error(`[store] ${label} failed:`, err && err.message ? err.message : err);
-    throw new Error(`store.${label}: ${err && err.message ? err.message : 'DynamoDB error'}`);
+    const e = new Error(`store.${label}: ${err && err.message ? err.message : 'DynamoDB error'}`);
+    e.code = err && err.name; // e.g. 'ConditionalCheckFailedException'
+    throw e;
   }
+}
+
+// SET expression for a shallow patch → { expr, names, values }.
+function setExpr(patch) {
+  const names = {}, values = {};
+  const sets = Object.keys(patch).map((k, i) => {
+    names[`#k${i}`] = k;
+    values[`:v${i}`] = patch[k];
+    return `#k${i} = :v${i}`;
+  });
+  return { expr: `SET ${sets.join(', ')}`, names, values };
 }
 
 // ── Tickets ───────────────────────────────────────
@@ -77,23 +90,40 @@ const tickets = {
   },
   // Patch a ticket by id with a shallow set of attributes; returns updated item.
   async update(id, patch) {
-    const keys = Object.keys(patch || {});
-    if (!keys.length) return tickets.get(id);
-    const names = {}, values = {};
-    const sets = keys.map((k, i) => {
-      names[`#k${i}`] = k;
-      values[`:v${i}`] = patch[k];
-      return `#k${i} = :v${i}`;
-    });
+    if (!Object.keys(patch || {}).length) return tickets.get(id);
+    const { expr, names, values } = setExpr(patch);
     const r = await run('tickets.update', new UpdateCommand({
       TableName: T.tickets,
       Key: { id },
-      UpdateExpression: `SET ${sets.join(', ')}`,
+      UpdateExpression: expr,
       ExpressionAttributeNames: names,
       ExpressionAttributeValues: values,
       ReturnValues: 'ALL_NEW',
     }));
     return r.Attributes || null;
+  },
+  // Like update(), but atomic: applies only while the item's status is still
+  // `status` (one-use invites). Returns null if it isn't, or if there's no item.
+  async updateIf(id, status, patch) {
+    const { expr, names, values } = setExpr(patch);
+    let cs = Object.keys(names).find(k => names[k] === 'status');
+    if (!cs) { cs = '#cs'; names[cs] = 'status'; }
+    values[':cs'] = status;
+    try {
+      const r = await run('tickets.updateIf', new UpdateCommand({
+        TableName: T.tickets,
+        Key: { id },
+        UpdateExpression: expr,
+        ConditionExpression: `${cs} = :cs`,
+        ExpressionAttributeNames: names,
+        ExpressionAttributeValues: values,
+        ReturnValues: 'ALL_NEW',
+      }));
+      return r.Attributes || null;
+    } catch (err) {
+      if (err.code === 'ConditionalCheckFailedException') return null;
+      throw err;
+    }
   },
   // Hard-delete a ticket by id (staff "Eliminar"). No-op if it doesn't exist.
   async remove(id) {

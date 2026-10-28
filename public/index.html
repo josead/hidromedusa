@@ -841,6 +841,7 @@
         <button class="btn btn-acid btn-block btn-lg" onclick="payWhatsApp()">Mandar captura por WhatsApp 🟢</button>
         <button class="btn btn-line btn-block btn-lg" style="margin-top:8px" onclick="payInstagram()">Mandar captura por Instagram 📸</button>
         <p style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">El staff confirma el pago y te habilita tus palabras clave (dos palabras) para reclamar tu entrada.</p>
+        <p style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5">¿Tenés un código de invitación? <a href="/invitacion/" onclick="ckSave({ open:false });track('invitacion-abrir',{ desde:'comprar' })" style="color:var(--acid)">Anotate acá →</a></p>
       </div>
     </div>
   </div>
@@ -882,6 +883,7 @@
           <input class="field" id="redeem-claim" placeholder="ej. medusa violeta" autocomplete="off" onkeydown="if(event.key==='Enter')redeem()" />
           <button class="btn btn-acid btn-block btn-lg" onclick="redeem()">Ver mi entrada</button>
           <p style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5">¿Todavía no pagaste tu entrada? <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Pedila acá →</a></p>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5">¿Tenés un código de invitación? <a href="/invitacion/" onclick="track('invitacion-abrir',{ desde:'reclamar' })" style="color:var(--acid)">Anotate acá →</a></p>
         </div>
         <div id="redeem-result"></div>
       </div>

@@ -67,6 +67,7 @@ module `lambdas/lib/store.js` builds a `DynamoDBDocumentClient` honouring
 
 ```
 tickets.put(t) / tickets.get(id) / tickets.byClaim(norm) / tickets.list({status?}) / tickets.update(id, patch)
+tickets.updateIf(id, status, patch)   // conditional on current status; null if it changed (single-use)
 tasks.getAll() / tasks.getPanel(panelId) / tasks.putPanel(panelId, tasks)
 newsletter.add(email) / newsletter.list()
 sessions.put(s) / sessions.get(token) / sessions.del(token)
@@ -87,6 +88,11 @@ status: 'pending'  -> created from a buy/WhatsApp request, no claim code yet
         'freed'    -> staff freed it; claim + claimNorm + qrData set
         'used'     -> scanned at the door
         'cancelled'
+
+Invitations (free, type 'invitado', id `INV-<CODE>`, no claim phrase):
+        'invite'   -> staff minted a single-use code (inviteCode, inviteNote)
+        'guest'    -> someone used it: name + contact set, on the guest list
+                      (looked up by name at the door; no claim/claimNorm/qrData)
 ```
 
 ```js
@@ -95,9 +101,14 @@ status: 'pending'  -> created from a buy/WhatsApp request, no claim code yet
   buyerName, buyerEmail|null, buyerPhone|null, merchIdea|null,
   claim|null, claimNorm|null, qrData|null,        // set on free
   status, issuedBy|null,
-  createdAt, freedAt|null, usedAt|null
+  createdAt, freedAt|null, usedAt|null,
+  inviteCode?, inviteNote?, registeredAt?          // invitations only (channel 'invitacion')
 }
 ```
+
+Invite codes: 6 chars from `ABCDEFGHJKMNPQRSTUVWXYZ23456789` (no 0/O/1/I/L);
+input is upper-cased and stripped of non-alphanumerics. Single use is enforced
+with `tickets.updateIf(id, 'invite', …)` (DynamoDB ConditionExpression).
 
 `qrData` = base64 of `JSON.stringify({ id, claim, type, eventId })`.
 
@@ -114,6 +125,9 @@ Tickets:
 - `POST /tickets/redeem`   (public) `{ claim }` → `{ ticket, event }` (lookup by claimNorm; 404 if none)
 - `POST /tickets/:id/scan` (staff)  `{ staffToken }` → `{ valid, ticket, reason? }`
 - `GET  /tickets/:id`      (staff)  → `{ ticket }`
+- `POST /tickets/invites`  (staff)  `{ count?=1 (max 50), note?, staffToken }` → `{ invites:[ticket] }` (status `invite`)
+- `POST /tickets/invite/check` (public) `{ code }` → `{ ok, event }` (404 unknown/cancelled, 409 already used)
+- `POST /tickets/invite/claim` (public) `{ code, buyerName, buyerPhone?, buyerEmail? }` (name + phone or email) → `{ ticket:{ id, buyerName, status:'guest' }, event }` (409 if already used). Front: `/invitacion/?c=CODE`.
 
 Staff:
 - `GET  /staff/members`        → `[{id,name,role,panels}]` (static config)

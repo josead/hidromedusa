@@ -55,11 +55,13 @@
   .pill.freed{color:var(--acid);border-color:var(--acid);}
   .pill.used{color:var(--muted);}
   .pill.cancelled{color:var(--hot);border-color:var(--hot);}
+  .pill.guest{color:var(--acid);border-color:var(--acid);}
   .claim{font-family:var(--mono);font-size:15px;color:var(--acid);cursor:pointer;letter-spacing:.02em;}
   .claim:hover{text-decoration:underline;}
   .sub{font-family:var(--mono);font-size:11px;color:var(--muted);}
   .empty{padding:22px 14px;color:var(--muted);font-family:var(--mono);font-size:12px;text-align:center;}
   .issue-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+  .span2{grid-column:span 2;}
   .field{width:100%;background:var(--bg);border:2px solid var(--line);padding:10px 12px;color:var(--bone);font-family:var(--body);font-size:14px;outline:none;}
   .field:focus{border-color:var(--acid);}
   .todo{border:2px dashed var(--line-strong);padding:12px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px;}
@@ -74,6 +76,7 @@
   @media(max-width:680px){
     .stats{grid-template-columns:repeat(2,1fr);}
     .issue-grid{grid-template-columns:1fr;}
+    .span2{grid-column:auto;}
   }
 </style>
 </head>
@@ -119,6 +122,32 @@
         <tbody id="tb-words"></tbody>
       </table>
     </div>
+  </section>
+
+  <section>
+    <h2 class="sec">Invitados (gratis) <span class="c" id="c-guests"></span></h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Nombre</th><th>Contacto</th><th>Código</th><th>Nota</th><th>Cuándo</th><th></th></tr></thead>
+        <tbody id="tb-guests"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">Códigos de invitación <span class="c" id="c-inv"></span></h2>
+    <div class="issue-grid">
+      <input class="field" id="inv-count" type="number" min="1" max="50" value="1" placeholder="Cantidad" />
+      <input class="field span2" id="inv-note" placeholder="Nota (opcional): para quién / de parte de quién" />
+    </div>
+    <button class="btn btn-acid" onclick="createInvites()">Generar códigos</button>
+    <div class="tablewrap" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Código</th><th>Nota</th><th>Creado</th><th>Acciones</th></tr></thead>
+        <tbody id="tb-inv"></tbody>
+      </table>
+    </div>
+    <div class="todo">Cada código sirve <b>una sola vez</b>: con el link (<b>hidromedusa.com/invitacion</b>) la persona pone su código, nombre y contacto, y queda en <b>Invitados</b>. No tiene palabra clave ni hidromedusa: en la puerta se la busca por nombre. <b>Eliminar</b> un código lo anula; eliminar un invitado lo saca de la lista.</div>
   </section>
 
   <section>
@@ -227,6 +256,7 @@ function render(tickets){
     .map(([l,v])=>`<div class="stat"><div class="n">${v}</div><div class="l">${l}</div></div>`).join('');
   document.getElementById('c-pend').textContent=pend.length?('· '+pend.length):'';
   document.getElementById('c-words').textContent=words.length?('· '+words.length):'';
+  renderInvites(tickets);
 
   // Leads & pendientes
   const tbp=document.getElementById('tb-pend');
@@ -339,6 +369,69 @@ async function deleteTicket(id,name){
   try{
     await api('/tickets/'+encodeURIComponent(id)+'/delete',{method:'POST',body:{}});
     toast('Eliminada 🗑️');
+    load();
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+// ── Invitaciones (gratis): códigos de un solo uso → lista de invitados, sin palabra ──
+function inviteLink(code){ return SITE+'/invitacion/?c='+encodeURIComponent(code); }
+function inviteMsg(code){
+  return '¡Hola! 🪼 Tenés una invitación para la próxima de Hidromedusa.\n'
+    +'Anotate con tu nombre acá: '+inviteLink(code)+'\n'
+    +'(Tu código: '+code+' — sirve una sola vez)';
+}
+function renderInvites(tickets){
+  const byNewest=(a,b)=>(b.registeredAt||b.createdAt||'').localeCompare(a.registeredAt||a.createdAt||'');
+  const guests=tickets.filter(t=>t.status==='guest').sort(byNewest);
+  const inv=tickets.filter(t=>t.status==='invite').sort(byNewest);
+  document.getElementById('c-guests').textContent=guests.length?('· '+guests.length):'';
+  document.getElementById('c-inv').textContent=inv.length?('· '+inv.length+' sin usar'):'';
+
+  document.getElementById('tb-guests').innerHTML = guests.length ? guests.map(t=>`
+    <tr>
+      <td class="name">${esc(t.buyerName)}</td>
+      <td>${contact(t)}</td>
+      <td><span class="sub">${esc(t.inviteCode)}</span></td>
+      <td><span class="sub">${esc(t.inviteNote)||'—'}</span></td>
+      <td class="sub">${fmtWhen(t.registeredAt)}</td>
+      <td><button class="btn btn-hot btn-sm" onclick="deleteTicket('${esc(t.id)}','${esc(t.buyerName||'')}')">Eliminar</button></td>
+    </tr>`).join('') : `<tr><td colspan="6" class="empty">Nadie usó una invitación todavía.</td></tr>`;
+
+  document.getElementById('tb-inv').innerHTML = inv.length ? inv.map(t=>{
+    const c=esc(t.inviteCode);
+    return `
+    <tr>
+      <td><span class="claim" onclick="copyText(inviteLink('${c}'),'Link copiado 🔗 ${c}')">${c}</span></td>
+      <td><span class="sub">${esc(t.inviteNote)||'—'}</span></td>
+      <td class="sub">${fmtWhen(t.createdAt)}</td>
+      <td><div class="row-actions">
+        <button class="btn btn-acid btn-sm" onclick="copyText(inviteLink('${c}'),'Link copiado 🔗 ${c}')">Copiar link 🔗</button>
+        <a class="btn btn-sm" href="${esc('https://wa.me/?text='+encodeURIComponent(inviteMsg(t.inviteCode)))}" target="_blank" rel="noopener">WhatsApp ↗</a>
+        <button class="btn btn-hot btn-sm" onclick="deleteInvite('${esc(t.id)}','${c}')">Eliminar</button>
+      </div></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="4" class="empty">No hay códigos sin usar.</td></tr>`;
+}
+
+async function createInvites(){
+  const count=Math.min(50,Math.max(1,parseInt(document.getElementById('inv-count').value,10)||1));
+  const note=(document.getElementById('inv-note').value||'').trim();
+  try{
+    const data=await api('/tickets/invites',{method:'POST',body:{count,note:note||null}});
+    const inv=data.invites||[];
+    if(inv.length===1) copyText(inviteLink(inv[0].inviteCode),'Código '+inv[0].inviteCode+' · link copiado 🔗');
+    else toast(inv.length+' códigos generados 🎟️');
+    document.getElementById('inv-count').value='1'; document.getElementById('inv-note').value='';
+    load();
+  }catch(e){ toast('Error: '+e.message); }
+}
+
+// Eliminar un código sin usar: deja de servir (borra el registro).
+async function deleteInvite(id,code){
+  if(!confirm('¿Eliminar el código '+code+'?\nDeja de servir.')) return;
+  try{
+    await api('/tickets/'+encodeURIComponent(id)+'/delete',{method:'POST',body:{}});
+    toast('Código eliminado 🗑️');
     load();
   }catch(e){ toast('Error: '+e.message); }
 }

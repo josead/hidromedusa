@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Página privada (se llega con el link que manda el staff): no indexar, pero sí dejar
+     que WhatsApp/IG la lean para el preview. Por eso NO va en robots.txt ni en el sitemap. -->
+<meta name="robots" content="noindex" />
+<title>Invitación · Hidromedusa</title>
+<meta name="description" content="Tenés una invitación para la próxima fecha de Hidromedusa en Tandil. Poné tu código y anotate en la lista." />
+<meta name="theme-color" content="#0a0a0b" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<!-- link preview (Open Graph + Twitter): imagen genérica, sin fecha -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hidromedusa" />
+<meta property="og:title" content="Tenés una invitación · Hidromedusa" />
+<meta property="og:description" content="Poné tu código y anotate en la lista de la próxima fecha de Hidromedusa en Tandil." />
+<meta property="og:url" content="https://hidromedusa.com/invitacion/" />
+<meta property="og:image" content="https://hidromedusa.com/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:alt" content="Hidromedusa — música en vivo, Tandil" />
+<meta property="og:locale" content="es_AR" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Tenés una invitación · Hidromedusa" />
+<meta name="twitter:description" content="Poné tu código y anotate en la lista de la próxima fecha de Hidromedusa en Tandil." />
+<meta name="twitter:image" content="https://hidromedusa.com/og.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<!-- analytics: Umami Cloud (sin cookies). -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="ebbeb174-f573-4e9e-834a-dd92edcbfc0d"></script>
+<style>
+  :root{
+    --bg:#0a0a0b; --bg-2:#141417; --abyss:#060607; --bone:#ECE7DA; --bone-dim:#A8A399;
+    --muted:#6f6b63; --line:rgba(236,231,218,0.16); --line-strong:rgba(236,231,218,0.55);
+    --acid:#C6FF1A; --hot:#FF2E88; --ink:#0a0a0b;
+    --display:"Anton",sans-serif; --body:"Space Grotesk",sans-serif; --mono:"Space Mono",monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  body{background:var(--abyss) radial-gradient(ellipse 80% 50% at 50% 0%,rgba(198,255,26,0.07),transparent 70%) no-repeat;color:var(--bone);font-family:var(--body);-webkit-font-smoothing:antialiased;min-height:100vh;}
+  [hidden]{display:none !important;}
+  .wrap{max-width:440px;margin:0 auto;padding:28px 16px 60px;}
+  .brand{display:block;font-family:var(--display);font-size:30px;text-transform:uppercase;letter-spacing:.02em;line-height:1;color:var(--bone);text-decoration:none;margin-bottom:28px;}
+  .brand small{display:block;font-family:var(--mono);font-size:10px;color:var(--acid);letter-spacing:.18em;margin-top:6px;}
+  .card{border:2px solid var(--line-strong);background:var(--bg-2);padding:26px 22px;}
+  .kicker{font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--acid);margin-bottom:10px;}
+  h1{font-family:var(--display);font-weight:400;font-size:38px;line-height:1.02;text-transform:uppercase;letter-spacing:.01em;margin-bottom:12px;overflow-wrap:anywhere;}
+  .lead{color:var(--bone-dim);font-size:15px;line-height:1.5;margin-bottom:18px;}
+  .ev{color:var(--bone);font-family:var(--mono);font-size:13px;border-left:3px solid var(--acid);padding-left:10px;}
+  label{display:block;font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--bone-dim);margin:14px 0 6px;}
+  label span{color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;}
+  .field{width:100%;background:var(--bg);border:2px solid var(--line);padding:12px 14px;color:var(--bone);font-family:var(--body);font-size:16px;outline:none;border-radius:0;}
+  .field:focus{border-color:var(--acid);}
+  .field.code{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--acid);}
+  .btn{display:block;width:100%;margin-top:18px;font-family:var(--mono);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border:2px solid var(--acid);background:var(--acid);color:var(--ink);padding:14px 16px;text-align:center;text-decoration:none;transition:transform .15s,box-shadow .15s;}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(198,255,26,.25);}
+  .btn:disabled{opacity:.6;cursor:wait;transform:none;box-shadow:none;}
+  .btn-line{background:transparent;color:var(--bone);border-color:var(--line-strong);}
+  .btn-line:hover{border-color:var(--acid);box-shadow:none;}
+  .err{color:var(--hot);font-family:var(--mono);font-size:12px;line-height:1.5;margin-top:12px;min-height:18px;}
+  .fine{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.5;margin-top:14px;}
+  .link{background:none;border:none;color:var(--acid);font-family:var(--mono);font-size:11px;cursor:pointer;text-decoration:underline;margin-top:16px;padding:0;}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="brand" href="/">Hidromedusa<small>Música en vivo · Tandil</small></a>
+
+  <div class="card">
+    <div class="kicker" id="kicker">Invitación 🎟️</div>
+    <h1 id="title">Tenés una invitación</h1>
+
+    <!-- 1 · código -->
+    <form id="step-code" onsubmit="checkCode(event)" novalidate>
+      <p class="lead">Poné tu código para anotarte en la lista. Sirve una sola vez.</p>
+      <label for="code">Código</label>
+      <input class="field code" id="code" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="K7QM3P" />
+      <button class="btn" id="code-btn" type="submit">Seguir →</button>
+      <div class="err" id="code-err" role="alert"></div>
+    </form>
+
+    <!-- 2 · datos -->
+    <form id="step-form" onsubmit="claim(event)" novalidate hidden>
+      <p class="lead ev" id="f-ev"></p>
+      <label for="name">Nombre y apellido</label>
+      <input class="field" id="name" autocomplete="name" placeholder="Ej. Gustavo Cerati" />
+      <label for="phone">WhatsApp</label>
+      <input class="field" id="phone" type="tel" autocomplete="tel" placeholder="Ej. 2494 123456" />
+      <label for="email">Email <span>(opcional si dejás WhatsApp)</span></label>
+      <input class="field" id="email" type="email" autocomplete="email" placeholder="cerati@correo.com" />
+      <button class="btn" id="claim-btn" type="submit">Anotarme en la lista</button>
+      <div class="err" id="claim-err" role="alert"></div>
+      <p class="fine">El WhatsApp o el email es solo para avisarte si cambia algo de la fecha.</p>
+    </form>
+
+    <!-- 3 · listo -->
+    <div id="step-done" hidden>
+      <p class="lead ev" id="d-ev"></p>
+      <p class="lead">En la puerta decí tu nombre y pasás. Nos vemos en el fondo. 🪼</p>
+      <a class="btn btn-line" href="/">Ir a hidromedusa.com</a>
+      <button class="link" type="button" onclick="another()">¿Tenés otro código?</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const API_BASE='https://p2vsvdihylfl6w4c6pfnnuwd4u0dwcvw.lambda-url.sa-east-1.on.aws';
+const DONE_KEY='hm_invite';   // { code, name, event } — al volver al link, mostrar "ya estás en la lista"
+let CODE='';
+
+const $=id=>document.getElementById(id);
+function track(name,data){ try { if(window.umami && umami.track) umami.track(name,data); } catch(e){} }
+const norm=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+
+// POST → { status, data }; status 0 = sin conexión.
+async function api(path, body){
+  try {
+    const res=await fetch(API_BASE+path,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    let data={}; try { data=await res.json(); } catch(e){}
+    return { status:res.status, data };
+  } catch(e){ return { status:0, data:{} }; }
+}
+function errMsg(r){
+  if(r.status===404) return 'Ese código no existe. Revisalo: son 6 letras y números.';
+  if(r.status===409) return 'Esta invitación ya se usó.';
+  if(r.status===400 && r.data.error) return r.data.error+'.';
+  return 'No pudimos conectar. Probá de nuevo en un ratito.';
+}
+// { date:'2026-10-31', time:'21:00', venue } → "Sáb 31/10 · 21hs · 990 Espacio Cultural, Tandil"
+function evLine(ev){
+  if(!ev || !ev.date) return '';
+  const wd=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][new Date(ev.date+'T12:00:00').getDay()];
+  const hs=ev.time ? ' · '+ev.time.replace(/:00$/,'')+'hs' : '';
+  return wd+' '+ev.date.slice(8,10)+'/'+ev.date.slice(5,7)+hs+(ev.venue ? ' · '+ev.venue : '');
+}
+function setEv(id, ev){ const el=$(id), t=evLine(ev); el.textContent=t; el.hidden=!t; }
+function show(step, kicker, title){
+  ['code','form','done'].forEach(s=>{ $('step-'+s).hidden=(s!==step); });
+  $('kicker').textContent=kicker; $('title').textContent=title;
+}
+function busy(btn, on, label){ btn.disabled=on; btn.textContent=on ? '…' : label; }
+
+async function checkCode(e){
+  if(e) e.preventDefault();
+  const code=norm($('code').value);
+  if(!code){ $('code-err').textContent='Poné tu código.'; return; }
+  $('code-err').textContent='';
+  busy($('code-btn'), true, 'Seguir →');
+  const r=await api('/tickets/invite/check',{ code });
+  busy($('code-btn'), false, 'Seguir →');
+  track('invitacion-codigo',{ estado: r.status===200 ? 'ok' : r.status===409 ? 'usado' : r.status===404 ? 'invalido' : 'error' });
+  if(r.status!==200){ $('code-err').textContent=errMsg(r); return; }
+  CODE=code;
+  setEv('f-ev', r.data.event);
+  show('form', 'Código '+code+' ✓', 'Anotate en la lista');
+  $('name').focus();
+}
+
+async function claim(e){
+  e.preventDefault();
+  const buyerName=$('name').value.trim(), buyerPhone=$('phone').value.trim(), buyerEmail=$('email').value.trim();
+  const err=$('claim-err');
+  if(!buyerName){ err.textContent='Falta tu nombre.'; $('name').focus(); return; }
+  if(!buyerPhone && !buyerEmail){ err.textContent='Dejanos un WhatsApp o un email.'; $('phone').focus(); return; }
+  err.textContent='';
+  busy($('claim-btn'), true, 'Anotarme en la lista');
+  const r=await api('/tickets/invite/claim',{ code:CODE, buyerName, buyerPhone, buyerEmail });
+  busy($('claim-btn'), false, 'Anotarme en la lista');
+  if(r.status===200){
+    track('invitacion-anotado');
+    const saved={ code:CODE, name:buyerName, event:r.data.event||null };
+    try { localStorage.setItem(DONE_KEY, JSON.stringify(saved)); } catch(e){}
+    done(saved);
+    return;
+  }
+  if(r.status===404 || r.status===409){   // el código dejó de servir mientras completaba
+    show('code', 'Invitación 🎟️', 'Tenés una invitación');
+    $('code-err').textContent=errMsg(r);
+    return;
+  }
+  err.textContent=errMsg(r);
+}
+
+function done(saved){
+  setEv('d-ev', saved.event);
+  show('done', 'Listo ✓', 'Estás en la lista, '+String(saved.name).split(/\s+/)[0]);
+}
+function another(){
+  $('code').value=''; $('code-err').textContent='';
+  show('code', 'Invitación 🎟️', 'Tenés una invitación');
+  $('code').focus();
+}
+
+// Link del staff: /invitacion/?c=K7QM3P → código cargado y validado solo.
+// Si este navegador ya se anotó con ese código, se muestra "ya estás en la lista".
+(function(){
+  const q=new URLSearchParams(location.search);
+  const c=norm(q.get('c') || q.get('codigo'));
+  let saved=null; try { saved=JSON.parse(localStorage.getItem(DONE_KEY)||'null'); } catch(e){}
+  if(saved && saved.code && (!c || c===saved.code)){ done(saved); return; }
+  if(c){ $('code').value=c; checkCode(); }
+  else $('code').focus();
+})();
+</script>
+</body>
+</html>

@@ -276,11 +276,14 @@ function renderCancelledText({ name }) {
   ].join('\n');
 }
 
-// ── Aviso interno: nuevo lead / pidió entrada ────────────────────────────────
+// ── Aviso interno: nuevo lead / pidió entrada / usó una invitación ───────────
+const LEAD_LABEL = { lead: 'Nuevo lead', pending: 'Pidió una entrada', invite: 'Invitado en lista' };
 function renderLeadNotifyHtml({ ticket, kind }) {
   const isPending = kind === 'pending';
   const accent = isPending ? C.hot : C.acid;
-  const intro = isPending
+  const intro = kind === 'invite'
+    ? `Usó la invitación <b style="color:${C.acid};">${esc(ticket.inviteCode)}</b> y quedó en la lista. 🎟️`
+    : isPending
     ? `Alguien apretó <b style="color:${C.hot};">pedir entrada</b>. Generale la palabra desde el panel. 🪼`
     : `Entró un nuevo lead a la base. 🪼`;
   const rows =
@@ -300,11 +303,11 @@ function renderLeadNotifyHtml({ ticket, kind }) {
         </td></tr>
       </table>`, 22)
     + adminButton();
-  return htmlDoc({ subLabel: isPending ? 'Pidió una entrada' : 'Nuevo lead', accent, rows });
+  return htmlDoc({ subLabel: LEAD_LABEL[kind] || LEAD_LABEL.lead, accent, rows });
 }
 function renderLeadNotifyText({ ticket, kind }) {
   return [
-    `${kind === 'pending' ? 'Pidió una entrada' : 'Nuevo lead'} — Hidromedusa`, '',
+    `${LEAD_LABEL[kind] || LEAD_LABEL.lead} — Hidromedusa`, '',
     `Nombre:   ${ticket.buyerName || '—'}`,
     `Email:    ${ticket.buyerEmail || '—'}`,
     `WhatsApp: ${ticket.buyerPhone || '—'}`,
@@ -407,12 +410,14 @@ async function sendTicketCancelled({ to, name }) {
     text: renderCancelledText({ name }),
   });
 }
-// Aviso interno al staff (ADMIN_EMAIL) cuando entra un lead o un "pidió entrada".
+// Aviso interno al staff (ADMIN_EMAIL) cuando entra un lead, un "pidió entrada"
+// o alguien usa una invitación.
 async function sendLeadNotification({ ticket, kind }) {
   const who = ticket.buyerName || ticket.buyerEmail || ticket.buyerPhone || ticket.id;
+  const prefix = { pending: '🔥 Pidió entrada: ', invite: '🎟️ Invitado en lista: ' }[kind] || '🪼 Nuevo lead: ';
   return send({
     to: ADMIN_EMAIL, tag: 'lead-notify-' + kind,
-    subject: (kind === 'pending' ? '🔥 Pidió entrada: ' : '🪼 Nuevo lead: ') + who,
+    subject: prefix + who,
     html: renderLeadNotifyHtml({ ticket, kind }),
     text: renderLeadNotifyText({ ticket, kind }),
   });

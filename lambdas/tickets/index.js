@@ -8,6 +8,9 @@
 //   POST /tickets/redeem    (public) { claim } → { ticket, event }
 //   POST /tickets/:id/scan  (staff)  { staffToken } → { valid, ticket, reason? }
 //   GET  /tickets/:id       (staff)  → { ticket, event }
+//   POST /tickets/invites       (staff)  { count?, note?, staffToken } → { invites }
+//   POST /tickets/invite/check  (public) { code } → { ok, event } | 404 | 409
+//   POST /tickets/invite/claim  (public) { code, buyerName, buyerPhone?, buyerEmail? } → { ticket, event }
 
 const crypto = require('crypto');
 const store = require('../lib/store');
@@ -326,6 +329,100 @@ async function scan(req) {
   }
 }
 
+// ── Invitaciones (gratis, de un solo uso) ─────────
+// Staff mints codes; each lives in hm_tickets as id INV-<code>, type 'invitado',
+// status 'invite'. Whoever uses it with name + contact becomes 'guest' (en la
+// lista): no palabra clave ni hidromedusa — en la puerta se lo busca por nombre.
+const INVITE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // sin 0/O, 1/I/L
+const inviteId = (code) => `INV-${code}`;
+
+function makeInviteCode() {
+  let code = '';
+  for (let i = 0; i < 6; i++) code += INVITE_ALPHABET[crypto.randomInt(INVITE_ALPHABET.length)];
+  return code;
+}
+
+// "k7qm-3p " → "K7QM3P"
+function normInviteCode(s) {
+  return String(s == null ? '' : s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+// Invite record for a typed code (any status), or null.
+async function findInvite(code) {
+  const c = normInviteCode(code);
+  if (!c) return null;
+  const t = await store.tickets.get(inviteId(c));
+  return t && t.type === 'invitado' ? t : null;
+}
+
+// STAFF: mint `count` (1–50) one-use invite codes, with an optional note.
+async function createInvites(req) {
+  if (!requireStaff(req)) return { status: 401, body: { error: 'Staff token required' } };
+  const body = req.body || {};
+  const count = Math.min(50, Math.max(1, parseInt(body.count, 10) || 1));
+  const note = (typeof body.note === 'string' && body.note.trim()) || null;
+  try {
+    const invites = [];
+    for (let i = 0; i < count; i++) {
+      let code;
+      do { code = makeInviteCode(); } while (await store.tickets.get(inviteId(code)));
+      const invite = {
+        ...newTicket({ type: 'invitado', buyerName: null }),
+        id: inviteId(code),
+        inviteCode: code,
+        inviteNote: note,
+        status: 'invite',
+      };
+      await store.tickets.put(invite);
+      invites.push(invite);
+    }
+    return { status: 200, body: { invites } };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
+// PUBLIC: is this invite code still usable?
+async function checkInvite(req) {
+  try {
+    const inv = await findInvite(req.body?.code);
+    if (!inv || inv.status === 'cancelled') return { status: 404, body: { error: 'Ese código no existe' } };
+    if (inv.status !== 'invite') return { status: 409, body: { error: 'Esa invitación ya se usó' } };
+    return { status: 200, body: { ok: true, event: EVENTS[inv.eventId] || null } };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
+// PUBLIC: use an invite → name + contact, status 'guest'. One shot: the
+// conditional update only lands while the record is still 'invite'.
+async function claimInvite(req) {
+  const body = req.body || {};
+  const name  = (body.buyerName  || '').trim();
+  const eml   = (body.buyerEmail || '').trim() || null;
+  const phone = (body.buyerPhone || '').trim() || null;
+  if (!name) return { status: 400, body: { error: 'Falta tu nombre' } };
+  if (!eml && !phone) return { status: 400, body: { error: 'Dejanos un WhatsApp o un email' } };
+  try {
+    const inv = await findInvite(body.code);
+    if (!inv || inv.status === 'cancelled') return { status: 404, body: { error: 'Ese código no existe' } };
+    const now = new Date().toISOString();
+    const guest = await store.tickets.updateIf(inv.id, 'invite', {
+      buyerName: name, buyerEmail: eml, buyerPhone: phone, channel: 'invitacion',
+      status: 'guest', registeredAt: now, updatedAt: now,
+    });
+    if (!guest) return { status: 409, body: { error: 'Esa invitación ya se usó' } };
+    await email.sendLeadNotification({ ticket: guest, kind: 'invite' })
+      .catch((e) => console.error('[tickets.claimInvite] notify error:', e && e.message));
+    return {
+      status: 200,
+      body: { ticket: { id: guest.id, buyerName: guest.buyerName, status: guest.status }, event: EVENTS[guest.eventId] || null },
+    };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
 // STAFF: fetch a single ticket + its event.
 async function getTicket(req) {
   if (!requireStaff(req)) return { status: 401, body: { error: 'Staff token required' } };
@@ -340,4 +437,7 @@ async function getTicket(req) {
   }
 }
 
-module.exports = { request, capture, list, free, issue, reword, cancel, remove, redeem, scan, getTicket };
+module.exports = {
+  request, capture, list, free, issue, reword, cancel, remove, redeem, scan, getTicket,
+  createInvites, checkInvite, claimInvite,
+};
