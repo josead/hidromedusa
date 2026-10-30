@@ -8,6 +8,7 @@
 //   POST /tickets/redeem    (public) { claim } → { ticket, event }
 //   POST /tickets/:id/scan  (staff)  { staffToken } → { valid, ticket, reason? }
 //   GET  /tickets/:id       (staff)  → { ticket, event }
+//   POST /tickets/:id/rename (staff) { buyerName, staffToken } → { ticket }
 //   POST /tickets/invites       (staff)  { count?, note?, staffToken } → { invites }
 //   POST /tickets/invite/check  (public) { code } → { ok, event } | 404 | 409
 //   POST /tickets/invite/claim  (public) { code, buyerName, buyerPhone?, buyerEmail? } → { ticket, event }
@@ -276,6 +277,25 @@ async function cancel(req) {
   }
 }
 
+// STAFF: fix the name on any ticket (e.g. "Isabela Ibarra" → "Isabela Ibarra x 2").
+// Only the name changes: palabra, status and dates stay; no email.
+async function rename(req) {
+  if (!requireStaff(req)) return { status: 401, body: { error: 'Staff token required' } };
+  const raw = req.body && typeof req.body.buyerName === 'string' ? req.body.buyerName : '';
+  const name = raw.trim().replace(/\s+/g, ' ');
+  if (!name) return { status: 400, body: { error: 'Falta el nombre' } };
+  if (name.length > 80) return { status: 400, body: { error: 'Nombre demasiado largo' } };
+  try {
+    const id = req.params?.id;
+    const ticket = await store.tickets.get(id);
+    if (!ticket) return { status: 404, body: { error: 'Ticket not found' } };
+    const updated = await store.tickets.update(id, { buyerName: name });
+    return { status: 200, body: { ticket: updated } };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
 // STAFF: hard-delete a ticket (mistake/test cleanup). No email — the record is gone.
 async function remove(req) {
   if (!requireStaff(req)) return { status: 401, body: { error: 'Staff token required' } };
@@ -438,6 +458,6 @@ async function getTicket(req) {
 }
 
 module.exports = {
-  request, capture, list, free, issue, reword, cancel, remove, redeem, scan, getTicket,
+  request, capture, list, free, issue, reword, cancel, rename, remove, redeem, scan, getTicket,
   createInvites, checkInvite, claimInvite,
 };

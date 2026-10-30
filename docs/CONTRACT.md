@@ -125,6 +125,7 @@ Tickets:
 - `POST /tickets/redeem`   (public) `{ claim }` → `{ ticket, event }` (lookup by claimNorm; 404 if none)
 - `POST /tickets/:id/scan` (staff)  `{ staffToken }` → `{ valid, ticket, reason? }`
 - `GET  /tickets/:id`      (staff)  → `{ ticket }`
+- `POST /tickets/:id/rename` (staff) `{ buyerName, staffToken }` → `{ ticket }` (only the name changes; no email)
 - `POST /tickets/invites`  (staff)  `{ count?=1 (max 50), note?, staffToken }` → `{ invites:[ticket] }` (status `invite`)
 - `POST /tickets/invite/check` (public) `{ code }` → `{ ok, event }` (404 unknown/cancelled, 409 already used)
 - `POST /tickets/invite/claim` (public) `{ code, buyerName, buyerPhone?, buyerEmail? }` (name + phone or email) → `{ ticket:{ id, buyerName, status:'guest' }, event }` (409 if already used). Front: `/invitacion/?c=CODE`.

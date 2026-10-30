@@ -21,6 +21,7 @@ const ROUTES = [
   { m: 'POST', re: /^\/tickets\/([^/]+)\/free$/,   fn: tickets.free,      params: ['id'] },
   { m: 'POST', re: /^\/tickets\/([^/]+)\/reword$/, fn: tickets.reword,    params: ['id'] },
   { m: 'POST', re: /^\/tickets\/([^/]+)\/cancel$/, fn: tickets.cancel,    params: ['id'] },
+  { m: 'POST', re: /^\/tickets\/([^/]+)\/rename$/, fn: tickets.rename,    params: ['id'] },
   { m: 'POST', re: /^\/tickets\/([^/]+)\/delete$/, fn: tickets.remove,    params: ['id'] },
   { m: 'POST', re: /^\/tickets\/([^/]+)\/scan$/,   fn: tickets.scan,      params: ['id'] },
   { m: 'GET',  re: /^\/tickets\/([^/]+)$/,         fn: tickets.getTicket, params: ['id'] },

@@ -49,6 +49,8 @@
   th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);background:var(--abyss);position:sticky;top:0;}
   tr:last-child td{border-bottom:none;}
   td.name{font-weight:600;}
+  .edit{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;padding:0 4px;margin-left:4px;}
+  .edit:hover{color:var(--acid);}
   .pill{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border:1px solid var(--line-strong);}
   .pill.lead{color:var(--bone-dim);}
   .pill.pending{color:var(--hot);border-color:var(--hot);}
@@ -262,7 +264,7 @@ function render(tickets){
   const tbp=document.getElementById('tb-pend');
   tbp.innerHTML = pend.length ? pend.map(t=>`
     <tr>
-      <td class="name">${esc(t.buyerName)||'<span class="sub">—</span>'}</td>
+      ${nameCell(t)}
       <td>${contact(t)}</td>
       <td><span class="sub">${esc(t.channel)||'—'}</span></td>
       <td><span class="pill ${t.status}">${t.status==='pending'?'Pagó?':'Lead'}</span></td>
@@ -278,12 +280,17 @@ function render(tickets){
   tbw.innerHTML = words.length ? words.map(t=>`
     <tr>
       <td><span class="claim" onclick="copyClaim('${esc(t.claim)}')">${esc(t.claim)||'—'}</span></td>
-      <td class="name">${esc(t.buyerName)||'<span class="sub">—</span>'}</td>
+      ${nameCell(t)}
       <td>${contact(t)}</td>
       <td><span class="pill ${t.status}">${statusLabel(t.status)}</span></td>
       <td class="sub">${fmtWhen(t.freedAt||t.createdAt)}</td>
       <td>${wordActions(t)}</td>
     </tr>`).join('') : `<tr><td colspan="6" class="empty">Todavía no se generó ninguna palabra.</td></tr>`;
+}
+
+// Nombre + lápiz para corregirlo (ej. "Isabela Ibarra x 2").
+function nameCell(t){
+  return `<td class="name">${esc(t.buyerName)||'<span class="sub">—</span>'}<button class="edit" title="Editar nombre" onclick="renameTicket('${esc(t.id)}')">✎</button></td>`;
 }
 
 function statusLabel(s){ return s==='used'?'Usada':s==='cancelled'?'Invalidada':'Válida'; }
@@ -353,6 +360,20 @@ async function rewordTicket(id,name){
   }
 }
 
+// Editar nombre: solo cambia el nombre (palabra, estado y fechas quedan igual; sin email).
+async function renameTicket(id){
+  const t=BY_ID[id]||{};
+  const name=prompt('Nombre (podés sumar "x 2", etc.):',t.buyerName||'');
+  if(name===null) return; // canceló el prompt
+  if(!name.trim()){ toast('El nombre no puede quedar vacío'); return; }
+  if(name.trim()===(t.buyerName||'')) return;
+  try{
+    await api('/tickets/'+encodeURIComponent(id)+'/rename',{method:'POST',body:{buyerName:name.trim()}});
+    toast('Nombre actualizado ✎');
+    load();
+  }catch(e){ toast('Error: '+e.message); }
+}
+
 // Invalidar: la palabra deja de servir y se avisa por email (si hay).
 async function cancelTicket(id,name){
   if(!confirm('¿Invalidar la entrada de '+(name||'esta persona')+'?\nLa palabra deja de servir y se le avisa por email.')) return;
@@ -389,7 +410,7 @@ function renderInvites(tickets){
 
   document.getElementById('tb-guests').innerHTML = guests.length ? guests.map(t=>`
     <tr>
-      <td class="name">${esc(t.buyerName)}</td>
+      ${nameCell(t)}
       <td>${contact(t)}</td>
       <td><span class="sub">${esc(t.inviteCode)}</span></td>
       <td><span class="sub">${esc(t.inviteNote)||'—'}</span></td>
