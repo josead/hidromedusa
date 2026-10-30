@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Link de la entrada que manda el staff (/entrada/?claim=palabra). Existe por la vista previa:
+     WhatsApp/IG no corren JS y en GitHub Pages /?claim= mostraría el preview de la home.
+     La entrada se abre en la home (?claim=), así que acá solo redirigimos.
+     Privada: noindex, pero NO va en robots.txt (los previews tienen que poder leerla) ni en el sitemap. -->
+<meta name="robots" content="noindex" />
+<script>location.replace('/' + location.search + location.hash);</script>
+<title>Tu entrada · Hidromedusa</title>
+<meta name="description" content="Tu entrada para Hidromedusa: abrí el link para ver tu palabra clave y tu hidromedusa, y mostrala en la puerta." />
+<meta name="theme-color" content="#0a0a0b" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<!-- link preview (Open Graph + Twitter): imagen de entrada, sin fecha -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hidromedusa" />
+<meta property="og:title" content="🎟️ Tu entrada para Hidromedusa" />
+<meta property="og:description" content="Abrí el link para ver tu palabra clave y tu hidromedusa. Mostrala en la puerta." />
+<meta property="og:url" content="https://hidromedusa.com/entrada/" />
+<meta property="og:image" content="https://hidromedusa.com/og-entrada.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="Tu entrada para Hidromedusa, con una hidromedusa pixelada rosa en el talón" />
+<meta property="og:locale" content="es_AR" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="🎟️ Tu entrada para Hidromedusa" />
+<meta name="twitter:description" content="Abrí el link para ver tu palabra clave y tu hidromedusa. Mostrala en la puerta." />
+<meta name="twitter:image" content="https://hidromedusa.com/og-entrada.jpg" />
+<meta name="twitter:image:alt" content="Tu entrada para Hidromedusa" />
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#060607;color:#ECE7DA;font-family:system-ui,sans-serif;}
+  a{color:#C6FF1A;}
+</style>
+</head>
+<body>
+  <p>Abriendo tu entrada… <a href="/">hidromedusa.com</a></p>
+</body>
+</html>

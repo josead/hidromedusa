@@ -217,15 +217,16 @@ function contact(t){
 function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function copyClaim(c){ try{ navigator.clipboard.writeText(c); toast('Palabra copiada: '+c+' 📋'); }catch(e){ toast(c); } }
 
-// Link directo a su hidromedusa: la web abre ?claim= sola (modal + medusa + compartir en IG).
+// Link directo a su entrada: /entrada/ tiene su propio preview ("Tu entrada") y redirige a /?claim=,
+// que abre la entrada sola (modal + medusa + compartir en IG).
 const SITE='https://hidromedusa.com';
 let BY_ID={};
-function claimLink(c){ return SITE+'/?claim='+encodeURIComponent(c); }
+function claimLink(c){ return SITE+'/entrada/?claim='+encodeURIComponent(c); }
 function shareMsg(t){
   const first=String(t.buyerName||'').trim().split(/\s+/)[0];
   return '¡Hola'+(first?' '+first:'')+'! 🪼 Ya tenés tu entrada para Hidromedusa.\n'
     +'Tu palabra: '+String(t.claim).replace(/-/g,' ').toUpperCase()+'\n'
-    +'Tu hidromedusa (la podés compartir): '+claimLink(t.claim)+'\n'
+    +'Tu entrada y tu hidromedusa: '+claimLink(t.claim)+'\n'
     +'En la puerta decí tu palabra y te damos tu entrada-sticker.';
 }
 // "2494658203" → "5492494658203" (wa.me pide 549 + área + número). Si no se entiende, '' → elegís el contacto.

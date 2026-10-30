@@ -10,7 +10,7 @@ Cada cambio de contenido o estructura tiene que dejar el SEO al 100%. Antes de c
 3. **Cache de previews**: WhatsApp/Facebook cachean días. Si cambia la imagen o el texto, **usar un nombre de archivo nuevo** (ej. `og-<evento>.jpg`) y avisar que se re-scrapee en https://developers.facebook.com/tools/debug/.
 4. **JSON-LD** (`MusicGroup` + `MusicEvent` con fecha ISO -03:00, lugar, performers, `offers` con precio/ARS): actualizarlo siempre que cambie la fecha, lugar, line-up o precio. Al pasar la fecha, quitar/actualizar el evento.
 5. **Contenido indexable**: fecha, lugar, line-up y precio como texto real en el HTML (no solo en imagen/WebGL/JS); un solo `<h1>`; imágenes con `alt` descriptivo y `width`/`height`.
-6. **robots.txt / sitemap.xml**: mantenerlos (`lastmod` al día); `/staff-admin-secreto/` va en Disallow.
+6. **robots.txt / sitemap.xml**: mantenerlos (`lastmod` al día); `/staff-admin-secreto/` va en Disallow. Las páginas privadas que se mandan por link (`/invitacion/`, `/entrada/` → redirige a `/?claim=`) llevan `noindex` y su propio OG, sin fecha; no van en robots.txt (los previews tienen que leerlas) ni en el sitemap.
 7. **Performance** (Core Web Vitals): imágenes comprimidas, sin bloqueos nuevos en el head.
 
 ## Cambiar la fecha/evento
