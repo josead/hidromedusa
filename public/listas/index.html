@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Listas de puerta y barra para el staff, en vivo desde la base (POST /tickets/lists con clave).
+     Privada: noindex, pero NO va en robots.txt (el preview del link tiene que poder leerla) ni en el sitemap. -->
+<meta name="robots" content="noindex" />
+<title>Listas · Hidromedusa</title>
+<meta name="description" content="Listas de puerta y barra de Hidromedusa para el staff." />
+<meta name="theme-color" content="#0a0a0b" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<!-- link preview (Open Graph + Twitter): imagen genérica, sin fecha -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hidromedusa" />
+<meta property="og:title" content="Listas de puerta y barra · Hidromedusa" />
+<meta property="og:description" content="Para el staff: poné la clave y mirá las listas en vivo." />
+<meta property="og:url" content="https://hidromedusa.com/listas/" />
+<meta property="og:image" content="https://hidromedusa.com/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:alt" content="Hidromedusa — música en vivo, Tandil" />
+<meta property="og:locale" content="es_AR" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Listas de puerta y barra · Hidromedusa" />
+<meta name="twitter:description" content="Para el staff: poné la clave y mirá las listas en vivo." />
+<meta name="twitter:image" content="https://hidromedusa.com/og.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0a0b; --bg-2:#141417; --bone:#ECE7DA; --bone-dim:#A8A399;
+    --muted:#6f6b63; --line:rgba(236,231,218,0.16); --line-strong:rgba(236,231,218,0.55);
+    --acid:#C6FF1A; --hot:#FF2E88; --ink:#0a0a0b;
+    --display:'Anton',sans-serif; --body:'Space Grotesk',system-ui,sans-serif; --mono:'Space Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--bone);font-family:var(--body);font-size:15px;}
+  .wrap{max-width:760px;margin:0 auto;padding:16px 16px 60px;}
+  h1{font-family:var(--display);font-weight:400;font-size:30px;text-transform:uppercase;margin:4px 0 2px;letter-spacing:.01em;}
+  .meta{font-family:var(--mono);font-size:11px;color:var(--bone-dim);}
+  .gate{margin-top:40px;display:flex;flex-direction:column;gap:10px;max-width:320px;}
+  input{font:inherit;background:var(--bg-2);color:var(--bone);border:1px solid var(--line-strong);padding:11px 12px;border-radius:0;width:100%;}
+  input:focus{outline:2px solid var(--acid);outline-offset:-1px;}
+  button{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:var(--acid);color:var(--ink);border:0;padding:11px 14px;cursor:pointer;font-weight:700;}
+  button.ghost{background:none;color:var(--bone);border:1px solid var(--line-strong);}
+  .err{color:var(--hot);font-family:var(--mono);font-size:12px;min-height:1em;}
+  .tabs{display:flex;gap:0;margin:14px 0 10px;position:sticky;top:0;background:var(--bg);z-index:2;padding-top:6px;}
+  .tabs button{flex:1;background:none;color:var(--bone-dim);border:1px solid var(--line);font-size:13px;}
+  .tabs button.on{background:var(--acid);color:var(--ink);border-color:var(--acid);}
+  .bar{display:flex;gap:8px;align-items:center;position:sticky;top:52px;background:var(--bg);z-index:2;padding:4px 0 8px;}
+  .bar input{flex:1;}
+  .tot{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px;}
+  .tot div{border:1px solid var(--line-strong);padding:6px 9px;font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--bone-dim);}
+  .tot b{display:block;font-family:var(--display);font-weight:400;font-size:22px;color:var(--bone);line-height:1.1;}
+  .how{border-left:3px solid var(--acid);background:var(--bg-2);padding:8px 10px;font-size:13px;line-height:1.5;margin-bottom:10px;}
+  h2{font-family:var(--display);font-weight:400;font-size:19px;text-transform:uppercase;margin:18px 0 4px;letter-spacing:.02em;}
+  h2 small{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0;}
+  .row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);}
+  .row.done .p,.row.done .nm{text-decoration:line-through;color:var(--muted);}
+  .cks{display:flex;gap:4px;flex:none;}
+  .cks input{appearance:none;-webkit-appearance:none;width:24px;height:24px;padding:0;border:1.5px solid var(--bone);background:none;cursor:pointer;}
+  .cks input:checked{background:var(--acid);border-color:var(--acid);}
+  .p{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.02em;}
+  .nm{color:var(--bone-dim);font-size:14px;margin-left:auto;text-align:right;}
+  .x2{font-family:var(--mono);font-size:10px;font-weight:700;background:var(--bone);color:var(--ink);padding:1px 5px;margin-left:5px;}
+  .pr{line-height:1.6;} .pr small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);} .ar{color:var(--acid);}
+  .row.done .pr .p{text-decoration:line-through;color:var(--muted);}
+  .warn{border:1px dashed var(--line-strong);padding:8px 10px;margin-top:14px;font-size:13px;line-height:1.5;}
+  .hide{display:none!important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Listas · Hidromedusa</h1>
+  <div class="meta" id="meta">Puerta y barra, en vivo</div>
+
+  <form class="gate" id="gate">
+    <input id="clave" type="password" placeholder="Clave" autocomplete="current-password" required />
+    <button type="submit">Ver listas</button>
+    <div class="err" id="err"></div>
+  </form>
+
+  <div id="app" class="hide">
+    <div class="tabs"><button id="t-door" class="on" onclick="tab('door')">Puerta</button><button id="t-bar" onclick="tab('bar')">Barra</button></div>
+    <div class="bar"><input id="q" type="search" placeholder="Buscar palabra o nombre…" oninput="filter()" /><button class="ghost" onclick="load()">↻</button></div>
+    <div id="door"></div>
+    <div id="barra" class="hide"></div>
+  </div>
+</div>
+<script>
+const API_BASE='https://p2vsvdihylfl6w4c6pfnnuwd4u0dwcvw.lambda-url.sa-east-1.on.aws';
+const $=(id)=>document.getElementById(id);
+const esc=(s)=>String(s==null?'':s).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fold=(s)=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const pal=(c)=>c.replace(/-/g,' ').toUpperCase();
+const personas=(n)=>{const m=/\bx\s*(\d+)\s*$/i.exec(n||'');return m?+m[1]:1;};
+const clean=(n)=>String(n||'').replace(/\s*\bx\s*\d+\s*$/i,'');
+const x2=(n)=>personas(n)>1?`<span class="x2">x${personas(n)}</span>`:'';
+
+// Casillas tachadas: quedan guardadas en ESTE celular (no se comparten entre dispositivos).
+const TK='hm-listas-ticks';
+let ticks={};
+try{ticks=JSON.parse(localStorage.getItem(TK)||'{}');}catch(e){}
+function setTick(id,on){ ticks[id]=on; try{localStorage.setItem(TK,JSON.stringify(ticks));}catch(e){} }
+function cks(prefix,n){
+  let h='';
+  for(let i=0;i<n;i++){const id=prefix+':'+i;h+=`<input type="checkbox" data-id="${esc(id)}" ${ticks[id]?'checked':''} onchange="tickChange(this)">`;}
+  return `<span class="cks">${h}</span>`;
+}
+function tickChange(el){ setTick(el.dataset.id,el.checked); paintDone(); }
+function paintDone(){
+  document.querySelectorAll('[data-row]').forEach((r)=>{
+    const boxes=[...r.querySelectorAll('input[type=checkbox]')];
+    r.classList.toggle('done',boxes.length>0&&boxes.every((b)=>b.checked));
+  });
+}
+
+let CLAVE='';
+try{CLAVE=localStorage.getItem('hm-listas-clave')||'';}catch(e){}
+$('gate').onsubmit=(ev)=>{ev.preventDefault();CLAVE=$('clave').value.trim();load(true);};
+
+async function load(fromGate){
+  if(!CLAVE)return;
+  $('err').textContent='';
+  try{
+    const res=await fetch(API_BASE+'/tickets/lists',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clave:CLAVE})});
+    const data=await res.json().catch(()=>({}));
+    if(res.status===401){try{localStorage.removeItem('hm-listas-clave');}catch(e){} $('gate').classList.remove('hide');$('app').classList.add('hide');$('err').textContent='Clave incorrecta';return;}
+    if(!res.ok)throw new Error(data.error||('Error '+res.status));
+    try{localStorage.setItem('hm-listas-clave',CLAVE);}catch(e){}
+    $('gate').classList.add('hide');$('app').classList.remove('hide');
+    render(data);
+  }catch(e){
+    if(fromGate||$('app').classList.contains('hide'))$('err').textContent='No se pudo cargar: '+e.message;
+    else $('meta').textContent='Sin conexión — mostrando la última versión';
+  }
+}
+
+function render(d){
+  const at=new Date(d.at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:'America/Argentina/Buenos_Aires'});
+  $('meta').textContent=`${d.event?d.event.name+' · ':''}actualizado ${at} · las casillas quedan en este celular`;
+  const paid=[...d.paid].sort((a,b)=>a.claim.localeCompare(b.claim));
+  const guests=[...d.guests].sort((a,b)=>fold(a.buyerName).localeCompare(fold(b.buyerName)));
+  const nPaid=paid.reduce((s,t)=>s+personas(t.buyerName),0);
+  const anul=d.cancelled.map((t)=>`<b>${esc(pal(t.claim))}</b>`).join(', ');
+
+  // ── Puerta ──
+  let h=`<div class="tot"><div><b>${nPaid+guests.length}</b>personas</div><div><b>${nPaid}</b>con entrada (${paid.length})</div><div><b>${guests.length}</b>invitados</div></div>
+  <div class="how">Te dicen su <b>palabra clave</b> → buscala, tachá una casilla por persona y dales la entrada-sticker. <span class="x2">x2</span> = entran 2. <b>Invitados</b> van por nombre. Si no se acuerdan la palabra, buscá el nombre.</div>
+  <h2>Con entrada <small>· por palabra</small></h2>`;
+  h+=paid.map((t)=>`<div class="row" data-row data-q="${esc(fold(t.claim+' '+t.buyerName))}">${cks('d:'+t.claim,personas(t.buyerName))}<span class="p">${esc(pal(t.claim))}</span><span class="nm">${esc(clean(t.buyerName))}${x2(t.buyerName)}</span></div>`).join('');
+  h+=`<h2>Invitados <small>· sin palabra</small></h2>`;
+  h+=guests.map((t)=>`<div class="row" data-row data-q="${esc(fold(t.buyerName))}">${cks('g:'+fold(t.buyerName),1)}<span class="nm" style="margin-left:0;text-align:left;color:var(--bone)">${esc(t.buyerName)}</span></div>`).join('');
+  if(anul)h+=`<div class="warn">⚠️ Anulada (no entra): ${anul}</div>`;
+  if(d.invitesUnused)h+=`<div class="warn">${d.invitesUnused} invitaciones sin usar: si alguien se anota, aparece acá al actualizar (↻).</div>`;
+  $('door').innerHTML=h;
+
+  // ── Barra: parejas fijas del backend (lib/barpairs.js) → una línea y una casilla por pareja ──
+  const seen={};
+  let b=`<div class="tot"><div><b>${d.bar.pairs.length}</b>consumiciones</div><div><b>${d.bar.pairs.length*2}</b>personas</div><div><b>${d.bar.unpaired.length}</b>sin pareja</div></div>
+  <div class="how">Cada pareja tiene <b>una sola consumición</b> 🍹 Vienen los dos: buscá su línea. Si la casilla está vacía, tachala y sale 1 trago. Si no están juntos en una línea, no es match. <span class="x2">x2</span> = esa palabra la tienen 2 personas (aparece en 2 líneas).</div>
+  <h2>Parejas <small>· ${d.bar.pairs.length}</small></h2>`;
+  const nm=Object.fromEntries(paid.map((t)=>[t.claim,t.buyerName]));
+  b+=d.bar.pairs.map((p,i)=>{
+    const k=p.a+'|'+p.b;seen[k]=(seen[k]||0)+1;
+    return `<div class="row" data-row data-q="${esc(fold(p.a+' '+p.b))}"><span class="meta">${i+1}</span>${cks('b:'+k+'|'+seen[k],1)}<span class="pr"><span class="p">${esc(pal(p.a))}</span>${x2(nm[p.a])} <span class="ar">↔</span> <span class="p">${esc(pal(p.b))}</span>${x2(nm[p.b])}<small>comparten ${esc(p.word.toUpperCase())}</small></span></div>`;
+  }).join('');
+  const sinP={};for(const c of d.bar.unpaired)sinP[c]=(sinP[c]||0)+1;
+  const sinTxt=Object.entries(sinP).map(([c,n])=>`<b>${esc(pal(c))}</b>${personas(nm[c])>1?` (${n} de ${personas(nm[c])})`:''}`).join(', ');
+  if(sinTxt||anul)b+=`<div class="warn">${sinTxt?`<b>Sin pareja</b> (no reclaman): ${sinTxt}`:''}${anul?`<br><b>Anulada</b> (no vale): ${anul}`:''}</div>`;
+  $('barra').innerHTML=b;
+  paintDone();filter();
+}
+
+function filter(){
+  const q=fold($('q').value.trim());
+  document.querySelectorAll('[data-q]').forEach((el)=>el.classList.toggle('hide',!!q&&!el.dataset.q.includes(q)));
+}
+function tab(t){
+  $('door').classList.toggle('hide',t!=='door');$('barra').classList.toggle('hide',t!=='bar');
+  $('t-door').classList.toggle('on',t==='door');$('t-bar').classList.toggle('on',t==='bar');
+  $('q').placeholder=t==='door'?'Buscar palabra o nombre…':'Buscar palabra (ej. lunar)…';
+}
+
+if(CLAVE)load();
+setInterval(()=>{if(!document.hidden)load();},60000);
+</script>
+</body>
+</html>

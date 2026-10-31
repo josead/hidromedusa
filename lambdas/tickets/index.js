@@ -12,11 +12,13 @@
 //   POST /tickets/invites       (staff)  { count?, note?, staffToken } → { invites }
 //   POST /tickets/invite/check  (public) { code } → { ok, event } | 404 | 409
 //   POST /tickets/invite/claim  (public) { code, buyerName, buyerPhone?, buyerEmail? } → { ticket, event }
+//   POST /tickets/lists         (clave)  { clave } → { paid, bar:{pairs,unpaired}, guests, cancelled, invitesUnused, event, at }
 
 const crypto = require('crypto');
 const store = require('../lib/store');
 const claimcode = require('../lib/claimcode');
 const email = require('../lib/email');
+const barpairs = require('../lib/barpairs');
 
 // Lifecycle order — status only ever moves FORWARD (never downgrades).
 const STATUS_RANK = { lead: 0, pending: 1, freed: 2, used: 3, cancelled: 3 };
@@ -443,6 +445,37 @@ async function claimInvite(req) {
   }
 }
 
+// Clave de /listas/ (la que se pasa a puerta y barra). Va hasheada porque el repo es
+// público. Para cambiarla: printf %s 'nueva' | sha256sum
+const LISTS_KEY_SHA256 = 'bfc89bdc0fc4091f03f03b6d98e8f66cda8e29d8ac197043392e0b6a0b20518c';
+
+// PUBLIC (con clave): lo justo para armar las listas de puerta y barra, sin contactos.
+async function lists(req) {
+  const typed = crypto.createHash('sha256').update(String(req.body?.clave || '').trim()).digest();
+  if (!crypto.timingSafeEqual(typed, Buffer.from(LISTS_KEY_SHA256, 'hex'))) {
+    return { status: 401, body: { error: 'Clave incorrecta' } };
+  }
+  try {
+    const all = await store.tickets.list();
+    const pick = (t) => ({ claim: t.claim || null, buyerName: t.buyerName || '', status: t.status });
+    const paid = all.filter((t) => (t.status === 'freed' || t.status === 'used') && t.claim).map(pick);
+    return {
+      status: 200,
+      body: {
+        paid,
+        bar: barpairs.pairUp(paid),
+        guests: all.filter((t) => t.status === 'guest').map(pick),
+        cancelled: all.filter((t) => t.status === 'cancelled' && t.claim).map(pick),
+        invitesUnused: all.filter((t) => t.status === 'invite').length,
+        event: EVENTS['ev-1'],
+        at: new Date().toISOString(),
+      },
+    };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
 // STAFF: fetch a single ticket + its event.
 async function getTicket(req) {
   if (!requireStaff(req)) return { status: 401, body: { error: 'Staff token required' } };
@@ -459,5 +492,5 @@ async function getTicket(req) {
 
 module.exports = {
   request, capture, list, free, issue, reword, cancel, rename, remove, redeem, scan, getTicket,
-  createInvites, checkInvite, claimInvite,
+  createInvites, checkInvite, claimInvite, lists,
 };

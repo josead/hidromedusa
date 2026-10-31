@@ -20,6 +20,7 @@
     { "path": "/tickets/invites",          "method": "POST", "module": "tickets/index",    "fn": "createInvites" },
     { "path": "/tickets/invite/check",     "method": "POST", "module": "tickets/index",    "fn": "checkInvite" },
     { "path": "/tickets/invite/claim",     "method": "POST", "module": "tickets/index",    "fn": "claimInvite" },
+    { "path": "/tickets/lists"       ,     "method": "POST", "module": "tickets/index",    "fn": "lists" },
     { "path": "/tickets",                  "method": "GET",  "module": "tickets/index",    "fn": "list"        },
     { "path": "/tickets/:id/free",         "method": "POST", "module": "tickets/index",    "fn": "free"        },
     { "path": "/tickets/:id/scan",         "method": "POST", "module": "tickets/index",    "fn": "scan"        },

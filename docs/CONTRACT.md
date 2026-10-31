@@ -127,6 +127,7 @@ Tickets:
 - `GET  /tickets/:id`      (staff)  → `{ ticket }`
 - `POST /tickets/:id/rename` (staff) `{ buyerName, staffToken }` → `{ ticket }` (only the name changes; no email)
 - `POST /tickets/invites`  (staff)  `{ count?=1 (max 50), note?, staffToken }` → `{ invites:[ticket] }` (status `invite`)
+- `POST /tickets/lists` (clave) `{ clave }` → `{ paid, bar:{ pairs:[{a,b,word}], unpaired:[claim] }, guests, cancelled:[{claim,buyerName,status}], invitesUnused, event, at }` (401 clave incorrecta). `bar` = parejas fijas de barra de `lib/barpairs.js` (cada persona en una sola pareja, 1 consumición por pareja, determinístico). Sin emails/teléfonos; la clave va hasheada (sha256) en `lambdas/tickets/index.js`. La usa `/listas/` (puerta + barra en vivo).
 - `POST /tickets/invite/check` (public) `{ code }` → `{ ok, event }` (404 unknown/cancelled, 409 already used)
 - `POST /tickets/invite/claim` (public) `{ code, buyerName, buyerPhone?, buyerEmail? }` (name + phone or email) → `{ ticket:{ id, buyerName, status:'guest' }, event }` (409 if already used). Front: `/invitacion/?c=CODE`.
 
