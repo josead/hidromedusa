@@ -10,8 +10,8 @@
 //   GET  /tickets/:id       (staff)  → { ticket, event }
 //   POST /tickets/:id/rename (staff) { buyerName, staffToken } → { ticket }
 //   POST /tickets/invites       (staff)  { count?, note?, staffToken } → { invites }
-//   POST /tickets/invite/check  (public) { code } → { ok, event } | 404 | 409
-//   POST /tickets/invite/claim  (public) { code, buyerName, buyerPhone?, buyerEmail? } → { ticket, event }
+//   POST /tickets/invite/check  (public) { code } → { ok, event } | 404 | 409 | 410 (fecha pasada)
+//   POST /tickets/invite/claim  (public) { code, buyerName, buyerPhone?, buyerEmail? } → { ticket, event } | 410
 //   POST /tickets/lists         (clave)  { clave } → { paid, bar:{pairs,unpaired}, guests, cancelled, invitesUnused, event, at }
 
 const crypto = require('crypto');
@@ -31,9 +31,14 @@ const EVENTS = {
     name: 'Hidromedusa · Fechón estelar',
     date: '2026-10-31',
     time: '21:00',
+    end: '2026-11-01T03:00:00-03:00',
     venue: '990 Espacio Cultural, Tandil',
   },
 };
+
+// Pasado el fin del evento ya no se anota gente (las invitaciones sin usar mueren).
+const eventOver = (ev) => !!(ev && ev.end) && Date.now() > Date.parse(ev.end);
+const PAST_INVITE = { status: 410, body: { error: 'Esa invitación era para una fecha que ya pasó' } };
 
 // ── Helpers ───────────────────────────────────────
 
@@ -410,6 +415,7 @@ async function checkInvite(req) {
     const inv = await findInvite(req.body?.code);
     if (!inv || inv.status === 'cancelled') return { status: 404, body: { error: 'Ese código no existe' } };
     if (inv.status !== 'invite') return { status: 409, body: { error: 'Esa invitación ya se usó' } };
+    if (eventOver(EVENTS[inv.eventId])) return PAST_INVITE;
     return { status: 200, body: { ok: true, event: EVENTS[inv.eventId] || null } };
   } catch (err) {
     return { status: 500, body: { error: err.message } };
@@ -428,6 +434,7 @@ async function claimInvite(req) {
   try {
     const inv = await findInvite(body.code);
     if (!inv || inv.status === 'cancelled') return { status: 404, body: { error: 'Ese código no existe' } };
+    if (eventOver(EVENTS[inv.eventId])) return PAST_INVITE;
     const now = new Date().toISOString();
     const guest = await store.tickets.updateIf(inv.id, 'invite', {
       buyerName: name, buyerEmail: eml, buyerPhone: phone, channel: 'invitacion',

@@ -16,5 +16,7 @@ Cada cambio de contenido o estructura tiene que dejar el SEO al 100%. Antes de c
 ## Cambiar la fecha/evento
 Hardcodeado en: `public/index.html` (hero, stub, fechas, modales, `HM_EVENT`, `TICKET`, JSON-LD, metas), `lambdas/tickets/index.js`, `lambdas/lib/email.js`, `lambdas/calendar/index.js`, `docs/CONTRACT.md`. Los bloques se prenden/apagan con `data-until`/`data-after="YYYY-MM-DD"`. Después: commit + push a main + `deploy-api.sh`.
 
+**Cuando pasa la fecha (entre fechas)**: title/description/OG/Twitter sin fecha con `og-entre-fechas.jpg`, sacar el `MusicEvent` del JSON-LD, `lastmod` del sitemap y `hidden` en el HTML a los bloques `data-until` vencidos (para crawlers sin JS). Solos, por el `end` del evento (`HM_EVENT.end` / `EVENTS[id].end`): se cierra la compra (`buy()`), la entrada se ve como "Recuerdo" y las invitaciones sin usar dan 410. Para la fecha nueva: sacarles el `hidden`, OG nuevo `og-<evento>.jpg` y el `eventId` de `newTicket()`.
+
 ## Métricas
 Umami Cloud (sin cookies) en el `<head>` de `public/index.html` (`data-website-id`). Eventos propios con `track(nombre, datos)`: `comprar-abrir`, `comprar-retomar` (se reabrió un pedido a medias), `comprar-captura` (canal), `comprar-listo`, `copiar-alias`, `eleccion` (opcion), `contratar-enviar` (canal), `invitacion-abrir` (desde), `invitacion-codigo` (estado; en `/invitacion/`), `invitacion-anotado`. Al agregar un CTA nuevo, trackearlo.

@@ -101,7 +101,7 @@
     <!-- 3 · listo -->
     <div id="step-done" hidden>
       <p class="lead ev" id="d-ev"></p>
-      <p class="lead">En la puerta decí tu nombre y pasás. Nos vemos en el fondo. 🪼</p>
+      <p class="lead" id="d-msg">En la puerta decí tu nombre y pasás. Nos vemos en el fondo. 🪼</p>
       <a class="btn btn-line" href="/">Ir a hidromedusa.com</a>
       <button class="link" type="button" onclick="another()">¿Tenés otro código?</button>
     </div>
@@ -128,6 +128,7 @@ async function api(path, body){
 function errMsg(r){
   if(r.status===404) return 'Ese código no existe. Revisalo: son 6 letras y números.';
   if(r.status===409) return 'Esta invitación ya se usó.';
+  if(r.status===410) return 'Esta invitación era para una fecha que ya pasó. La próxima se anuncia en hidromedusa.com 🪼';
   if(r.status===400 && r.data.error) return r.data.error+'.';
   return 'No pudimos conectar. Probá de nuevo en un ratito.';
 }
@@ -138,6 +139,8 @@ function evLine(ev){
   const hs=ev.time ? ' · '+ev.time.replace(/:00$/,'')+'hs' : '';
   return wd+' '+ev.date.slice(8,10)+'/'+ev.date.slice(5,7)+hs+(ev.venue ? ' · '+ev.venue : '');
 }
+// ¿La fecha ya pasó? (por día, hora AR — como data-until en la home)
+const evPast=ev=>!!(ev && ev.date) && new Date(Date.now()-3*3600e3).toISOString().slice(0,10) > ev.date;
 function setEv(id, ev){ const el=$(id), t=evLine(ev); el.textContent=t; el.hidden=!t; }
 function show(step, kicker, title){
   ['code','form','done'].forEach(s=>{ $('step-'+s).hidden=(s!==step); });
@@ -153,7 +156,7 @@ async function checkCode(e){
   busy($('code-btn'), true, 'Seguir →');
   const r=await api('/tickets/invite/check',{ code });
   busy($('code-btn'), false, 'Seguir →');
-  track('invitacion-codigo',{ estado: r.status===200 ? 'ok' : r.status===409 ? 'usado' : r.status===404 ? 'invalido' : 'error' });
+  track('invitacion-codigo',{ estado: r.status===200 ? 'ok' : r.status===409 ? 'usado' : r.status===410 ? 'vencido' : r.status===404 ? 'invalido' : 'error' });
   if(r.status!==200){ $('code-err').textContent=errMsg(r); return; }
   CODE=code;
   setEv('f-ev', r.data.event);
@@ -178,7 +181,7 @@ async function claim(e){
     done(saved);
     return;
   }
-  if(r.status===404 || r.status===409){   // el código dejó de servir mientras completaba
+  if(r.status===404 || r.status===409 || r.status===410){   // el código dejó de servir mientras completaba
     show('code', 'Invitación 🎟️', 'Tenés una invitación');
     $('code-err').textContent=errMsg(r);
     return;
@@ -187,8 +190,10 @@ async function claim(e){
 }
 
 function done(saved){
+  const past=evPast(saved.event), first=String(saved.name).split(/\s+/)[0];
   setEv('d-ev', saved.event);
-  show('done', 'Listo ✓', 'Estás en la lista, '+String(saved.name).split(/\s+/)[0]);
+  $('d-msg').textContent=past ? 'Gracias por venir. La próxima fecha se anuncia primero en hidromedusa.com 🪼' : 'En la puerta decí tu nombre y pasás. Nos vemos en el fondo. 🪼';
+  show('done', past ? 'Fecha pasada' : 'Listo ✓', past ? 'Gracias, '+first : 'Estás en la lista, '+first);
 }
 function another(){
   $('code').value=''; $('code-err').textContent='';

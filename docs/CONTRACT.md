@@ -16,12 +16,15 @@ conform to this. Read this fully before editing any file.
 - **Membership is hidden** for this pass (no MP, no billing).
 - **OAuth login stays optional** and env-gated (demo fallback when no creds).
 
-## Event (current, hardcoded fallback)
+## Event (last one, hardcoded fallback)
+
+Ya pasó: la web está "entre fechas" (metas/OG sin fecha, `og-entre-fechas.jpg`; compra cerrada,
+invitaciones → 410, la entrada se ve como "Recuerdo"). Para una fecha nueva ver CLAUDE.md.
 
 ```
 id: ev-1
 title: Hidromedusa · Fechón estelar en 990
-date: 2026-10-31 (sábado)  time: 21:00 (-03:00)  · DJ invitados: VHS, Marcos Acosta
+date: 2026-10-31 (sábado)  time: 21:00 (-03:00) → end 2026-11-01 03:00 · DJ invitados: VHS, Marcos Acosta
 venue: 990 Espacio Cultural, Tandil, Buenos Aires, AR
 tickets: general $10.000 ARS · pago por transferencia al alias, captura por WhatsApp/IG
 ```
@@ -128,8 +131,8 @@ Tickets:
 - `POST /tickets/:id/rename` (staff) `{ buyerName, staffToken }` → `{ ticket }` (only the name changes; no email)
 - `POST /tickets/invites`  (staff)  `{ count?=1 (max 50), note?, staffToken }` → `{ invites:[ticket] }` (status `invite`)
 - `POST /tickets/lists` (clave) `{ clave }` → `{ paid, bar:{ pairs:[{a,b,word}], unpaired:[claim] }, guests, cancelled:[{claim,buyerName,status}], invitesUnused, event, at }` (401 clave incorrecta). `bar` = parejas fijas de barra de `lib/barpairs.js` (cada persona en una sola pareja, 1 consumición por pareja, determinístico). Sin emails/teléfonos; la clave va hasheada (sha256) en `lambdas/tickets/index.js`. La usa `/listas/` (puerta + barra en vivo).
-- `POST /tickets/invite/check` (public) `{ code }` → `{ ok, event }` (404 unknown/cancelled, 409 already used)
-- `POST /tickets/invite/claim` (public) `{ code, buyerName, buyerPhone?, buyerEmail? }` (name + phone or email) → `{ ticket:{ id, buyerName, status:'guest' }, event }` (409 if already used). Front: `/invitacion/?c=CODE`.
+- `POST /tickets/invite/check` (public) `{ code }` → `{ ok, event }` (404 unknown/cancelled, 409 already used, 410 event already over)
+- `POST /tickets/invite/claim` (public) `{ code, buyerName, buyerPhone?, buyerEmail? }` (name + phone or email) → `{ ticket:{ id, buyerName, status:'guest' }, event }` (409 if already used, 410 event already over). Front: `/invitacion/?c=CODE`.
 
 Staff:
 - `GET  /staff/members`        → `[{id,name,role,panels}]` (static config)
