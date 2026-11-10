@@ -26,7 +26,7 @@
   header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--line-strong);padding-bottom:16px;margin-bottom:24px;flex-wrap:wrap;}
   .brand{font-family:var(--display);font-size:30px;text-transform:uppercase;letter-spacing:.02em;line-height:1;}
   .brand small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.18em;margin-top:4px;}
-  .top-actions{display:flex;gap:8px;align-items:center;}
+  .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .btn{font-family:var(--mono);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border:2px solid var(--line);background:var(--bg);color:var(--bone);padding:9px 14px;transition:all .15s;white-space:nowrap;}
   .btn:hover{border-color:var(--acid);}
   .btn-acid{background:var(--acid);color:var(--ink);border-color:var(--acid);}
@@ -99,6 +99,7 @@
   <header class="top">
     <div class="brand">Hidromedusa<small>PANEL · ENTRADAS</small></div>
     <div class="top-actions">
+      <select class="btn btn-sm" id="ev-sel" style="display:none" onchange="EV_FILTER=this.value;renderSel()" aria-label="Fecha"></select>
       <button class="btn btn-sm" onclick="load()">↻ Actualizar</button>
       <button class="btn btn-sm" onclick="logout()">Salir</button>
     </div>
@@ -224,10 +225,35 @@ let BY_ID={};
 function claimLink(c){ return SITE+'/entrada/?claim='+encodeURIComponent(c); }
 function shareMsg(t){
   const first=String(t.buyerName||'').trim().split(/\s+/)[0];
+  const ev=EVS[t.eventId];
+  if(ev&&ev.free) return '¡Hola'+(first?' '+first:'')+'! 🪼 Ya tenés tu lugar para '+ev.name+' ('+evDay(ev)+').\n'
+    +'Tu palabra: '+String(t.claim).replace(/-/g,' ').toUpperCase()+'\n'
+    +'Tu hidromedusa: '+claimLink(t.claim)+'\n'
+    +'La entrada es libre. En la fiesta decí tu palabra: si matchea con la de otra persona, ganan una consumición 🍹';
   return '¡Hola'+(first?' '+first:'')+'! 🪼 Ya tenés tu entrada para Hidromedusa.\n'
     +'Tu palabra: '+String(t.claim).replace(/-/g,' ').toUpperCase()+'\n'
     +'Tu entrada y tu hidromedusa: '+claimLink(t.claim)+'\n'
     +'En la puerta decí tu palabra y te damos tu entrada-sticker.';
+}
+// Fechas que manda el backend ({ id, name, date, free… }) y la vigente; el panel muestra una por vez.
+let EVS={}, CUR='', ALL=[], EV_FILTER=null;   // EV_FILTER null = la vigente; '' = todas
+function evDay(ev){
+  const [y,m,d]=String(ev.date||'').split('-').map(Number);
+  if(!d) return '';
+  return ['dom','lun','mar','mié','jue','vie','sáb'][new Date(Date.UTC(y,m-1,d)).getUTCDay()]+' '+d+'/'+m;
+}
+function fillEvSel(){
+  const sel=document.getElementById('ev-sel');
+  const evs=Object.values(EVS).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  if(!evs.length){ sel.style.display='none'; return; }   // backend sin "events": todo junto
+  sel.innerHTML=evs.map(e=>`<option value="${esc(e.id)}">${esc(String(e.name).replace(/^Hidromedusa · /,''))} · ${esc(evDay(e))}${e.id===CUR?' (vigente)':''}</option>`).join('')
+    +'<option value="">Todas las fechas</option>';
+  sel.value=EV_FILTER===null ? CUR : EV_FILTER;
+  sel.style.display='';
+}
+function renderSel(){
+  const v=Object.keys(EVS).length ? (EV_FILTER===null ? CUR : EV_FILTER) : '';
+  render(v ? ALL.filter(t=>t.eventId===v) : ALL);
 }
 // "2494658203" → "5492494658203" (wa.me pide 549 + área + número). Si no se entiende, '' → elegís el contacto.
 function waNumber(p){
@@ -268,7 +294,7 @@ function render(tickets){
       ${nameCell(t)}
       <td>${contact(t)}</td>
       <td><span class="sub">${esc(t.channel)||'—'}</span></td>
-      <td><span class="pill ${t.status}">${t.status==='pending'?'Pagó?':'Lead'}</span></td>
+      <td><span class="pill ${t.status}">${t.status==='pending'?((EVS[t.eventId]||{}).free?'Avisó':'Pagó?'):'Lead'}</span></td>
       <td class="sub">${fmtWhen(t.updatedAt||t.createdAt)}</td>
       <td><div class="row-actions">
         <button class="btn btn-acid btn-sm" onclick="freeTicket('${esc(t.id)}',this)">Generar palabra</button>
@@ -310,7 +336,11 @@ function wordActions(t){
 async function load(){
   try{
     const data=await api('/tickets?staffToken='+encodeURIComponent(token()));
-    render(data.tickets||[]);
+    EVS={}; (data.events||[]).forEach(e=>{ EVS[e.id]=e; });
+    CUR=data.current||'';
+    ALL=data.tickets||[];
+    fillEvSel();
+    renderSel();
   }catch(e){
     if(e.message==='401'){ toast('Sesión vencida'); logout(); return; }
     toast('Error cargando: '+e.message);

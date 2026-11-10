@@ -16,17 +16,24 @@ conform to this. Read this fully before editing any file.
 - **Membership is hidden** for this pass (no MP, no billing).
 - **OAuth login stays optional** and env-gated (demo fallback when no creds).
 
-## Event (last one, hardcoded fallback)
+## Event (hardcoded fallback)
 
-Ya pasó: la web está "entre fechas" (metas/OG sin fecha, `og-entre-fechas.jpg`; compra cerrada,
-invitaciones → 410, la entrada se ve como "Recuerdo"). Para una fecha nueva ver CLAUDE.md.
+Una entrada por fecha en `EVENTS` (`lambdas/tickets/index.js`); `CURRENT_EVENT` es la vigente. Las entradas
+viejas conservan su `eventId` y se ven como "Recuerdo" con SU fecha y lugar; las nuevas (pedidos, palabras,
+invitaciones) nacen con `CURRENT_EVENT`. Si el `leadId` del navegador ya es una entrada de otra fecha,
+`POST /tickets/capture` crea un registro aparte `<leadId>-<CURRENT_EVENT>`. `/tickets/lists` es solo de la vigente.
 
 ```
-id: ev-1
+id: ev-2   (vigente)
+title: Hidromedusa · Los Rojos
+date: 2026-12-04 (viernes)  time: a confirmar (start vacío; end holgado 2026-12-05 06:00 -03:00) · invitados a confirmar
+venue: Los Rojos, Pinto 35, Tandil, Buenos Aires, AR
+tickets: entrada libre y gratuita (`free: true`) · se reserva avisando por WhatsApp/IG
+
+id: ev-1   (pasó)
 title: Hidromedusa · Fechón estelar en 990
-date: 2026-10-31 (sábado)  time: 21:00 (-03:00) → end 2026-11-01 03:00 · DJ invitados: VHS, Marcos Acosta
-venue: 990 Espacio Cultural, Tandil, Buenos Aires, AR
-tickets: general $10.000 ARS · pago por transferencia al alias, captura por WhatsApp/IG
+date: 2026-10-31 (sábado) 21:00 (-03:00) → end 2026-11-01 03:00 · DJ invitados: VHS, Marcos Acosta
+venue: 990 Espacio Cultural, Tandil · general $10.000 ARS por transferencia
 ```
 
 ## Config (env + window)
@@ -122,7 +129,7 @@ Staff-gated routes require `staffToken` (body) matching `STAFF_TOKEN`
 
 Tickets:
 - `POST /tickets/request`  (public) `{ type, buyerName, buyerEmail?, buyerPhone?, merchIdea? }` → `{ ticket }` (status `pending`). Used to log a WhatsApp lead. Best-effort.
-- `GET  /tickets`          (staff)  `?status=` → `[tickets]`
+- `GET  /tickets`          (staff)  `?status=` → `{ tickets, events, current }` (el panel filtra por `eventId`, por defecto la vigente)
 - `POST /tickets/:id/free` (staff)  `{ staffToken }` → `{ ticket }` (mints claim, sets `freed`)
 - `POST /tickets/issue`    (staff)  `{ type, buyerName, ..., staffToken }` → `{ ticket }` (create + free in one step)
 - `POST /tickets/redeem`   (public) `{ claim }` → `{ ticket, event }` (lookup by claimNorm; 404 if none)

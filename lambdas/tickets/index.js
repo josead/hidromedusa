@@ -2,7 +2,7 @@
 // Lifecycle: pending -> freed (claim minted) -> used. No user accounts.
 // Endpoints (see CONTRACT.md "HTTP API" → Tickets):
 //   POST /tickets/request   (public) { type, buyerName, buyerEmail?, buyerPhone?, merchIdea? } → { ticket }
-//   GET  /tickets           (staff)  ?status= → { tickets }
+//   GET  /tickets           (staff)  ?status= → { tickets, events, current }
 //   POST /tickets/:id/free  (staff)  { staffToken } → { ticket }
 //   POST /tickets/issue     (staff)  { type, buyerName, ..., staffToken } → { ticket }
 //   POST /tickets/redeem    (public) { claim } → { ticket, event }
@@ -12,7 +12,7 @@
 //   POST /tickets/invites       (staff)  { count?, note?, staffToken } → { invites }
 //   POST /tickets/invite/check  (public) { code } → { ok, event } | 404 | 409 | 410 (fecha pasada)
 //   POST /tickets/invite/claim  (public) { code, buyerName, buyerPhone?, buyerEmail? } → { ticket, event } | 410
-//   POST /tickets/lists         (clave)  { clave } → { paid, bar:{pairs,unpaired}, guests, cancelled, invitesUnused, event, at }
+//   POST /tickets/lists         (clave)  { clave } → { paid, bar:{pairs,unpaired}, guests, cancelled, invitesUnused, event, at } (fecha vigente)
 
 const crypto = require('crypto');
 const store = require('../lib/store');
@@ -24,7 +24,8 @@ const barpairs = require('../lib/barpairs');
 const STATUS_RANK = { lead: 0, pending: 1, freed: 2, used: 3, cancelled: 3 };
 const rank = (s) => (s in STATUS_RANK ? STATUS_RANK[s] : -1);
 
-// In-file event map (hardcoded fallback per CONTRACT.md "Event").
+// In-file event map (hardcoded fallback per CONTRACT.md "Event"). Una entrada por fecha:
+// las viejas conservan su eventId (y se ven como "Recuerdo"); las nuevas nacen con CURRENT_EVENT.
 const EVENTS = {
   'ev-1': {
     id: 'ev-1',
@@ -34,7 +35,17 @@ const EVENTS = {
     end: '2026-11-01T03:00:00-03:00',
     venue: '990 Espacio Cultural, Tandil',
   },
+  'ev-2': {
+    id: 'ev-2',
+    name: 'Hidromedusa · Los Rojos',
+    date: '2026-12-04',
+    time: '',   // hora a confirmar
+    free: true, // entrada libre: el panel arma el mensaje de la palabra sin entrada-sticker
+    end: '2026-12-05T06:00:00-03:00',   // holgado mientras no hay hora
+    venue: 'Los Rojos (Pinto 35), Tandil',
+  },
 };
+const CURRENT_EVENT = 'ev-2';
 
 // Pasado el fin del evento ya no se anota gente (las invitaciones sin usar mueren).
 const eventOver = (ev) => !!(ev && ev.end) && Date.now() > Date.parse(ev.end);
@@ -92,7 +103,7 @@ function newTicket(body) {
   return {
     id: makeId(),
     type,
-    eventId: 'ev-1',
+    eventId: CURRENT_EVENT,
     buyerName,
     buyerEmail: buyerEmail || null,
     buyerPhone: buyerPhone || null,
@@ -130,8 +141,14 @@ async function capture(req) {
   if (!name && !eml && !phone) return { status: 400, body: { error: 'Nothing to capture' } };
 
   try {
-    const id = leadId || makeId();
-    const existing = leadId ? await store.tickets.get(id) : null;
+    let id = leadId || makeId();
+    let existing = leadId ? await store.tickets.get(id) : null;
+    // El leadId vive en el navegador entre fechas: si apunta a la entrada de una fecha
+    // anterior, el pedido nuevo va a un registro aparte y la vieja queda como estaba.
+    if (existing && existing.eventId !== CURRENT_EVENT) {
+      id = `${leadId}-${CURRENT_EVENT}`;
+      existing = await store.tickets.get(id);
+    }
     const now = new Date().toISOString();
 
     if (!existing) {
@@ -178,13 +195,14 @@ async function request(req) {
   return capture({ body: { ...body, stage: 'pending' } });
 }
 
-// STAFF: list tickets, optional ?status= filter.
+// STAFF: list tickets (all events), optional ?status= filter. `events` + `current`
+// let the panel filter by fecha.
 async function list(req) {
   if (!requireStaff(req)) return { status: 401, body: { error: 'Staff token required' } };
   try {
     const status = req.query?.status;
     const tickets = await store.tickets.list({ status });
-    return { status: 200, body: { tickets } };
+    return { status: 200, body: { tickets, events: Object.values(EVENTS), current: CURRENT_EVENT } };
   } catch (err) {
     return { status: 500, body: { error: err.message } };
   }
@@ -456,14 +474,15 @@ async function claimInvite(req) {
 // público. Para cambiarla: printf %s 'nueva' | sha256sum
 const LISTS_KEY_SHA256 = 'bfc89bdc0fc4091f03f03b6d98e8f66cda8e29d8ac197043392e0b6a0b20518c';
 
-// PUBLIC (con clave): lo justo para armar las listas de puerta y barra, sin contactos.
+// PUBLIC (con clave): lo justo para armar las listas de puerta y barra de la fecha
+// vigente, sin contactos.
 async function lists(req) {
   const typed = crypto.createHash('sha256').update(String(req.body?.clave || '').trim()).digest();
   if (!crypto.timingSafeEqual(typed, Buffer.from(LISTS_KEY_SHA256, 'hex'))) {
     return { status: 401, body: { error: 'Clave incorrecta' } };
   }
   try {
-    const all = await store.tickets.list();
+    const all = (await store.tickets.list()).filter((t) => t.eventId === CURRENT_EVENT);
     const pick = (t) => ({ claim: t.claim || null, buyerName: t.buyerName || '', status: t.status });
     const paid = all.filter((t) => (t.status === 'freed' || t.status === 'used') && t.claim).map(pick);
     return {
@@ -474,7 +493,7 @@ async function lists(req) {
         guests: all.filter((t) => t.status === 'guest').map(pick),
         cancelled: all.filter((t) => t.status === 'cancelled' && t.claim).map(pick),
         invitesUnused: all.filter((t) => t.status === 'invite').length,
-        event: EVENTS['ev-1'],
+        event: EVENTS[CURRENT_EVENT],
         at: new Date().toISOString(),
       },
     };
