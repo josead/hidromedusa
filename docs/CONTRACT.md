@@ -11,8 +11,11 @@ conform to this. Read this fully before editing any file.
   ticket.
 - **Claim by secret phrase.** When staff frees a ticket the system mints a
   **two-word Spanish phrase** (e.g. `medusa-violeta`). The buyer enters that
-  phrase on the site to pull up their **ticket card** — the palabras clave shown
-  for the icebreaker game (NO QR; no physical sticker for the current free date).
+  phrase on the site to pull up their **ticket card** with the palabras clave and
+  their **hidromedusa** (NO entry QR; no physical sticker for the current free date).
+- **Medusas que evolucionan.** The phrase is kept across dates: at each later date
+  the buyer scans the night's QR (`/?evo=CODE`), enters the phrase and the jellyfish
+  levels up (more definition + one new rasgo). See "Evolución" below.
 - **Membership is hidden** for this pass (no MP, no billing).
 - **OAuth login stays optional** and env-gated (demo fallback when no creds).
 
@@ -113,8 +116,25 @@ Invitations (free, type 'invitado', id `INV-<CODE>`, no claim phrase):
   status, issuedBy|null,
   createdAt, freedAt|null, usedAt|null,
   inviteCode?, inviteNote?, registeredAt?          // invitations only (channel 'invitacion')
+  evos?: { [eventId]: { rasgo, at } }              // evolutions, one per later date (QR de la noche)
 }
 ```
+
+### Evolución (QR de la noche)
+
+The jellyfish lives on the **birth ticket** (the phrase is unique across the table):
+level = 1 + number of `evos`; the drawing is `JellyfishGen.render(canvas, noun, adj,
+{ level, rasgos })` (`public/js/jellyfish.js`: level 1 = the original 28×44 pixel art,
+level 2+ = 56×88 with dithering, continuous pulse and the rasgos earned).
+
+- Each date has a secret code printed as a QR at the party → `https://hidromedusa.com/?evo=CODE`.
+  Only its sha256 goes in `EVO` (`lambdas/tickets/index.js`), apart from the public `EVENTS`;
+  the plaintext stays outside the repo.
+- Window: from `EVO[CURRENT_EVENT].from` to `EVENTS[CURRENT_EVENT].end`.
+- One evolution per date, never on the birth date. The new rasgo is deterministic
+  (sha256 of `claimNorm|eventId`, among the ones not owned yet), so a double tap gets the same one.
+- `RASGOS` in the Lambda must match `RASGOS` in `jellyfish.js`:
+  `corona, espiral, destello, aura, velo, brazos, trebol, lunares, cometa, faro`.
 
 Invite codes: 6 chars from `ABCDEFGHJKMNPQRSTUVWXYZ23456789` (no 0/O/1/I/L);
 input is upper-cased and stripped of non-alphanumerics. Single use is enforced
@@ -132,12 +152,13 @@ Tickets:
 - `GET  /tickets`          (staff)  `?status=` → `{ tickets, events, current }` (el panel filtra por `eventId`, por defecto la vigente)
 - `POST /tickets/:id/free` (staff)  `{ staffToken }` → `{ ticket }` (mints claim, sets `freed`)
 - `POST /tickets/issue`    (staff)  `{ type, buyerName, ..., staffToken }` → `{ ticket }` (create + free in one step)
-- `POST /tickets/redeem`   (public) `{ claim }` → `{ ticket, event }` (lookup by claimNorm; 404 if none)
+- `POST /tickets/redeem`   (public) `{ claim }` → `{ ticket:{ id, type, eventId, claim, status, level, rasgos, evos:[{ eventId, rasgo, date }] }, event }` (lookup by claimNorm; 404 if none or cancelled). Sin nombre ni contactos: hay 18×18 frases y se dicen en voz alta. `event` = la fecha en que nació.
+- `POST /tickets/evolve`   (public) `{ claim, code }` → `{ ticket, event, rasgo, evolved:true }` or `{ ticket, event, rasgo, already:true }` (ya evolucionó en esta fecha). 403 QR de otra fecha / antes de `from`, 410 la fecha ya terminó, 404 palabra desconocida o anulada, 409 `{ error, ticket, event }` nació esta noche.
 - `POST /tickets/:id/scan` (staff)  `{ staffToken }` → `{ valid, ticket, reason? }`
 - `GET  /tickets/:id`      (staff)  → `{ ticket }`
 - `POST /tickets/:id/rename` (staff) `{ buyerName, staffToken }` → `{ ticket }` (only the name changes; no email)
 - `POST /tickets/invites`  (staff)  `{ count?=1 (max 50), note?, staffToken }` → `{ invites:[ticket] }` (status `invite`)
-- `POST /tickets/lists` (clave) `{ clave }` → `{ paid, bar:{ pairs:[{a,b,word}], unpaired:[claim] }, guests, cancelled:[{claim,buyerName,status}], invitesUnused, event, at }` (401 clave incorrecta). `bar` = parejas fijas de barra de `lib/barpairs.js` (cada persona en una sola pareja, 1 consumición por pareja, determinístico). Sin emails/teléfonos; la clave va hasheada (sha256) en `lambdas/tickets/index.js`. La usa `/listas/` (puerta + barra en vivo).
+- `POST /tickets/lists` (clave) `{ clave }` → `{ paid, guests, cancelled:[{claim,buyerName,status}], invitesUnused, evolved:[{claim,rasgo,level}], event, at }` (401 clave incorrecta). `evolved` = las medusas que evolucionaron en la fecha vigente, en orden de llegada (de cualquier fecha de nacimiento, sin nombres). Sin emails/teléfonos; la clave va hasheada (sha256) en `lambdas/tickets/index.js`. La usa `/listas/` (puerta + evoluciones en vivo).
 - `POST /tickets/invite/check` (public) `{ code }` → `{ ok, event }` (404 unknown/cancelled, 409 already used, 410 event already over)
 - `POST /tickets/invite/claim` (public) `{ code, buyerName, buyerPhone?, buyerEmail? }` (name + phone or email) → `{ ticket:{ id, buyerName, status:'guest' }, event }` (409 if already used, 410 event already over). Front: `/invitacion/?c=CODE`.
 
@@ -180,8 +201,11 @@ Default panel/task seed = the set already in `public/js/staff-panel.js`
   WhatsApp" opens `https://wa.me/<WHATSAPP_NUMBER>?text=<prefilled>` AND
   best-effort `POST /tickets/request`. No payment UI.
 - Retrieve: "Reclamar tu palabra" → input phrase → `POST /tickets/redeem` → render
-  a **ticket card showing the palabras clave** for the icebreaker game (NO QR). Works
-  without login. No physical sticker for the current free date.
+  a **ticket card showing the palabras clave** and the jellyfish at its level (NO QR).
+  Works without login. No physical sticker for the current free date.
+- Evolve: `/?evo=CODE` keeps the code in `sessionStorage` (`hm_evo`) and opens the same
+  modal in "Evolucionar" mode → `POST /tickets/evolve` → the card animates from the
+  previous level to the new one.
 - Staff portal (`public/js/staff-panel.js`): call `/staff/*` (fallback to
   localStorage). Add an **Entradas** management view: list pending requests +
   freed tickets, "Liberar" button → `/tickets/:id/free`, show/copy claim phrase.

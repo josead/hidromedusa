@@ -6,19 +6,19 @@
 //   POST /tickets/:id/free  (staff)  { staffToken } → { ticket }
 //   POST /tickets/issue     (staff)  { type, buyerName, ..., staffToken } → { ticket }
 //   POST /tickets/redeem    (public) { claim } → { ticket, event }
+//   POST /tickets/evolve    (QR de la noche) { claim, code } → { ticket, event, rasgo, evolved | already }
 //   POST /tickets/:id/scan  (staff)  { staffToken } → { valid, ticket, reason? }
 //   GET  /tickets/:id       (staff)  → { ticket, event }
 //   POST /tickets/:id/rename (staff) { buyerName, staffToken } → { ticket }
 //   POST /tickets/invites       (staff)  { count?, note?, staffToken } → { invites }
 //   POST /tickets/invite/check  (public) { code } → { ok, event } | 404 | 409 | 410 (fecha pasada)
 //   POST /tickets/invite/claim  (public) { code, buyerName, buyerPhone?, buyerEmail? } → { ticket, event } | 410
-//   POST /tickets/lists         (clave)  { clave } → { paid, bar:{pairs,unpaired}, guests, cancelled, invitesUnused, event, at } (fecha vigente)
+//   POST /tickets/lists         (clave)  { clave } → { paid, guests, cancelled, invitesUnused, evolved, event, at } (fecha vigente)
 
 const crypto = require('crypto');
 const store = require('../lib/store');
 const claimcode = require('../lib/claimcode');
 const email = require('../lib/email');
-const barpairs = require('../lib/barpairs');
 
 // Lifecycle order — status only ever moves FORWARD (never downgrades).
 const STATUS_RANK = { lead: 0, pending: 1, freed: 2, used: 3, cancelled: 3 };
@@ -50,6 +50,16 @@ const CURRENT_EVENT = 'ev-2';
 // Pasado el fin del evento ya no se anota gente (las invitaciones sin usar mueren).
 const eventOver = (ev) => !!(ev && ev.end) && Date.now() > Date.parse(ev.end);
 const PAST_INVITE = { status: 410, body: { error: 'Esa invitación era para una fecha que ya pasó' } };
+
+// Evolución: la medusa de una fecha anterior que vuelve a otra sube un nivel y gana un rasgo.
+// Se marca con el QR de la noche (hidromedusa.com/?evo=<código>), abierto de `from` al `end`
+// de la fecha. Cada fecha tiene su código, y va hasheado porque el repo es público:
+// printf %s 'CODIGO' | sha256sum  (ver CLAUDE.md). Va aparte de EVENTS porque EVENTS sale al público.
+const EVO = {
+  'ev-2': { from: '2026-12-04T18:00:00-03:00', codeSha256: 'd2f6d3f695300c62eb87fcaf78d33807d8a10108e3d5340a059d403dd2b5d354' },
+};
+// Los mismos que dibuja public/js/jellyfish.js (RASGOS).
+const RASGOS = ['corona', 'espiral', 'destello', 'aura', 'velo', 'brazos', 'trebol', 'lunares', 'cometa', 'faro'];
 
 // ── Helpers ───────────────────────────────────────
 
@@ -335,17 +345,82 @@ async function remove(req) {
   }
 }
 
+// Lo único de una entrada que sale por redeem/evolve. La frase se dice en voz alta en la fiesta y
+// hay solo 18×18, así que cualquiera puede probarlas todas: nunca nombre, mail ni teléfono.
+// Nace en nivel 1 y suma un nivel y un rasgo por cada fecha a la que volvió (`evos`, en orden).
+function publicTicket(t) {
+  const evos = Object.entries(t.evos || {})
+    .sort((a, b) => String(a[1].at).localeCompare(String(b[1].at)))
+    .map(([eventId, e]) => ({ eventId, rasgo: e.rasgo, date: (EVENTS[eventId] || {}).date || null }));
+  return {
+    id: t.id, type: t.type, eventId: t.eventId, claim: t.claim, status: t.status,
+    level: 1 + evos.length, rasgos: evos.map((e) => e.rasgo), evos,
+  };
+}
+
+// La entrada válida de una frase (con medusa), o null.
+async function ticketByClaim(claim) {
+  const norm = claimcode.normalize(claim);
+  if (!norm) return null;
+  const ticket = await store.tickets.byClaim(norm);
+  return ticket && ticket.claim && ticket.status !== 'cancelled' ? ticket : null;
+}
+
 // PUBLIC: redeem a claim phrase → ticket + event (for the ticket card / palabras clave).
 async function redeem(req) {
-  const { claim } = req.body || {};
   try {
-    const norm = claimcode.normalize(claim);
-    const ticket = await store.tickets.byClaim(norm);
-    if (!ticket || ticket.status === 'cancelled') {
-      return { status: 404, body: { error: 'No encontramos ese código' } };
-    }
+    const ticket = await ticketByClaim((req.body || {}).claim);
+    if (!ticket) return { status: 404, body: { error: 'No encontramos ese código' } };
     const event = EVENTS[ticket.eventId] || null;
-    return { status: 200, body: { ticket, event } };
+    return { status: 200, body: { ticket: publicTicket(ticket), event } };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
+// El rasgo nuevo: uno que la medusa todavía no tenga, elegido por su frase y la fecha. Al no ser
+// al azar, un doble toque en el QR escribe lo mismo dos veces y no hace falta un update condicional.
+function pickRasgo(ticket) {
+  const owned = Object.values(ticket.evos || {}).map((e) => e.rasgo);
+  const free = RASGOS.filter((r) => !owned.includes(r));
+  const pool = free.length ? free : RASGOS;
+  const h = crypto.createHash('sha256').update(`${ticket.claimNorm}|${CURRENT_EVENT}`).digest();
+  return pool[h.readUInt32BE(0) % pool.length];
+}
+
+// PUBLIC (con el código del QR de la noche): la medusa de esa frase sube un nivel y gana un rasgo.
+// Una vez por fecha, y no en la fecha en que nació. Ojo: con el código, cualquier frase evoluciona
+// (son 324); alcanza porque el código solo está en la fiesta y no da nada más que el dibujo.
+async function evolve(req) {
+  const body = req.body || {};
+  const evo = EVO[CURRENT_EVENT];
+  const typed = crypto.createHash('sha256').update(String(body.code || '').trim()).digest();
+  if (!evo || !crypto.timingSafeEqual(typed, Buffer.from(evo.codeSha256, 'hex'))) {
+    return { status: 403, body: { error: 'Ese QR no es el de esta fecha' } };
+  }
+  if (Date.now() < Date.parse(evo.from)) {
+    return { status: 403, body: { error: 'La evolución se abre en la fiesta' } };
+  }
+  if (eventOver(EVENTS[CURRENT_EVENT])) {
+    return { status: 410, body: { error: 'Esa fiesta ya terminó: tu medusa evoluciona en la próxima fecha' } };
+  }
+  try {
+    const ticket = await ticketByClaim(body.claim);
+    if (!ticket) return { status: 404, body: { error: 'No encontramos esa palabra' } };
+    const event = EVENTS[ticket.eventId] || null;
+    if (ticket.eventId === CURRENT_EVENT) {
+      return {
+        status: 409,
+        body: { error: 'Tu medusa nació esta noche: evoluciona en la próxima fecha', ticket: publicTicket(ticket), event },
+      };
+    }
+    const had = (ticket.evos || {})[CURRENT_EVENT];
+    if (had) return { status: 200, body: { ticket: publicTicket(ticket), event, rasgo: had.rasgo, already: true } };
+    const rasgo = pickRasgo(ticket);
+    const updated = await store.tickets.update(ticket.id, {
+      evos: { ...(ticket.evos || {}), [CURRENT_EVENT]: { rasgo, at: new Date().toISOString() } },
+    });
+    return { status: 200, body: { ticket: publicTicket(updated), event, rasgo, evolved: true } };
   } catch (err) {
     return { status: 500, body: { error: err.message } };
   }
@@ -474,25 +549,28 @@ async function claimInvite(req) {
 // público. Para cambiarla: printf %s 'nueva' | sha256sum
 const LISTS_KEY_SHA256 = 'bfc89bdc0fc4091f03f03b6d98e8f66cda8e29d8ac197043392e0b6a0b20518c';
 
-// PUBLIC (con clave): lo justo para armar las listas de puerta y barra de la fecha
-// vigente, sin contactos.
+// PUBLIC (con clave): lo justo para armar la lista de puerta de la fecha vigente, sin
+// contactos, y las medusas que evolucionaron esta noche (solo frase y rasgo).
 async function lists(req) {
   const typed = crypto.createHash('sha256').update(String(req.body?.clave || '').trim()).digest();
   if (!crypto.timingSafeEqual(typed, Buffer.from(LISTS_KEY_SHA256, 'hex'))) {
     return { status: 401, body: { error: 'Clave incorrecta' } };
   }
   try {
-    const all = (await store.tickets.list()).filter((t) => t.eventId === CURRENT_EVENT);
+    const every = await store.tickets.list();
+    const all = every.filter((t) => t.eventId === CURRENT_EVENT);
     const pick = (t) => ({ claim: t.claim || null, buyerName: t.buyerName || '', status: t.status });
-    const paid = all.filter((t) => (t.status === 'freed' || t.status === 'used') && t.claim).map(pick);
+    const evolved = every.filter((t) => t.claim && t.evos && t.evos[CURRENT_EVENT])
+      .sort((a, b) => String(a.evos[CURRENT_EVENT].at).localeCompare(String(b.evos[CURRENT_EVENT].at)))
+      .map((t) => ({ claim: t.claim, rasgo: t.evos[CURRENT_EVENT].rasgo, level: 1 + Object.keys(t.evos).length }));
     return {
       status: 200,
       body: {
-        paid,
-        bar: barpairs.pairUp(paid),
+        paid: all.filter((t) => (t.status === 'freed' || t.status === 'used') && t.claim).map(pick),
         guests: all.filter((t) => t.status === 'guest').map(pick),
         cancelled: all.filter((t) => t.status === 'cancelled' && t.claim).map(pick),
         invitesUnused: all.filter((t) => t.status === 'invite').length,
+        evolved,
         event: EVENTS[CURRENT_EVENT],
         at: new Date().toISOString(),
       },
@@ -517,6 +595,6 @@ async function getTicket(req) {
 }
 
 module.exports = {
-  request, capture, list, free, issue, reword, cancel, rename, remove, redeem, scan, getTicket,
+  request, capture, list, free, issue, reword, cancel, rename, remove, redeem, evolve, scan, getTicket,
   createInvites, checkInvite, claimInvite, lists,
 };

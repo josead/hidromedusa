@@ -307,6 +307,16 @@
   .jf-canvas-wrap:hover canvas { filter: drop-shadow(0 0 20px rgba(198,255,26,0.55)) drop-shadow(0 0 60px rgba(198,255,26,0.18)); }
   .jf-hint { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.1em; margin-top: 8px; }
   .jf-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+  /* Niveles: rasgos debajo de la medusa, aviso del QR arriba y el destello al evolucionar */
+  .jf-lvl { font-family: var(--mono); font-size: 12px; color: var(--bone); letter-spacing: 0.06em; margin-top: 10px; min-height: 1em; }
+  .jf-note { display: inline-block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; line-height: 1.45; text-transform: uppercase; background: var(--acid); color: var(--ink); padding: 8px 12px; margin-bottom: 16px; max-width: 320px; }
+  .jf-canvas-wrap.evolving canvas { animation: jf-evo 1.2s ease-in-out; }
+  @keyframes jf-evo {
+    0%   { transform: scale(1); }
+    42%  { transform: scale(1.1); filter: brightness(2.6) drop-shadow(0 0 30px rgba(198,255,26,1)) drop-shadow(0 0 90px rgba(198,255,26,0.6)); }
+    100% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) { .jf-canvas-wrap.evolving canvas { animation: none; } }
 
   /* ---------- Jellyfish fullscreen ---------- */
   #jf-fullscreen {
@@ -641,17 +651,17 @@
               <li>Invitados (se anuncian pronto)</li>
               <li>Barra habilitada</li>
               <li>Tu hidromedusa digital para compartir</li>
-              <li>Tu palabra icebreaker</li>
+              <li>Si ya tenés una, evoluciona</li>
             </ul>
           </div>
           <div>
             <div class="secret" style="margin-bottom:0">
               <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--acid);flex-shrink:0;margin-top:2px"></i>
-              <div><b>Palabra icebreaker</b><p>Tu reserva trae una palabra rompehielos de dos palabras. Si compartís una palabra con otra persona, se presentan y ganan una consumición. 🍹</p></div>
+              <div><b>Medusas que evolucionan</b><p>Tu hidromedusa nace con tus dos palabras. Volvé con ella a la fecha siguiente, escaneá el QR de la noche y sube de nivel: más definición y un rasgo nuevo, cada vez más única. ¿Tenés una del 31/10? Traela el 4/12. 🪼</p></div>
             </div>
           </div>
         </div>
-        <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">La entrada es gratis. Si querés tu hidromedusa, avisá que venís por WhatsApp o Instagram y te habilitamos tu <b style="color:var(--acid);font-style:normal">palabra icebreaker</b> (dos palabras) — la cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu hidromedusa»</a> y aparece tu hidromedusa. En la fiesta compartí tu palabra: si coincide con la de otra persona, ganan una consumición.</p>
+        <p class="reveal" style="font-family:var(--body);color:var(--bone);font-size:16px;line-height:1.6;max-width:640px;margin-top:24px">La entrada es gratis. Si querés tu hidromedusa, avisá que venís por WhatsApp o Instagram y te habilitamos tus <b style="color:var(--acid);font-style:normal">dos palabras</b>: las cargás en <a onclick="openModal('m-redeem')" style="color:var(--acid);cursor:pointer;font-style:normal">«Reclamar tu hidromedusa»</a> y aparece tu hidromedusa. Si ya tenés una, traela: en la fiesta escaneás el QR de la noche y evoluciona.</p>
       </div>
     </div>
   </section>
@@ -872,10 +882,10 @@
       <div class="modal-head"><h4>Tu hidromedusa 🪼</h4><button class="modal-x" onclick="closeRedeem()">×</button></div>
       <div class="modal-body">
         <div id="redeem-form">
-          <p style="color:var(--bone-dim);font-size:14px;line-height:1.5;margin-bottom:16px">Cargá tu <b style="color:var(--acid)">palabra icebreaker</b> (dos palabras). Se habilita cuando el staff confirme tu lugar.</p>
+          <p id="redeem-intro" style="color:var(--bone-dim);font-size:14px;line-height:1.5;margin-bottom:16px">Cargá tus <b style="color:var(--acid)">dos palabras</b>. Se habilitan cuando el staff confirme tu lugar.</p>
           <label class="field-label">Tus dos palabras</label>
           <input class="field" id="redeem-claim" placeholder="ej. medusa violeta" autocomplete="off" onkeydown="if(event.key==='Enter')redeem()" />
-          <button class="btn btn-acid btn-block btn-lg" onclick="redeem()">Ver mi entrada</button>
+          <button class="btn btn-acid btn-block btn-lg" id="redeem-go" onclick="redeem()">Ver mi entrada</button>
           <p data-until="2026-12-04" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5">¿Todavía no tenés tu palabra? <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Reservá tu lugar acá →</a></p>
           <p data-until="2026-10-31" hidden style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5">¿Tenés un código de invitación? <a href="/invitacion/" onclick="track('invitacion-abrir',{ desde:'reclamar' })" style="color:var(--acid)">Anotate acá →</a></p>
         </div>
@@ -956,7 +966,11 @@ async function api(path, opts={}){
     headers: { 'Content-Type':'application/json' },
     ...(opts.body ? { body: JSON.stringify(opts.body) } : {})
   });
-  if(!res.ok) throw new Error('http-'+res.status);
+  if(!res.ok){
+    const err=new Error('http-'+res.status); err.status=res.status;
+    try { err.body=await res.json(); } catch(e){}   // { error, ... } del backend
+    throw err;
+  }
   return res.json();
 }
 
@@ -1021,6 +1035,8 @@ function restoreClaimedJf(){
     if(document.getElementById('redeem-result').innerHTML.trim()) return;
     const inp=document.getElementById('redeem-claim');
     if(inp) inp.value=saved.claim.replace(/-/g,' ');
+    // Con el QR de la noche espera el toque en "Evolucionar" (puede ser la medusa de otra persona)
+    if(window._evoCode) return;
     // Auto-run so they land straight on their jellyfish
     redeem();
   } catch(e){}
@@ -1117,7 +1133,7 @@ function collectOrder(channel){
   if(!name){ toast('Decinos tu nombre'); return null; }
   captureLead('pending', channel);
   // Fecha gratis: solo avisa que viene (para una paga, el mensaje de 16fcd4c pide la captura al alias).
-  return '¡Hola Hidromedusa! Voy a la tocada del '+HM_EVENT.shortLabel+'. Soy '+name+'. ¿Me pasan mi palabra icebreaker? 🪼';
+  return '¡Hola Hidromedusa! Voy a la tocada del '+HM_EVENT.shortLabel+'. Soy '+name+'. ¿Me pasan mi hidromedusa? 🪼';
 }
 // Abre un link externo en otra pestaña SIN dejar una pestaña en blanco: un
 // <a target="_blank"> navega directo al destino, mientras que window.open crea
@@ -1168,14 +1184,65 @@ function fallbackCopy(text,done){
 async function redeem(){
   const claim=(document.getElementById('redeem-claim').value||'').trim();
   if(!claim){ toast('Cargá tu frase de dos palabras'); return; }
+  if(window._evoCode) return evolve(claim);
   let data;
   try { data=await api('/tickets/redeem',{ method:'POST', body:{ claim } }); }
   catch(err){
     if(err && /http-(404|410)/.test(err.message)){ toast('No encontramos ese código 🪼'); return; }
-    // demo/offline: aceptar cualquier frase y mostrar una entrada de muestra
-    data={ ticket:{ id:'HM-'+claim.toLowerCase().replace(/\s+/g,'-'), type:'general', claim, status:'freed' }, event:HM_EVENT };
+    // demo/offline: aceptar cualquier frase y mostrar una entrada de muestra (con el nivel guardado si es la misma)
+    let saved=null; try { saved=JSON.parse(localStorage.getItem('hm_claimed')||'null'); } catch(e){}
+    const key=s=>String(s||'').toLowerCase().replace(/[-\s]+/g,' ').trim();
+    const same=saved && key(saved.claim)===key(claim);
+    data={ ticket:{ id:'HM-'+claim.toLowerCase().replace(/\s+/g,'-'), type:'general', claim, status:'freed',
+      level:same ? saved.level||1 : 1, rasgos:same ? saved.rasgos||[] : [] }, event:HM_EVENT };
   }
   renderTicketCard(data.ticket, data.event||HM_EVENT);
+}
+
+/* ---------- Evolución (QR de la noche: ?evo=CODE) ---------- */
+// Con el código del QR, el botón pasa a "Evolucionar": la medusa sube un nivel y gana un rasgo
+// (una vez por fecha, y no la noche en que nació). El código queda en la pestaña hasta que se
+// usa o se cierra el modal, así una recarga no lo pierde.
+function setEvoMode(code){
+  window._evoCode=code||null;
+  try { if(code) sessionStorage.setItem('hm_evo', code); else sessionStorage.removeItem('hm_evo'); } catch(e){}
+  document.getElementById('redeem-intro').innerHTML=code
+    ? 'Escaneaste el QR de la noche 🪼 Cargá tus <b style="color:var(--acid)">dos palabras</b> y tu medusa evoluciona.'
+    : 'Cargá tus <b style="color:var(--acid)">dos palabras</b>. Se habilitan cuando el staff confirme tu lugar.';
+  document.getElementById('redeem-go').textContent=code ? 'Evolucionar mi medusa' : 'Ver mi entrada';
+}
+let _evoBusy=false;
+async function evolve(claim){
+  if(_evoBusy) return;
+  _evoBusy=true;
+  try {
+    let data;
+    try { data=await api('/tickets/evolve',{ method:'POST', body:{ claim, code:window._evoCode } }); }
+    catch(err){
+      const b=(err&&err.body)||{};
+      if(err && err.status===404){ toast('No encontramos esa palabra 🪼'); return; }
+      if(err && err.status===409 && b.ticket){   // nació esta noche
+        setEvoMode(null); track('evolucion-lista',{ estado:'nacio-hoy' });
+        renderTicketCard(b.ticket, b.event||HM_EVENT, { note:b.error });
+        return;
+      }
+      if(err && (err.status===403 || err.status===410)){   // QR de otra fecha o fuera de hora: la tarjeta de siempre
+        setEvoMode(null); track('evolucion-lista',{ estado:'cerrada' });
+        toast(b.error||'Ese QR no es el de esta fecha');
+        return redeem();
+      }
+      toast('No pudimos conectar 🪼 Probá de nuevo');
+      return;
+    }
+    setEvoMode(null);
+    track('evolucion-lista',{ estado:data.evolved ? 'evoluciono' : 'ya', nivel:data.ticket.level });
+    renderTicketCard(data.ticket, data.event||HM_EVENT, data.evolved ? { evolved:true } : { note:'Tu medusa ya evolucionó esta noche' });
+  } finally { _evoBusy=false; }
+}
+// ['velo','faro','trebol'] → "con velo, faro y trébol"
+function rasgosLabel(rs){
+  const n=(rs||[]).map(r=>window.JellyfishGen ? JellyfishGen.rasgoLabel(r) : r);
+  return n.length ? 'con '+(n.length>1 ? n.slice(0,-1).join(', ')+' y '+n[n.length-1] : n[0]) : '';
 }
 // Parse "medusa-violeta" or "medusa violeta" → {noun, adj}
 function parseClaim(claim){
@@ -1184,20 +1251,26 @@ function parseClaim(claim){
   return parts.length>=2 ? {noun:parts[0], adj:parts.slice(1).join('-')} : null;
 }
 
-function renderTicketCard(tk, ev){
+// o = { evolved } anima la evolución (del nivel anterior al nuevo) · { note } aviso arriba de la medusa
+function renderTicketCard(tk, ev, o){
+  o=o||{};
   const typeLabel='ENTRADA';
   const statusMap={ freed:'Válida', pending:'Pendiente', used:'Usada', cancelled:'Cancelada' };
   const over=eventOver(ev);
   const status=over && tk.status!=='cancelled' ? 'Recuerdo' : (statusMap[tk.status]||'Válida');
   const L=evLabels(ev);
+  const level=Math.max(1, tk.level|0), rasgos=tk.rasgos||[];
   const pass=over ? 'Tu hidromedusa nació esa noche y es tuya: compartila cuando quieras.'
-    : TICKET.price==='GRATIS' ? 'No hace falta entrada: la tocada es gratis. Decí tu palabra en la fiesta y buscá tu match.'
-    : 'En la puerta decí tus palabras clave y te damos tu entrada-sticker. En la fiesta buscá tu match.';
-  // Entrada de una fecha que ya pasó mientras hay otra anunciada → invitarlo a la nueva.
+    : TICKET.price==='GRATIS' ? 'No hace falta entrada: la tocada es gratis. Guardá tus dos palabras: en cada fecha a la que vuelvas, tu medusa evoluciona.'
+    : 'En la puerta decí tus palabras clave y te damos tu entrada-sticker. Guardalas: en cada fecha a la que vuelvas, tu medusa evoluciona.';
+  // Entrada de una fecha que ya pasó mientras hay otra anunciada → que la traiga a evolucionar.
   const nextOn=over && !eventOver(HM_EVENT) && (ev&&ev.id)!==HM_EVENT.id;
-  const foot=nextOn ? '🪼 La próxima: '+HM_EVENT.shortLabel+', entrada '+TICKET.price.toLowerCase()+'. <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">'+(TICKET.price==='GRATIS' ? 'Reservá tu lugar' : 'Pedí tu entrada')+' →</a>'
-    : over ? '🪼 La próxima fecha se anuncia primero acá, por mail y en Instagram.'
-    : '🍹 Si compartís una palabra con otra persona en la fiesta, se presentan y ganan una consumición.';
+  const evoNow=!eventOver(HM_EVENT) && (tk.evos||[]).some(e=>e.eventId===HM_EVENT.id);
+  const foot=evoNow ? '🪼 Ya evolucionó en esta fecha. En la próxima, escaneá el QR de nuevo y gana otro rasgo.'
+    : nextOn ? '🪼 Llevala a la próxima, '+HM_EVENT.shortLabel+': en la fiesta escaneá el QR de la noche y tu medusa evoluciona.'
+      +(TICKET.price==='GRATIS' ? '' : ' <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Pedí tu entrada →</a>')
+    : over ? '🪼 La próxima fecha se anuncia primero acá, por mail y en Instagram. Llevá tu medusa: en cada fecha evoluciona.'
+    : '🪼 En cada fecha a la que vuelvas con tu medusa, escaneá el QR de la noche: sube de nivel y gana un rasgo.';
   const box=document.getElementById('redeem-result');
   const parsed=parseClaim(tk.claim);
   const hasJf=parsed && window.JellyfishGen;
@@ -1205,11 +1278,13 @@ function renderTicketCard(tk, ev){
   box.innerHTML=`
     ${hasJf?`
     <div class="jf-wrap">
-      <div class="jf-label">Tu hidromedusa</div>
+      ${o.note||o.evolved?'<div class="jf-note" id="jf-note"></div>':''}
+      <div class="jf-label" id="jf-label"></div>
       <div class="jf-canvas-wrap" onclick="openJfFullscreen()" title="Ver en pantalla completa">
         <canvas id="jf-canvas"></canvas>
         <div class="jf-hint">toca para pantalla completa</div>
       </div>
+      <div class="jf-lvl" id="jf-lvl"></div>
       <div class="jf-actions">
         <button class="btn btn-acid" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();shareJf()">Compartir en Instagram 📸</button>
         <button class="btn btn-line" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();openJfFullscreen()">Pantalla completa ↑</button>
@@ -1243,14 +1318,42 @@ function renderTicketCard(tk, ev){
     window._jfClaim=tk.claim;
     window._jfParsed=parsed;
     window._jfEv=ev;   // la fecha de ESTA entrada, para la imagen de compartir
-    if(window._jfHandle) window._jfHandle.stop();
-    window._jfHandle=JellyfishGen.render(document.getElementById('jf-canvas'), parsed.noun, parsed.adj);
+    window._jfOpts={ level, rasgos, scale:3 };   // nivel 2+: 168×264, apenas más grande que el 140×220 del nivel 1
+    const tok=window._jfTok=(window._jfTok||0)+1;   // cerrar o volver a dibujar corta la animación pendiente
+    const canvas=document.getElementById('jf-canvas'), note=document.getElementById('jf-note');
+    const show=function(lv, rs){
+      if(window._jfHandle) window._jfHandle.stop();
+      window._jfHandle=JellyfishGen.render(canvas, parsed.noun, parsed.adj, { level:lv, rasgos:rs, scale:3 });
+      document.getElementById('jf-label').textContent='Tu hidromedusa · nivel '+lv;
+      document.getElementById('jf-lvl').textContent=rasgosLabel(rs);
+    };
+    const done='¡Evolucionó a nivel '+level+'! Rasgo nuevo: '+JellyfishGen.rasgoLabel(rasgos[rasgos.length-1]||'')+' 🪼';
+    const reduce=window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(o.evolved && level>=2 && !reduce){
+      // Primero como era, después el destello y aparece la nueva
+      show(level-1, rasgos.slice(0,-1));
+      if(note) note.textContent='Evolucionando…';
+      const wrap=canvas.parentNode;
+      setTimeout(function(){
+        if(window._jfTok!==tok) return;
+        wrap.classList.add('evolving');
+        setTimeout(function(){
+          if(window._jfTok!==tok) return;
+          show(level, rasgos);
+          if(note) note.textContent=done;
+        },500);
+        setTimeout(function(){ wrap.classList.remove('evolving'); },1300);
+      },1100);
+    } else {
+      show(level, rasgos);
+      if(note) note.textContent=o.evolved ? done : o.note;
+    }
 
     // Persist claimed jellyfish across sessions
     try {
       localStorage.setItem('hm_claimed', JSON.stringify({
         claim: tk.claim, noun: parsed.noun, adj: parsed.adj,
-        ticketId: tk.id, status: tk.status,
+        ticketId: tk.id, status: tk.status, level, rasgos,
         claimedAt: new Date().toISOString(),
       }));
     } catch(e) {}
@@ -1259,11 +1362,13 @@ function renderTicketCard(tk, ev){
 
 function closeRedeem(){
   closeModal('m-redeem');
+  setEvoMode(null);
   document.getElementById('redeem-form').style.display='';
   document.getElementById('redeem-result').innerHTML='';
   document.getElementById('redeem-claim').value='';
   if(window._jfHandle){ window._jfHandle.stop(); window._jfHandle=null; }
-  window._jfClaim=null; window._jfParsed=null; window._jfEv=null;
+  window._jfTok=(window._jfTok||0)+1;
+  window._jfClaim=null; window._jfParsed=null; window._jfEv=null; window._jfOpts=null;
   // Note: localStorage claim is intentionally kept so it auto-restores next visit.
 }
 function forgetJf(){
@@ -1279,7 +1384,8 @@ function openJfFullscreen(){
   const fsCanvas=document.getElementById('jf-fs-canvas');
   document.getElementById('jf-fs-phrase').textContent=(window._jfClaim||'').replace(/-/g,' ');
   if(window._jfFsHandle) window._jfFsHandle.stop();
-  window._jfFsHandle=JellyfishGen.render(fsCanvas, p.noun, p.adj);
+  const o=window._jfOpts||{};
+  window._jfFsHandle=JellyfishGen.render(fsCanvas, p.noun, p.adj, { level:o.level, rasgos:o.rasgos });
   el.classList.add('open');
   document.body.style.overflow='hidden';
   const req=el.requestFullscreen||el.webkitRequestFullscreen;
@@ -1302,7 +1408,8 @@ function downloadJf(){
   const p=window._jfParsed; const claim=window._jfClaim||'hidromedusa';
   if(!p||!window.JellyfishGen) return;
   const tmp=document.createElement('canvas');
-  JellyfishGen.preview(tmp, p.noun, p.adj);
+  const o=window._jfOpts||{};
+  JellyfishGen.preview(tmp, p.noun, p.adj, { level:o.level, rasgos:o.rasgos });
   const a=document.createElement('a');
   a.href=tmp.toDataURL('image/png');
   a.download='hidromedusa-'+claim+'.png';
@@ -1320,11 +1427,13 @@ async function shareJf(){
 
   // 9:16 canvas for Instagram Stories (540×960)
   const CW=540, CH=960;
-  const JF_SCALE=3;                      // 3× pixel-crisp upscale
-  const JFW=140*JF_SCALE;                // 420px
-  const JFH=220*JF_SCALE;               // 660px
-  const JFX=Math.round((CW-JFW)/2);     // 60px — horizontally centered
-  const JFY=70;
+  const o=window._jfOpts||{}, hd=(o.level|0)>=2;
+  // Nivel 1: 140×220 a 3× (420×660). Nivel 2+: la grilla de 56×88 a 8 px por celda (448×704) y una línea más de texto.
+  const jfo={ level:o.level, rasgos:o.rasgos, scale:8 };
+  const JFW=hd ? JellyfishGen.size(jfo).w : 140*3;
+  const JFH=hd ? JellyfishGen.size(jfo).h : 220*3;
+  const JFX=Math.round((CW-JFW)/2);     // horizontally centered
+  const JFY=hd ? 44 : 70;
 
   const share=document.createElement('canvas');
   share.width=CW; share.height=CH;
@@ -1343,7 +1452,7 @@ async function shareJf(){
 
   // Jellyfish — render frame-0 on a tmp canvas then drawImage upscaled
   const tmp=document.createElement('canvas');
-  JellyfishGen.preview(tmp, p.noun, p.adj);  // 140×220
+  JellyfishGen.preview(tmp, p.noun, p.adj, hd ? jfo : undefined);  // 140×220 (nivel 1) o 448×704
   ctx.imageSmoothingEnabled=false;
   ctx.drawImage(tmp, JFX, JFY, JFW, JFH);
 
@@ -1360,21 +1469,28 @@ async function shareJf(){
   ctx.font='bold 50px Anton,"Arial Narrow",Impact,sans-serif';
   ctx.fillText(phrase, CW/2, TY+56);
 
+  // Nivel y rasgos (del 2 en adelante)
+  if(hd){
+    ctx.font='bold 15px "Space Mono","Courier New",monospace';
+    ctx.fillStyle='#ECE7DA';
+    ctx.fillText(('Nivel '+o.level+' · '+rasgosLabel(o.rasgos)).toUpperCase(), CW/2, TY+88);
+  }
+
   // Event tag
   ctx.font='13px "Space Mono","Courier New",monospace';
   ctx.fillStyle='rgba(168,163,153,0.75)';
   const L=evLabels(window._jfEv);
-  ctx.fillText('HIDROMEDUSA · '+L.tag+' · TANDIL', CW/2, TY+88);
+  ctx.fillText('HIDROMEDUSA · '+L.tag+' · TANDIL', CW/2, hd ? TY+114 : TY+88);
 
   // URL watermark
   ctx.font='11px "Space Mono","Courier New",monospace';
   ctx.fillStyle='rgba(198,255,26,0.35)';
-  ctx.fillText('hidromedusa.com', CW/2, TY+112);
+  ctx.fillText('hidromedusa.com', CW/2, hd ? TY+136 : TY+112);
 
   // Convert to blob
   const blob=await new Promise(res=>share.toBlob(res,'image/png'));
   const file=new File([blob], 'hidromedusa-'+claim+'.png', {type:'image/png'});
-  const shareText='🪼 '+claim.replace(/-/g,' ')+' — Hidromedusa · '+L.short+' · Tandil';
+  const shareText='🪼 '+claim.replace(/-/g,' ')+(hd ? ' · nivel '+o.level : '')+' — Hidromedusa · '+L.short+' · Tandil';
 
   // Web Share API (mobile: opens native share sheet → Instagram, WhatsApp, etc.)
   if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
@@ -1636,10 +1752,27 @@ window.addEventListener('load',()=>lucide.createIcons());
   } catch(e){}
 })();
 
+/* QR de la noche: ?evo=CODE abre "Evolucionar mi medusa". El código queda en la pestaña
+   (sessionStorage hm_evo) hasta que se usa o se cierra el modal, así una recarga no lo pierde. */
+(function(){
+  try {
+    let code=new URLSearchParams(window.location.search).get('evo');
+    if(code) history.replaceState(null,'',window.location.pathname+(window.location.hash||''));
+    else { try { code=sessionStorage.getItem('hm_evo'); } catch(e){} }
+    if(!code) return;
+    setEvoMode(code);
+    let saved=null; try { saved=JSON.parse(localStorage.getItem('hm_claimed')||'null'); } catch(e){}
+    setTimeout(function(){
+      track('evolucion-abrir',{ guardada:!!(saved && saved.claim) });
+      openModal('m-redeem');
+    }, 700);
+  } catch(e){}
+})();
+
 /* Retomar el pedido si quedó a medias (recarga del navegador de IG, volver de WhatsApp, etc.) */
 (function(){
   try {
-    if(new URLSearchParams(window.location.search).get('claim')) return;
+    if(new URLSearchParams(window.location.search).get('claim') || window._evoCode) return;
     const c=ckLoad(); if(!c || !c.open) return;
     if(Date.now()-(c.ts||0) > CK_TTL || eventOver()) return;
     setTimeout(function(){ if(!document.querySelector('.modal.open')) buy(true); }, 600);

@@ -229,11 +229,11 @@ function shareMsg(t){
   if(ev&&ev.free) return '¡Hola'+(first?' '+first:'')+'! 🪼 Ya tenés tu lugar para '+ev.name+' ('+evDay(ev)+').\n'
     +'Tu palabra: '+String(t.claim).replace(/-/g,' ').toUpperCase()+'\n'
     +'Tu hidromedusa: '+claimLink(t.claim)+'\n'
-    +'La entrada es libre. En la fiesta decí tu palabra: si matchea con la de otra persona, ganan una consumición 🍹';
+    +'La entrada es libre. Guardá tu palabra: en cada fecha a la que vuelvas, escaneás el QR de la noche y tu medusa evoluciona 🪼';
   return '¡Hola'+(first?' '+first:'')+'! 🪼 Ya tenés tu entrada para Hidromedusa.\n'
     +'Tu palabra: '+String(t.claim).replace(/-/g,' ').toUpperCase()+'\n'
     +'Tu entrada y tu hidromedusa: '+claimLink(t.claim)+'\n'
-    +'En la puerta decí tu palabra y te damos tu entrada-sticker.';
+    +'En la puerta decí tu palabra y te damos tu entrada-sticker. Guardala: en cada fecha a la que vuelvas, tu medusa evoluciona 🪼';
 }
 // Fechas que manda el backend ({ id, name, date, free… }) y la vigente; el panel muestra una por vez.
 let EVS={}, CUR='', ALL=[], EV_FILTER=null;   // EV_FILTER null = la vigente; '' = todas

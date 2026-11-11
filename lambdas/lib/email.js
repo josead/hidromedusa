@@ -218,18 +218,18 @@ function htmlDoc({ subLabel, accent = C.acid, rows }) {
 function renderConfirmationHtml({ name, claim, calUrl }) {
   const rows =
     text(`¡Hola ${esc(name) || 'crack'}! Te esperamos en el fondo. 🪼<br>Tu lugar para <b>Hidromedusa</b> está confirmado.`, 26)
-    + claimBox('Tu palabra icebreaker (dos palabras)', claim)
+    + claimBox('Tus dos palabras', claim)
     + jellyfishBlock(claim)
     + eventDetails()
-    + text(`<b style="color:${C.acid};">Entrada libre:</b> no hace falta entrada, venís y listo.<br><b style="color:${C.acid};">El juego:</b> si tu palabra matchea con la de otra persona, se presentan y ganan una consumición. 🍹`, 26);
+    + text(`<b style="color:${C.acid};">Entrada libre:</b> no hace falta entrada, venís y listo.<br><b style="color:${C.acid};">Tu medusa evoluciona:</b> guardá tus dos palabras. En cada fecha a la que vuelvas, escaneá el QR de la noche y sube de nivel: más definición y un rasgo nuevo. 🪼`, 26);
   return htmlDoc({ subLabel: 'Lugar confirmado', accent: C.acid, rows });
 }
 function renderConfirmationText({ name, claim, calUrl }) {
   return [
     `¡Hola ${name || ''}!`.trim(), '',
     `Confirmamos tu lugar para Hidromedusa · Los Rojos, Pinto 35 (${EVENT.dateLabel} · hora a confirmar · entrada gratis).`, '',
-    `Tu palabra icebreaker (dos palabras): ${claim}`, '',
-    'Entrada libre, no hace falta entrada. Decí tu palabra en la fiesta: si matchea con la de otra persona, se presentan y ganan una consumición.', '',
+    `Tus dos palabras: ${claim}`, '',
+    'Entrada libre, no hace falta entrada. Guardá tus dos palabras: en cada fecha a la que vuelvas, escaneás el QR de la noche y tu medusa evoluciona (sube de nivel y gana un rasgo).', '',
     `— Hidromedusa · ${SITE}`,
   ].join('\n');
 }
@@ -244,7 +244,7 @@ function renderPalabraChangedHtml({ name, claim, oldClaim, calUrl }) {
     + claimBox('Tu nueva palabra (dos palabras)', claim)
     + oldNote
     + eventDetails()
-    + text(`<b style="color:${C.acid};">En la fiesta:</b> usá tu <b>nueva</b> palabra para el juego del match. 🪼`, 26);
+    + text(`<b style="color:${C.acid};">Guardala:</b> con tu <b>nueva</b> palabra ves tu medusa y la hacés evolucionar en cada fecha. 🪼`, 26);
   return htmlDoc({ subLabel: 'Palabra actualizada', accent: C.acid, rows });
 }
 function renderPalabraChangedText({ name, claim, oldClaim, calUrl }) {
@@ -253,7 +253,7 @@ function renderPalabraChangedText({ name, claim, oldClaim, calUrl }) {
     'Actualizamos tu palabra para Hidromedusa.',
     oldClaim ? `Tu palabra anterior (${oldClaim}) ya no sirve.` : '', '',
     `Tu nueva palabra (dos palabras): ${claim}`, '',
-    'Usá la nueva en la fiesta para el juego del match.', '',
+    'Guardala: con la nueva ves tu medusa y la hacés evolucionar en cada fecha.', '',
     `— Hidromedusa · ${SITE}`,
   ].filter((l, i, a) => !(l === '' && a[i - 1] === '')).join('\n');
 }

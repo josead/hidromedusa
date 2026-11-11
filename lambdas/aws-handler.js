@@ -13,6 +13,7 @@ const ROUTES = [
   { m: 'POST', re: /^\/tickets\/request$/,        fn: tickets.request },
   { m: 'POST', re: /^\/tickets\/capture$/,        fn: tickets.capture },
   { m: 'POST', re: /^\/tickets\/redeem$/,         fn: tickets.redeem },
+  { m: 'POST', re: /^\/tickets\/evolve$/,         fn: tickets.evolve },
   { m: 'POST', re: /^\/tickets\/issue$/,          fn: tickets.issue },
   { m: 'POST', re: /^\/tickets\/invites$/,        fn: tickets.createInvites },
   { m: 'POST', re: /^\/tickets\/invite\/check$/,  fn: tickets.checkInvite },

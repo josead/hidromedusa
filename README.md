@@ -94,8 +94,11 @@ Configurá las tablas DynamoDB en AWS (mismos nombres que `create-tables.sh`:
 3. El comprador entra a **"Reclamar tu palabra"**, escribe sus palabras clave y
    confirma su lugar — sin cuenta ni registro.
 4. En la puerta dice sus **palabras clave** (no un número) y el staff le entrega
-   su **entrada-sticker**. Las primeras 10 vienen con merch secreto; si tu palabra
-   coincide con la de otra persona, ganan una consumición. 🍹
+   su **entrada-sticker**. Las primeras 10 vienen con merch secreto.
+5. Sus palabras abren su **hidromedusa** (pixel art de nivel 1). En cada fecha
+   siguiente a la que vuelve, escanea el **QR de la noche** (`/?evo=CODIGO`),
+   carga sus palabras y la medusa **evoluciona**: sube un nivel, gana definición
+   y un rasgo nuevo (uno por fecha, nunca la noche en que nació). 🪼
 
 ## Funcionalidades
 
@@ -103,7 +106,7 @@ Configurá las tablas DynamoDB en AWS (mismos nombres que `create-tables.sh`:
 - Entrada única: $10.000 ARS (entrada-sticker que se entrega en la puerta)
 - Pedido por WhatsApp o Instagram + liberación por staff + palabras clave
 - Identificación por **palabras clave** (no por número ni QR)
-- Primeras 10 con merch secreto · palabras coincidentes = consumición (icebreaker)
+- Primeras 10 con merch secreto · medusas que evolucionan con el QR de cada fecha
 
 ### 🔐 Auth (opcional)
 - Google / Apple / Instagram OAuth (env-gated; modo demo sin credenciales)
