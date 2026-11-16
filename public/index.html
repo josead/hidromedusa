@@ -1274,6 +1274,7 @@ function renderTicketCard(tk, ev, o){
   const box=document.getElementById('redeem-result');
   const parsed=parseClaim(tk.claim);
   const hasJf=parsed && window.JellyfishGen;
+  const viaChrome=hasJf && jfViaChrome();
 
   box.innerHTML=`
     ${hasJf?`
@@ -1286,9 +1287,12 @@ function renderTicketCard(tk, ev, o){
       </div>
       <div class="jf-lvl" id="jf-lvl"></div>
       <div class="jf-actions">
-        <button class="btn btn-acid" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();shareJf()">Compartir en Instagram 📸</button>
+        ${viaChrome
+          ? `<a class="btn btn-acid" style="font-size:11px;padding:8px 14px" href="${jfChromeUrl(tk.claim)}" onclick="event.stopPropagation();jfToChrome()">Abrir en Chrome para compartir ↗</a>`
+          : `<button class="btn btn-acid" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();shareJf()">Compartir en Instagram 📸</button>`}
         <button class="btn btn-line" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();openJfFullscreen()">Pantalla completa ↑</button>
       </div>
+      ${viaChrome?'<div class="jf-hint">Este navegador no deja compartir la imagen: tu medusa se abre en Chrome</div>':''}
     </div>`:''}
     <div class="tk-card">
       <div class="tk-top">
@@ -1319,6 +1323,8 @@ function renderTicketCard(tk, ev, o){
     window._jfParsed=parsed;
     window._jfEv=ev;   // la fecha de ESTA entrada, para la imagen de compartir
     window._jfOpts={ level, rasgos, scale:3 };   // nivel 2+: 168×264, apenas más grande que el 140×220 del nivel 1
+    prepShareJf();   // la imagen de compartir queda lista antes del toque
+    if(window._jfShareHint){ window._jfShareHint=false; toast('Tocá «Compartir en Instagram» 📸'); }   // llegó desde la app a Chrome
     const tok=window._jfTok=(window._jfTok||0)+1;   // cerrar o volver a dibujar corta la animación pendiente
     const canvas=document.getElementById('jf-canvas'), note=document.getElementById('jf-note');
     const show=function(lv, rs){
@@ -1368,7 +1374,7 @@ function closeRedeem(){
   document.getElementById('redeem-claim').value='';
   if(window._jfHandle){ window._jfHandle.stop(); window._jfHandle=null; }
   window._jfTok=(window._jfTok||0)+1;
-  window._jfClaim=null; window._jfParsed=null; window._jfEv=null; window._jfOpts=null;
+  window._jfClaim=null; window._jfParsed=null; window._jfEv=null; window._jfOpts=null; window._jfShare=null;
   // Note: localStorage claim is intentionally kept so it auto-restores next visit.
 }
 function forgetJf(){
@@ -1418,16 +1424,32 @@ function downloadJf(){
 }
 
 /* ---------- Share jellyfish (Instagram Stories format) ---------- */
-async function shareJf(){
-  const p=window._jfParsed; const claim=window._jfClaim||'hidromedusa';
-  if(!p||!window.JellyfishGen) return;
+// navigator.share() abre el menú de compartir del teléfono solo si se llama en el mismo toque (el gesto dura
+// unos segundos). Antes la imagen se armaba en el toque con toBlob(), que en esta página tarda más de un segundo
+// (espera un rato libre y las animaciones casi no dejan): en Android se perdía el gesto y caía a la descarga.
+// Ahora se arma apenas aparece la medusa, sincrónica con toDataURL() (~15 ms), y el toque comparte sin esperar.
+function prepShareJf(){
+  const p=window._jfParsed;
+  if(!p||!window.JellyfishGen) return null;
+  const o=window._jfOpts||{}, claim=window._jfClaim||'hidromedusa', L=evLabels(window._jfEv);
+  const s=window._jfShare={ o, file:null };
+  s.text='🪼 '+claim.replace(/-/g,' ')+((o.level|0)>=2 ? ' · nivel '+o.level : '')+' — Hidromedusa · '+L.short+' · Tandil';
+  s.build=function(){
+    const url=drawShareJf(p, claim, o, L).toDataURL('image/png'), bin=atob(url.slice(url.indexOf(',')+1));
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    s.file=new File([bytes], 'hidromedusa-'+claim+'.png', {type:'image/png'});
+  };
+  // Con Anton y Space Mono cargadas para el texto del canvas
+  if(document.fonts) Promise.all(['50px Anton','bold 15px "Space Mono"','13px "Space Mono"'].map(f=>document.fonts.load(f))).catch(()=>{}).then(s.build);
+  else s.build();
+  return s;
+}
 
-  // Wait for web fonts so Anton renders correctly in canvas
-  if(document.fonts && document.fonts.ready) await document.fonts.ready;
-
-  // 9:16 canvas for Instagram Stories (540×960)
+// 9:16 canvas for Instagram Stories (540×960)
+function drawShareJf(p, claim, o, L){
   const CW=540, CH=960;
-  const o=window._jfOpts||{}, hd=(o.level|0)>=2;
+  const hd=(o.level|0)>=2;
   // Nivel 1: 140×220 a 3× (420×660). Nivel 2+: la grilla de 56×88 a 8 px por celda (448×704) y una línea más de texto.
   const jfo={ level:o.level, rasgos:o.rasgos, scale:8 };
   const JFW=hd ? JellyfishGen.size(jfo).w : 140*3;
@@ -1479,7 +1501,6 @@ async function shareJf(){
   // Event tag
   ctx.font='13px "Space Mono","Courier New",monospace';
   ctx.fillStyle='rgba(168,163,153,0.75)';
-  const L=evLabels(window._jfEv);
   ctx.fillText('HIDROMEDUSA · '+L.tag+' · TANDIL', CW/2, hd ? TY+114 : TY+88);
 
   // URL watermark
@@ -1487,23 +1508,58 @@ async function shareJf(){
   ctx.fillStyle='rgba(198,255,26,0.35)';
   ctx.fillText('hidromedusa.com', CW/2, hd ? TY+136 : TY+112);
 
-  // Convert to blob
-  const blob=await new Promise(res=>share.toBlob(res,'image/png'));
-  const file=new File([blob], 'hidromedusa-'+claim+'.png', {type:'image/png'});
-  const shareText='🪼 '+claim.replace(/-/g,' ')+(hd ? ' · nivel '+o.level : '')+' — Hidromedusa · '+L.short+' · Tandil';
+  return share;
+}
 
+function shareJf(){
+  const s=window._jfShare && window._jfShare.o===window._jfOpts ? window._jfShare : prepShareJf();
+  if(!s) return;
+  if(!s.file) s.build();   // las fuentes todavía cargaban: se arma igual, el menú tiene que abrirse en este toque
+  const data={ files:[s.file], title:'Mi hidromedusa', text:s.text };
   // Web Share API (mobile: opens native share sheet → Instagram, WhatsApp, etc.)
-  if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-    try{ await navigator.share({files:[file], title:'Mi hidromedusa', text:shareText}); return; }
-    catch(e){ if(e.name==='AbortError') return; }  // user cancelled
+  if(navigator.share && navigator.canShare && navigator.canShare({ files:data.files })){
+    navigator.share(data).then(()=>track('compartir',{ resultado:'menu' }), e=>{
+      if(e && e.name==='AbortError') return track('compartir',{ resultado:'cancelado' });   // cerró el menú
+      saveShareJf(s, (e && e.name) || 'error');
+    });
+    return;
   }
-
-  // Fallback: trigger download + hint
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download=file.name;
+  saveShareJf(s, navigator.share ? 'sin-archivos' : 'sin-share');
+}
+// Sin menú de compartir (compu, Firefox) o si falló: se descarga la imagen
+function saveShareJf(s, motivo){
+  track('compartir',{ resultado:'descarga', motivo });
+  const url=URL.createObjectURL(s.file);
+  const a=document.createElement('a'); a.href=url; a.download=s.file.name;
   a.click();
   setTimeout(()=>URL.revokeObjectURL(url), 5000);
   toast('Imagen guardada — subila a tus stories 📸');
+}
+
+// Navegador interno de una app en Android (Instagram, Facebook…): es un WebView, sin menú de compartir.
+// Ahí el botón abre la misma medusa en Chrome (?claim=), que sí lo tiene.
+function jfViaChrome(){
+  const ua=navigator.userAgent||'';
+  if(!/Android/.test(ua) || !/; wv\)|Instagram|FBAN|FBAV|FB_IAB/.test(ua)) return false;
+  try { return !(navigator.share && navigator.canShare && navigator.canShare({ files:[new File([''], 'x.png', {type:'image/png'})] })); }
+  catch(e){ return true; }
+}
+function jfChromeUrl(claim){
+  return 'intent://'+location.host+location.pathname+'?claim='+encodeURIComponent(claim)+'&compartir=1'
+    +'#Intent;scheme='+location.protocol.replace(':','')+';package=com.android.chrome;end';
+}
+function jfToChrome(){
+  track('compartir',{ resultado:'chrome' });
+  // Si Chrome no se abrió (no está instalado o la app no deja salir), se descarga la imagen
+  const t=setTimeout(()=>{
+    const s=window._jfShare;
+    if(!s || document.hidden) return;
+    if(!s.file) s.build();
+    saveShareJf(s, 'sin-chrome');
+  }, 2500);
+  const cancel=()=>clearTimeout(t);
+  document.addEventListener('visibilitychange', cancel, { once:true });
+  window.addEventListener('blur', cancel, { once:true });
 }
 
 
@@ -1738,16 +1794,18 @@ window.addEventListener('load',()=>lucide.createIcons());
 /* Auto-open claim from URL ?claim=noun-adjective (email deep-link) */
 (function(){
   try {
-    const q=new URLSearchParams(window.location.search).get('claim');
+    const params=new URLSearchParams(window.location.search), q=params.get('claim');
     if(!q) return;
+    window._jfShareHint=params.get('compartir')==='1';   // viene del navegador de una app (jfToChrome) a compartirla
     // Remove param from URL bar without reloading
     const clean=window.location.pathname+(window.location.hash||'');
     history.replaceState(null,'',clean);
     setTimeout(function(){
+      if(window._jfShareHint) track('compartir',{ resultado:'en-chrome' });
       openModal('m-redeem');
       const inp=document.getElementById('redeem-claim');
       if(inp) inp.value=q.replace(/-/g,' ');
-      redeem();
+      redeem().finally(function(){ window._jfShareHint=false; });
     }, 700);
   } catch(e){}
 })();
