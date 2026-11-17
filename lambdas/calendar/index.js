@@ -11,7 +11,7 @@ const HIDROMEDUSA_EVENTS = [
   {
     id: 'ev-2',
     title: 'Hidromedusa · Los Rojos',
-    description: 'Hidromedusa vuelve a Los Rojos (Pinto 35), Tandil. Viernes 4 de diciembre 2026, entrada gratis, con invitados a confirmar. Hora a confirmar.',
+    description: 'Hidromedusa vuelve a Los Rojos (Pinto 35), Tandil. Viernes 4 de diciembre 2026, entrada gratis, con Psico Caldeo y VHS de invitados. Hora a confirmar.',
     start: '',   // hora a confirmar
     end:   '',
     location: 'Los Rojos, Pinto 35, Tandil, Buenos Aires, AR',

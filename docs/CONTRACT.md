@@ -29,7 +29,7 @@ invitaciones) nacen con `CURRENT_EVENT`. Si el `leadId` del navegador ya es una 
 ```
 id: ev-2   (vigente)
 title: Hidromedusa · Los Rojos
-date: 2026-12-04 (viernes)  time: a confirmar (start vacío; end holgado 2026-12-05 06:00 -03:00) · invitados a confirmar
+date: 2026-12-04 (viernes)  time: a confirmar (start vacío; end holgado 2026-12-05 06:00 -03:00) · invitados: Psico Caldeo, VHS
 venue: Los Rojos, Pinto 35, Tandil, Buenos Aires, AR
 tickets: entrada libre y gratuita (`free: true`) · se reserva avisando por WhatsApp/IG
 
