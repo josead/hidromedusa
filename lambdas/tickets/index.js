@@ -597,4 +597,5 @@ async function getTicket(req) {
 module.exports = {
   request, capture, list, free, issue, reword, cancel, rename, remove, redeem, evolve, scan, getTicket,
   createInvites, checkInvite, claimInvite, lists,
+  publicTicket, ticketByClaim, EVENTS,   // para account/
 };

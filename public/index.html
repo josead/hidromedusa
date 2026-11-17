@@ -317,6 +317,12 @@
     100% { transform: scale(1); }
   }
   @media (prefers-reduced-motion: reduce) { .jf-canvas-wrap.evolving canvas { animation: none; } }
+  /* Cuenta de Google: guardar la medusa (debajo de ella) o traerla (en el formulario) */
+  .jf-cuenta { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line-strong); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .jf-or { font-family: var(--mono); font-size: 11px; line-height: 1.5; letter-spacing: .04em; color: var(--bone-dim); text-align: center; max-width: 300px; }
+  .jf-saved { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--acid); }
+  .gsi-slot { width: 100%; min-height: 40px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .jf-chips { margin-bottom: 14px; }
 
   /* ---------- Jellyfish fullscreen ---------- */
   #jf-fullscreen {
@@ -403,9 +409,9 @@
   /* hero: próxima fecha destacada */
   .hero-next { display: grid; grid-template-columns: 132px 1fr auto; gap: 22px; align-items: center; margin-top: 26px; padding: 14px 22px 14px 14px; border: 2px solid var(--acid); background: rgba(5,6,7,.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); max-width: 860px; }
   .hero-next img { width: 132px; height: 176px; object-fit: cover; display: block; border: 1.5px solid var(--line-strong); }
-  .hero-next .hn-k { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--acid); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .hero-next .hn-t { font-family: var(--display); font-size: clamp(30px, 4vw, 52px); line-height: .9; text-transform: uppercase; }
-  .hero-next .hn-s { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--bone-dim); margin-top: 10px; line-height: 1.5; }
+  .hero-next .hn-k, .hero-jf .hn-k { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--acid); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .hero-next .hn-t, .hero-jf .hn-t { font-family: var(--display); font-size: clamp(30px, 4vw, 52px); line-height: .9; text-transform: uppercase; }
+  .hero-next .hn-s, .hero-jf .hn-s { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--bone-dim); margin-top: 10px; line-height: 1.5; }
   .hero-next .hn-s b { color: var(--bone); font-weight: 700; }
   .hero-next .hn-cta { display: flex; flex-direction: column; gap: 8px; align-items: stretch; text-align: center; }
   .hero-next .hn-price { font-family: var(--display); font-size: 34px; line-height: 1; color: var(--acid); }
@@ -413,6 +419,20 @@
     .hero-next { grid-template-columns: 96px 1fr; gap: 14px; padding: 12px; }
     .hero-next img { width: 96px; height: 128px; }
     .hero-next .hn-cta { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; }
+  }
+
+  /* hero: tu medusa, si ya la cargaste en este navegador (hm_claimed). Mismo 7:11 en los dos niveles:
+     el 1 (140×220) se ve a 4 px por celda y el 2+ (scale 2, 112×176) a 1:1 */
+  .hero-jf { display: grid; grid-template-columns: 112px 1fr auto; gap: 22px; align-items: center; width: 100%; max-width: 860px; margin-top: 26px; padding: 14px 22px 14px 14px; border: 2px solid var(--line-strong); background: rgba(5,6,7,.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--bone); font: inherit; text-align: left; cursor: pointer; transition: border-color .2s; }
+  .hero-jf:hover, .hero-jf:focus-visible { border-color: var(--acid); outline: none; }
+  .hero-jf canvas { width: 112px; height: 176px; display: block; image-rendering: pixelated; filter: drop-shadow(0 0 12px rgba(198,255,26,.35)); }
+  .hero-jf .hn-t, .hero-jf .hn-s { display: block; overflow-wrap: anywhere; }
+  .hero-jf:hover .btn-line, .hero-jf:focus-visible .btn-line { background: var(--bone); color: var(--ink); border-color: var(--bone); }
+  @media (max-width: 720px) {
+    .hero-jf { grid-template-columns: 84px 1fr auto; gap: 14px; padding: 12px; }
+    .hero-jf canvas { width: 84px; height: 132px; }
+    .hero-jf .hj-cta-t { display: none; }
+    .hero-jf .btn { padding: 10px; }
   }
 
   /* secciones translúcidas: se ve el abismo detrás */
@@ -504,6 +524,10 @@
     .stub-meta .k, .tier-tag, .cat-status, .tk-top .tk-ev { font-size: 11px; }
     /* más contraste en pie de página */
     .foot-col a, .foot-brand p { color: var(--bone-dim); }
+    /* pie: marca y newsletter a lo ancho, los links de a dos. Si no, a 360 px la grilla mide 390
+       y en Android todo lo fijo (los modales) se estira 30 px fuera de la pantalla */
+    .foot-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 32px 20px; }
+    .foot-brand, .foot-news { grid-column: 1 / -1; }
   }
 </style>
 </head>
@@ -545,6 +569,18 @@
       </div>
       <h1 class="reveal">HIDRO<br /><span class="hl" id="hero-word">MEDUSA</span></h1>
       <p class="hero-lede reveal">Música electrónica en vivo desde el fondo de Tandil.<br /><em>Escuchamos todo. Tocamos poco.</em></p>
+
+      <!-- tu medusa: aparece si ya cargaste tus dos palabras en este navegador (hm_claimed); la llena heroJf() -->
+      <button type="button" class="hero-jf reveal" id="hero-jf" hidden onclick="openMyJf()">
+        <canvas id="hero-jf-canvas" width="112" height="176" aria-hidden="true"></canvas>
+        <span>
+          <span class="hn-k"><span class="blip"></span> <span id="hero-jf-k">Tu medusa</span></span>
+          <span class="hn-t" id="hero-jf-name"></span>
+          <span class="hn-s" id="hero-jf-s"></span>
+        </span>
+        <span class="btn btn-line"><span class="hj-cta-t">Ver mi medusa</span> <i data-lucide="arrow-right" width="16"></i></span>
+      </button>
+      <script>try { if((JSON.parse(localStorage.getItem('hm_claimed')||'null')||{}).claim) document.getElementById('hero-jf').hidden=false; } catch(e){}</script>
 
       <!-- próxima fecha destacada: se muestra hasta el día del evento -->
       <a class="hero-next reveal" data-until="2026-12-04" onclick="buy()" style="cursor:pointer;text-decoration:none;color:inherit">
@@ -885,7 +921,12 @@
           <p id="redeem-intro" style="color:var(--bone-dim);font-size:14px;line-height:1.5;margin-bottom:16px">Cargá tus <b style="color:var(--acid)">dos palabras</b>. Se habilitan cuando el staff confirme tu lugar.</p>
           <label class="field-label">Tus dos palabras</label>
           <input class="field" id="redeem-claim" placeholder="ej. medusa violeta" autocomplete="off" onkeydown="if(event.key==='Enter')redeem()" />
+          <div class="jf-chips" id="redeem-chips" hidden></div>
           <button class="btn btn-acid btn-block btn-lg" id="redeem-go" onclick="redeem()">Ver mi entrada</button>
+          <div class="jf-cuenta" id="redeem-cuenta" hidden>
+            <div class="jf-or">¿Ya la guardaste con Google? Traela desde tu cuenta</div>
+            <div class="gsi-slot" id="gsi-recover"></div>
+          </div>
           <p data-until="2026-12-04" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5">¿Todavía no tenés tu palabra? <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Reservá tu lugar acá →</a></p>
           <p data-until="2026-10-31" hidden style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5">¿Tenés un código de invitación? <a href="/invitacion/" onclick="track('invitacion-abrir',{ desde:'reclamar' })" style="color:var(--acid)">Anotate acá →</a></p>
         </div>
@@ -925,6 +966,7 @@ window.HM_CONFIG = window.HM_CONFIG || {
   WHATSAPP_NUMBER: '5492494481699',    // E.164 sin '+'
   INSTAGRAM_HANDLE: 'hidromedusa',     // usuario de IG para el DM (ig.me/m/<handle>)
   ALIAS: 'hidromedusa.tandil',          // alias para transferir el pago
+  GOOGLE_CLIENT_ID: '135324745714-r9u90qfimqvf7a08f7nv1jo88gs531lu.apps.googleusercontent.com',  // "Guardar con Google" (Client ID público, proyecto hidromedusa de Google Cloud). Vacío = sin botones
 };
 try { localStorage.setItem('hm_api_base', window.HM_CONFIG.API_BASE || ''); } catch(e){}
 
@@ -1005,8 +1047,8 @@ function openModal(id){
     // Tras recargar, la entrada del modal ya está (history.state): no apilar otra.
     try { if(!(history.state && history.state.hmModal)) history.pushState({hmModal:1},''); } catch(e){}
   }
-  // Restore saved jellyfish when redeem modal opens
-  if(id==='m-redeem') restoreClaimedJf();
+  // Restore saved jellyfish when redeem modal opens; si no hay, la fila para traerla desde Google
+  if(id==='m-redeem' && !restoreClaimedJf()) cuentaForm();
 }
 function closeModal(id){
   document.getElementById(id).classList.remove('open'); document.body.style.overflow='';
@@ -1028,19 +1070,24 @@ window.addEventListener('popstate',function(){
 });
 
 // If the user already claimed, show their jellyfish immediately (no re-typing needed).
+// Devuelve true si ya la está mostrando o pidiendo (entonces el formulario no queda a la vista).
 function restoreClaimedJf(){
   try {
-    const saved=JSON.parse(localStorage.getItem('hm_claimed')||'null');
-    if(!saved||!saved.claim) return;
     // If result is already showing (re-opened modal), skip
-    if(document.getElementById('redeem-result').innerHTML.trim()) return;
+    if(document.getElementById('redeem-result').innerHTML.trim()) return true;
+    const saved=JSON.parse(localStorage.getItem('hm_claimed')||'null');
+    if(!saved||!saved.claim) return false;
+    // Un link con ?claim= ya cargó su frase: no pisarla con la guardada
     const inp=document.getElementById('redeem-claim');
-    if(inp) inp.value=saved.claim.replace(/-/g,' ');
-    // Con el QR de la noche espera el toque en "Evolucionar" (puede ser la medusa de otra persona)
-    if(window._evoCode) return;
+    if(inp.value.trim()) return false;
+    inp.value=saved.claim.replace(/-/g,' ');
+    // Con el QR de la noche espera el toque en "Evolucionar" (puede ser la medusa de otra persona);
+    // si vino a traer sus medusas desde Google (?cuenta=1), también (salvo que Google esté apagado).
+    if(window._evoCode || (window._jfRecover && gsiOn())) return false;
     // Auto-run so they land straight on their jellyfish
     redeem();
-  } catch(e){}
+    return true;
+  } catch(e){ return false; }
 }
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) dismissModal(m.id); }));
 
@@ -1189,11 +1236,10 @@ async function redeem(){
   let data;
   try { data=await api('/tickets/redeem',{ method:'POST', body:{ claim } }); }
   catch(err){
-    if(err && /http-(404|410)/.test(err.message)){ toast('No encontramos ese código 🪼'); return; }
+    if(err && /http-(404|410)/.test(err.message)){ toast('No encontramos ese código 🪼'); cuentaForm(); return; }
     // demo/offline: aceptar cualquier frase y mostrar una entrada de muestra (con el nivel guardado si es la misma)
     let saved=null; try { saved=JSON.parse(localStorage.getItem('hm_claimed')||'null'); } catch(e){}
-    const key=s=>String(s||'').toLowerCase().replace(/[-\s]+/g,' ').trim();
-    const same=saved && key(saved.claim)===key(claim);
+    const same=saved && claimKey(saved.claim)===claimKey(claim);
     data={ ticket:{ id:'HM-'+claim.toLowerCase().replace(/\s+/g,'-'), type:'general', claim, status:'freed',
       level:same ? saved.level||1 : 1, rasgos:same ? saved.rasgos||[] : [] }, event:HM_EVENT };
   }
@@ -1245,6 +1291,8 @@ function rasgosLabel(rs){
   const n=(rs||[]).map(r=>window.JellyfishGen ? JellyfishGen.rasgoLabel(r) : r);
   return n.length ? 'con '+(n.length>1 ? n.slice(0,-1).join(', ')+' y '+n[n.length-1] : n[0]) : '';
 }
+// "Remolino electrico" y "remolino-electrico" son la misma frase (para comparar, no para mostrar)
+const claimKey=s=>String(s||'').toLowerCase().replace(/[-\s]+/g,' ').trim();
 // Parse "medusa-violeta" or "medusa violeta" → {noun, adj}
 function parseClaim(claim){
   const s=String(claim||'').toLowerCase().trim();
@@ -1276,8 +1324,13 @@ function renderTicketCard(tk, ev, o){
   const parsed=parseClaim(tk.claim);
   const hasJf=parsed && window.JellyfishGen;
   const viaChrome=hasJf && jfViaChrome();
+  // Guardada en Google: está en la cuenta que se abrió o ya se había guardado esta misma frase desde acá
+  const prev=claimedJf();
+  const saved=(window._jfAccount||[]).some(m=>claimKey(m.ticket.claim)===claimKey(tk.claim))
+    || !!(prev.saved && claimKey(prev.claim)===claimKey(tk.claim));
 
   box.innerHTML=`
+    <div class="jf-chips" id="jf-chips" hidden></div>
     ${hasJf?`
     <div class="jf-wrap">
       ${o.note||o.evolved?'<div class="jf-note" id="jf-note"></div>':''}
@@ -1294,6 +1347,7 @@ function renderTicketCard(tk, ev, o){
         <button class="btn btn-line" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();openJfFullscreen()">Pantalla completa ↑</button>
       </div>
       ${viaChrome?'<div class="jf-hint">Este navegador no deja compartir la imagen: tu medusa se abre en Chrome</div>':''}
+      ${gsiOn()?'<div class="jf-cuenta" id="jf-cuenta"></div>':''}
     </div>`:''}
     <div class="tk-card">
       <div class="tk-top">
@@ -1317,6 +1371,7 @@ function renderTicketCard(tk, ev, o){
     </div>`;
 
   document.getElementById('redeem-form').style.display='none';
+  accountChips(document.getElementById('jf-chips'), tk.claim, showAccountJf);
 
   // Start jellyfish animation after DOM is ready
   if(hasJf){
@@ -1360,10 +1415,17 @@ function renderTicketCard(tk, ev, o){
     try {
       localStorage.setItem('hm_claimed', JSON.stringify({
         claim: tk.claim, noun: parsed.noun, adj: parsed.adj,
-        ticketId: tk.id, status: tk.status, level, rasgos,
+        ticketId: tk.id, status: tk.status, level, rasgos, saved,
         claimedAt: new Date().toISOString(),
       }));
     } catch(e) {}
+    heroJf();
+    renderCuenta(saved);
+    if(window._jfSaveHint){   // llegó desde el navegador de una app a guardarla (cuentaFuera)
+      window._jfSaveHint=false;
+      const row=document.getElementById('jf-cuenta');
+      if(row && !saved){ toast('Tocá «Continuar con Google» para guardarla 🪼'); row.scrollIntoView({ block:'center' }); }
+    }
   }
 }
 
@@ -1376,12 +1438,224 @@ function closeRedeem(){
   if(window._jfHandle){ window._jfHandle.stop(); window._jfHandle=null; }
   window._jfTok=(window._jfTok||0)+1;
   window._jfClaim=null; window._jfParsed=null; window._jfEv=null; window._jfOpts=null; window._jfShare=null;
+  window._jfRecover=false;
+  const chips=document.getElementById('redeem-chips'); chips.hidden=true; chips.innerHTML='';
   // Note: localStorage claim is intentionally kept so it auto-restores next visit.
 }
 function forgetJf(){
+  const saved=claimedJf().saved;
   try { localStorage.removeItem('hm_claimed'); } catch(e){}
+  window._jfAccount=null;
   closeRedeem();
-  toast('Hidromedusa olvidada. Podés cargar una nueva. 🌊');
+  heroJf();
+  toast(saved ? 'Olvidada en este navegador. Sigue guardada en tu cuenta de Google 🌊' : 'Hidromedusa olvidada. Podés cargar una nueva. 🌊');
+}
+// La última medusa que se vio en este navegador (hm_claimed), o {}
+function claimedJf(){
+  try { return JSON.parse(localStorage.getItem('hm_claimed')||'null')||{}; } catch(e){ return {}; }
+}
+
+/* ---------- Tu medusa en el inicio ---------- */
+// La tarjeta del hero sale de hm_claimed: un script en el hero la muestra apenas carga la página
+// (sin salto) y acá se llena y se anima. Se vuelve a llamar cada vez que cambia la medusa.
+let _heroJf=null;
+function heroJf(){
+  const card=document.getElementById('hero-jf');
+  const s=claimedJf(), p=parseClaim(s.claim);
+  if(_heroJf){ _heroJf.stop(); _heroJf=null; }
+  if(!p || !window.JellyfishGen){ card.hidden=true; return; }
+  const level=Math.max(1, s.level|0), rasgos=s.rasgos||[];
+  document.getElementById('hero-jf-k').textContent='Tu medusa · nivel '+level;
+  document.getElementById('hero-jf-name').textContent=s.claim.replace(/-/g,' ');
+  const rs=rasgosLabel(rasgos);
+  const sub=[rs.charAt(0).toUpperCase()+rs.slice(1), s.saved ? '✓ Guardada en Google' : gsiOn() ? 'Guardala con Google para no perderla' : '']
+    .filter(Boolean).join(' · ');
+  const el=document.getElementById('hero-jf-s');
+  el.textContent=sub; el.hidden=!sub;
+  card.hidden=false;
+  _heroJf=JellyfishGen.render(document.getElementById('hero-jf-canvas'), p.noun, p.adj, { level, rasgos, scale:2 });
+}
+function openMyJf(){
+  const s=claimedJf();
+  track('mi-medusa',{ nivel:Math.max(1, s.level|0), guardada:!!s.saved });
+  openModal('m-redeem');
+}
+
+/* ---------- Cuenta de Google (opcional): guardar y traer medusas ---------- */
+// Google Identity Services con el botón "Continuar con Google": devuelve un ID token (credential)
+// que el backend verifica en cada pedido (/account/*); no hay sesión ni se guarda mail o nombre.
+// El script de Google se baja recién cuando hace falta un botón (al abrir "Tu hidromedusa"),
+// nunca al entrar a la web. Sin GOOGLE_CLIENT_ID no aparece nada.
+let _gsi=null, _gsiIntent=null;
+function gsiOn(){ return !!window.HM_CONFIG.GOOGLE_CLIENT_ID; }
+function gsiLoad(){
+  if(_gsi) return _gsi;
+  _gsi=new Promise(function(ok, fail){
+    const s=document.createElement('script');
+    s.src='https://accounts.google.com/gsi/client'; s.async=true;
+    s.onload=function(){
+      try {
+        google.accounts.id.initialize({ client_id:window.HM_CONFIG.GOOGLE_CLIENT_ID, callback:gsiDone, ux_mode:'popup' });
+        ok(google.accounts.id);
+      } catch(e){ fail(e); }
+    };
+    s.onerror=function(){ fail(new Error('gsi')); };
+    document.head.appendChild(s);
+  }).catch(function(e){ _gsi=null; throw e; });   // bloqueado o sin red: el próximo intento lo vuelve a bajar
+  return _gsi;
+}
+// Un botón de Google en `el`: 'guardar' la medusa que se ve o 'recuperar' las de la cuenta.
+// En el navegador de una app Google no deja entrar (disallowed_useragent): ahí va cuentaFuera().
+// `data-gsi` marca el lugar como armado (o armándose); sin la marca, cuentaForm() lo vuelve a armar.
+function gsiSlot(el, intent){
+  el.dataset.gsi=intent;
+  if(inAppBrowser()){
+    el.innerHTML=inAppBrowser()==='android'
+      ? `<a class="btn btn-line btn-block" href="${chromeUrl(cuentaQuery(intent))}" onclick="cuentaFuera('${intent}')">Continuar con Google en Chrome ↗</a>
+         <div class="jf-hint">Google no deja entrar desde el navegador de esta app</div>`
+      : `<button class="btn btn-line btn-block" onclick="cuentaFuera('${intent}')">Continuar con Google ↗</button>`;
+    return;
+  }
+  el.innerHTML='';
+  gsiLoad().then(function(id){
+    // Oculto (el formulario quedó tapado por la tarjeta): sin ancho para medir, se arma al volver a verse
+    if(!el.isConnected || !el.offsetParent){ delete el.dataset.gsi; return; }
+    const w=Math.round(Math.min(320, Math.max(200, el.getBoundingClientRect().width)));
+    id.renderButton(el, { type:'standard', theme:'filled_black', size:'large', shape:'rectangular', text:'continue_with',
+      locale:'es-419', width:w, click_listener:function(){ _gsiIntent=intent; } });
+  }).catch(function(){
+    delete el.dataset.gsi;   // la próxima vez que se abra lo vuelve a intentar
+    el.innerHTML='<div class="jf-or">No pudimos cargar Google (¿algún bloqueador?). Probá de nuevo más tarde.</div>';
+  });
+}
+function gsiDone(r){
+  const intent=_gsiIntent || (window._jfClaim ? 'guardar' : 'recuperar');
+  _gsiIntent=null;
+  if(!r || !r.credential) return;
+  if(intent==='guardar') accountSave(r.credential); else accountLoad(r.credential);
+}
+// El error del backend solo si es para mostrar (401/404/503); el resto, uno genérico
+function cuentaError(err, fallback){
+  const b=(err&&err.body)||{};
+  return [401,404,503].includes(err&&err.status) && b.error ? b.error : fallback;
+}
+
+// Fila debajo de la medusa: el botón para guardarla o el aviso de que ya está en la cuenta
+function renderCuenta(saved){
+  const row=document.getElementById('jf-cuenta'); if(!row) return;
+  if(saved){ row.innerHTML='<div class="jf-saved">✓ Guardada en tu cuenta de Google</div>'; return; }
+  row.innerHTML='<div class="jf-or">Guardala con Google y la recuperás aunque se borre este navegador o cambies de celu</div><div class="gsi-slot" id="gsi-save"></div>';
+  gsiSlot(document.getElementById('gsi-save'), 'guardar');
+}
+// Fila "¿Ya la guardaste con Google?" del formulario (queda armada mientras siga a la vista)
+function cuentaForm(){
+  if(!gsiOn()) return;
+  const slot=document.getElementById('gsi-recover');
+  document.getElementById('redeem-cuenta').hidden=false;
+  if(!slot.dataset.gsi) gsiSlot(slot, 'recuperar');
+}
+
+async function accountSave(credential){
+  const claim=window._jfClaim, row=document.getElementById('jf-cuenta');
+  if(!claim) return;
+  if(row) row.innerHTML='<div class="jf-or">Guardando…</div>';
+  let data;
+  try { data=await api('/account/save',{ method:'POST', body:{ credential, claim } }); }
+  catch(err){
+    track('cuenta-guardar',{ resultado:'error', status:(err&&err.status)||0 });
+    toast(cuentaError(err, 'No pudimos guardarla 🪼 Probá de nuevo'));
+    if(window._jfClaim===claim) renderCuenta(false);
+    return;
+  }
+  const list=data.medusas||[];
+  track('cuenta-guardar',{ resultado:'ok', medusas:list.length });
+  window._jfAccount=list;
+  const s=claimedJf();
+  if(claimKey(s.claim)===claimKey(claim)){ s.saved=true; try { localStorage.setItem('hm_claimed', JSON.stringify(s)); } catch(e){} }
+  heroJf();
+  if(window._jfClaim!==claim) return;   // se cerró o cambió de medusa mientras guardaba
+  renderCuenta(true);
+  accountChips(document.getElementById('jf-chips'), claim, showAccountJf);
+  toast('Guardada en tu cuenta de Google 🪼');
+}
+async function accountLoad(credential){
+  const slot=document.getElementById('gsi-recover');
+  slot.innerHTML='<div class="jf-or">Buscando tus medusas…</div>';
+  let data;
+  try { data=await api('/account/medusas',{ method:'POST', body:{ credential } }); }
+  catch(err){
+    track('cuenta-entrar',{ resultado:'error', status:(err&&err.status)||0 });
+    toast(cuentaError(err, 'No pudimos traer tus medusas 🪼 Probá de nuevo'));
+    gsiSlot(slot, 'recuperar');
+    return;
+  }
+  const list=data.medusas||[];
+  track('cuenta-entrar',{ resultado:list.length ? 'ok' : 'vacia', medusas:list.length });
+  gsiSlot(slot, 'recuperar');
+  if(!list.length){ toast('Esa cuenta de Google todavía no tiene medusas guardadas 🪼'); return; }
+  window._jfAccount=list; window._jfRecover=false;
+  if(window._evoCode){   // QR de la noche: elige cuál evoluciona y toca el botón
+    pickEvo(0);
+    toast(list.length>1 ? 'Elegí tu medusa y tocá «Evolucionar» 🪼' : 'Listo 🪼 Tocá «Evolucionar mi medusa»');
+    return;
+  }
+  showAccountJf(0);
+}
+function showAccountJf(i){
+  const m=(window._jfAccount||[])[i]; if(!m) return;
+  renderTicketCard(m.ticket, m.event||HM_EVENT);
+}
+function pickEvo(i){
+  const m=(window._jfAccount||[])[i]; if(!m) return;
+  document.getElementById('redeem-claim').value=m.ticket.claim.replace(/-/g,' ');
+  accountChips(document.getElementById('redeem-chips'), m.ticket.claim, pickEvo);
+}
+// Chips con las medusas de la cuenta (si hay más de una): en la tarjeta cambian la que se ve;
+// con el QR de la noche eligen cuál evoluciona.
+function accountChips(box, current, pick){
+  const list=window._jfAccount||[];
+  box.innerHTML=''; box.hidden=list.length<2;
+  if(list.length<2) return;
+  const label=document.createElement('div'); label.className='field-label'; label.textContent='Tus medusas guardadas';
+  const wrap=document.createElement('div'); wrap.className='chips';
+  list.forEach(function(m, i){
+    const b=document.createElement('button');
+    b.type='button'; b.className='chip'; b.textContent=m.ticket.claim.replace(/-/g,' ');
+    b.setAttribute('aria-pressed', String(claimKey(m.ticket.claim)===claimKey(current)));
+    b.onclick=function(){ pick(i); };
+    wrap.appendChild(b);
+  });
+  box.append(label, wrap);
+}
+
+// Navegador interno de una app (Instagram, Facebook, TikTok…): 'android' | 'ios' | null
+function inAppBrowser(){
+  const ua=navigator.userAgent||'';
+  const app=/Instagram|FBAN|FBAV|FB_IAB|FBIOS|FB4A|Threads|TikTok|musical_ly|BytedanceWebview|Snapchat|Line\//.test(ua);
+  if(/Android/.test(ua)) return app || /; wv\)/.test(ua) ? 'android' : null;
+  if(/iPhone|iPad|iPod/.test(ua)) return app || !/Safari\//.test(ua) ? 'ios' : null;
+  return null;
+}
+// Lo que necesita la página en el navegador de verdad para seguir: la frase a guardar o solo traer las de la cuenta
+function cuentaQuery(intent){
+  return intent==='guardar' && window._jfClaim ? 'claim='+encodeURIComponent(window._jfClaim)+'&guardar=1' : 'cuenta=1';
+}
+// Desde el navegador de una app: en Android el link abre esta página en Chrome (?claim=…&guardar=1 o
+// ?cuenta=1); en iOS no se puede abrir Safari solo, así que la URL queda lista y se explica cómo pasar.
+function cuentaFuera(intent){
+  track(intent==='guardar' ? 'cuenta-guardar' : 'cuenta-entrar', { resultado:'navegador' });
+  if(inAppBrowser()==='android'){
+    // Si Chrome no se abrió (no está instalado o la app no deja salir), que sepa cómo seguir
+    const t=setTimeout(function(){ if(!document.hidden) toast('Abrí hidromedusa.com en Chrome para usar Google'); }, 2500);
+    const cancel=function(){ clearTimeout(t); };
+    document.addEventListener('visibilitychange', cancel, { once:true });
+    window.addEventListener('blur', cancel, { once:true });
+    return;
+  }
+  // La frase va en la URL solo mientras el modal está abierto: al cerrarlo, "atrás" vuelve a la limpia
+  try { history.replaceState(history.state, '', location.pathname+'?'+cuentaQuery(intent)); } catch(e){}
+  const slot=document.getElementById(intent==='guardar' ? 'gsi-save' : 'gsi-recover');
+  if(slot) slot.innerHTML='<div class="jf-or">Google no deja entrar desde el navegador de esta app. Tocá <b>···</b> arriba, elegí abrir en el navegador externo y seguí en Safari.</div>';
 }
 
 /* ---------- Jellyfish fullscreen ---------- */
@@ -1545,8 +1819,10 @@ function jfViaChrome(){
   try { return !(navigator.share && navigator.canShare && navigator.canShare({ files:[new File([''], 'x.png', {type:'image/png'})] })); }
   catch(e){ return true; }
 }
-function jfChromeUrl(claim){
-  return 'intent://'+location.host+location.pathname+'?claim='+encodeURIComponent(claim)+'&compartir=1'
+function jfChromeUrl(claim){ return chromeUrl('claim='+encodeURIComponent(claim)+'&compartir=1'); }
+// Esta página en Chrome (Android), con la query `q`
+function chromeUrl(q){
+  return 'intent://'+location.host+location.pathname+'?'+q
     +'#Intent;scheme='+location.protocol.replace(':','')+';package=com.android.chrome;end';
 }
 function jfToChrome(){
@@ -1630,7 +1906,7 @@ const LEGAL={
     <h4>4. Notificaciones</h4><p>Podés optar por recibir avisos antes de las tocadas y novedades. Te podés dar de baja cuando quieras.</p>
     <h4>5. Conducta</h4><p>El respeto entre asistentes es fundamental. Cualquier conducta que atente contra la seguridad de otros es motivo de expulsión sin reembolso.</p>` },
   privacidad:{ title:'Política de Privacidad', html:`
-    <h4>Qué datos recopilamos</h4><p>Nombre y, si los dejás, email y WhatsApp para gestionar tu entrada. Si iniciás sesión (opcional), los datos básicos del proveedor que elijas (Google, Apple o Instagram) y tus preferencias de notificación.</p>
+    <h4>Qué datos recopilamos</h4><p>Nombre y, si los dejás, email y WhatsApp para gestionar tu entrada. Si guardás tu medusa con Google (opcional), solo un identificador de tu cuenta de Google y qué medusas guardaste: ni tu mail ni tu nombre. El script de Google se carga recién cuando abrís «Tu hidromedusa», nunca al entrar a la web.</p>
     <h4>Para qué los usamos</h4><p>Para <b>contar con vos para la diversión</b>: confirmar tu entrada por WhatsApp o Instagram, recordatorios antes de las tocadas y novedades. Nunca vendemos tus datos.</p>
     <h4>Pagos</h4><p>Cuando una fecha tiene entrada paga, el pago se coordina directamente por WhatsApp con el staff. No procesamos ni almacenamos datos de tarjeta en el sitio.</p>
     <h4>Tus derechos</h4><p>Podés acceder, rectificar o borrar tus datos cuando quieras escribiendo a <b>hola@hidromedusa.com</b>.</p>
@@ -1642,6 +1918,8 @@ function openLegal(which){
   document.getElementById('legal-content').innerHTML=l.html;
   openOverlay('o-legal');
 }
+// /#privacidad y /#terminos abren el modal: son los links de la pantalla de permisos de Google («Guardar con Google»)
+if(Object.keys(LEGAL).includes(location.hash.slice(1))) openLegal(location.hash.slice(1));
 
 
 /* ---------- Fechas con vencimiento: data-until / data-after (YYYY-MM-DD, hora AR) ---------- */
@@ -1792,21 +2070,26 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 /* nav bg already solid; ensure icons render after dynamic insertions */
 window.addEventListener('load',()=>lucide.createIcons());
 
+/* Tu medusa en el inicio, si ya la cargaste en este navegador */
+heroJf();
+
 /* Auto-open claim from URL ?claim=noun-adjective (email deep-link) */
 (function(){
   try {
     const params=new URLSearchParams(window.location.search), q=params.get('claim');
     if(!q) return;
+    window._claimLink=true;   // la frase sale de la URL acá abajo: la marca avisa al resto que vino por link
     window._jfShareHint=params.get('compartir')==='1';   // viene del navegador de una app (jfToChrome) a compartirla
+    window._jfSaveHint=params.get('guardar')==='1';      // ídem, a guardarla con Google (cuentaFuera)
     // Remove param from URL bar without reloading
     const clean=window.location.pathname+(window.location.hash||'');
     history.replaceState(null,'',clean);
     setTimeout(function(){
       if(window._jfShareHint) track('compartir',{ resultado:'en-chrome' });
+      // La frase antes de abrir: así no la pisa la medusa guardada en este navegador
+      document.getElementById('redeem-claim').value=q.replace(/-/g,' ');
       openModal('m-redeem');
-      const inp=document.getElementById('redeem-claim');
-      if(inp) inp.value=q.replace(/-/g,' ');
-      redeem().finally(function(){ window._jfShareHint=false; });
+      redeem().finally(function(){ window._jfShareHint=false; window._jfSaveHint=false; });
     }, 700);
   } catch(e){}
 })();
@@ -1828,10 +2111,24 @@ window.addEventListener('load',()=>lucide.createIcons());
   } catch(e){}
 })();
 
+/* ?cuenta=1: llega desde el navegador de una app a traer sus medusas con Google (cuentaFuera) */
+(function(){
+  try {
+    if(new URLSearchParams(window.location.search).get('cuenta')!=='1') return;
+    history.replaceState(null,'',window.location.pathname+(window.location.hash||''));
+    window._jfRecover=true;   // que no muestre sola la medusa de este navegador: viene a buscar las suyas
+    setTimeout(function(){
+      openModal('m-redeem');
+      const row=document.getElementById('redeem-cuenta');
+      if(!row.hidden){ toast('Tocá «Continuar con Google» y traé tus medusas 🪼'); row.scrollIntoView({ block:'center' }); }
+    }, 700);
+  } catch(e){}
+})();
+
 /* Retomar el pedido si quedó a medias (recarga del navegador de IG, volver de WhatsApp, etc.) */
 (function(){
   try {
-    if(new URLSearchParams(window.location.search).get('claim') || window._evoCode) return;
+    if(window._claimLink || window._evoCode || window._jfRecover) return;
     const c=ckLoad(); if(!c || !c.open) return;
     if(Date.now()-(c.ts||0) > CK_TTL || eventOver()) return;
     setTimeout(function(){ if(!document.querySelector('.modal.open')) buy(true); }, 600);

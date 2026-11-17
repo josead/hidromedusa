@@ -8,7 +8,8 @@
     "staff/index.js",
     "newsletter/index.js",
     "jellyfish/index.js",
-    "booking/index.js"
+    "booking/index.js",
+    "account/index.js"
   ],
   "endpoints": [
     { "path": "/auth/exchange",            "method": "POST", "module": "auth/index",       "fn": "exchange"    },
@@ -27,6 +28,9 @@
     { "path": "/tickets/:id",              "method": "GET",  "module": "tickets/index",    "fn": "getTicket"   },
 
     { "path": "/booking/request",          "method": "POST", "module": "booking/index",    "fn": "request"     },
+
+    { "path": "/account/save",             "method": "POST", "module": "account/index",    "fn": "save"        },
+    { "path": "/account/medusas",          "method": "POST", "module": "account/index",    "fn": "medusas"     },
 
     { "path": "/calendar/events",          "method": "GET",  "module": "calendar/index",   "fn": "getEvents"   },
     { "path": "/calendar/subscribe",       "method": "POST", "module": "calendar/index",   "fn": "subscribe"   },

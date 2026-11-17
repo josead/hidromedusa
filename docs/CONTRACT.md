@@ -17,7 +17,9 @@ conform to this. Read this fully before editing any file.
   the buyer scans the night's QR (`/?evo=CODE`), enters the phrase and the jellyfish
   levels up (more definition + one new rasgo). See "Evolución" below.
 - **Membership is hidden** for this pass (no MP, no billing).
-- **OAuth login stays optional** and env-gated (demo fallback when no creds).
+- **Cuenta opcional con Google** («Guardar con Google»): solo para no perder la medusa
+  si se borra el navegador o cambia de celu. Nunca hace falta para ver o usar la entrada.
+  Apagada (sin botones) mientras `GOOGLE_CLIENT_ID` esté vacío. See "Cuenta" below.
 
 ## Event (hardcoded fallback)
 
@@ -45,11 +47,11 @@ Frontend reads a single global set near the top of `index.html`:
 
 ```js
 window.HM_CONFIG = {
-  API_BASE:        '',                 // '' => demo/offline fallback mode
-  WHATSAPP_NUMBER: '549XXXXXXXXXX',    // E.164 no '+', placeholder — user fills
-  GOOGLE_CLIENT_ID:    '',             // '' => demo auth
-  APPLE_CLIENT_ID:     '',
-  INSTAGRAM_CLIENT_ID: '',
+  API_BASE:         '',                // '' => demo/offline fallback mode
+  WHATSAPP_NUMBER:  '549XXXXXXXXXX',   // E.164 no '+'
+  INSTAGRAM_HANDLE: 'hidromedusa',     // DM (ig.me/m/<handle>)
+  ALIAS:            'hidromedusa.tandil', // alias para transferir
+  GOOGLE_CLIENT_ID: '',                // Client ID público de Google Identity Services; '' => sin «Guardar con Google»
 };
 ```
 
@@ -60,7 +62,8 @@ toast) so the static site keeps working with zero backend.
 Backend env (`.env.example`): `APP_URL`, `API_URL`, `AWS_REGION`,
 `DYNAMODB_ENDPOINT` (e.g. `http://localhost:4566` for LocalStack; unset => real
 AWS), `DDB_TABLE_PREFIX` (default `hm_`), `STAFF_TOKEN` (shared staff passphrase;
-unset => allow all in dev), `WHATSAPP_NUMBER`, OAuth + Google Calendar vars
+unset => allow all in dev), `WHATSAPP_NUMBER`, `GOOGLE_CLIENT_ID` (el mismo Client ID
+público del front; unset => `/account/*` responde 503), Google Calendar vars
 (all optional).
 
 ## Persistence — DynamoDB (LocalStack-compatible)
@@ -74,7 +77,8 @@ module `lambdas/lib/store.js` builds a `DynamoDBDocumentClient` honouring
 | `hm_tickets`   | `id` (S)      | `claimNorm-index` on `claimNorm` | ticket records |
 | `hm_tasks`     | `panelId` (S) | —                           | one item per panel, attr `tasks` (list) — GLOBAL/shared |
 | `hm_newsletter`| `email` (S)   | —                           | subscribers |
-| `hm_sessions`  | `token` (S)   | —                           | OAuth sessions (TTL `expiresAt`) |
+| `hm_sessions`  | `token` (S)   | —                           | OAuth sessions (TTL `expiresAt`) — legacy, unused |
+| `hm_accounts`  | `sub` (S)     | —                           | cuenta de Google → `medusas:[{ id, claimNorm }]` (la última guardada primero, máx. 20), `createdAt`, `updatedAt`. Sin mail ni nombre |
 
 `store.js` exports a small typed API (implement at least these):
 
@@ -84,6 +88,7 @@ tickets.updateIf(id, status, patch)   // conditional on current status; null if 
 tasks.getAll() / tasks.getPanel(panelId) / tasks.putPanel(panelId, tasks)
 newsletter.add(email) / newsletter.list()
 sessions.put(s) / sessions.get(token) / sessions.del(token)
+accounts.get(sub) / accounts.put(a)
 ```
 
 Plus `lambdas/lib/claimcode.js`: `makePhrase()` → `noun-adjective` from curated
@@ -177,7 +182,16 @@ Calendar:
 - `POST /calendar/subscribe`   `{ email?, eventId }` → `{ icsUrl, googleUrl, event }`
 - `GET  /calendar/ics/:id`     → ICS file
 
-Auth (optional, keep):
+Cuenta (Google, opcional — `lambdas/account/index.js`):
+- Sin sesiones: cada pedido trae el ID token de Google Identity Services (`credential`, el
+  del botón «Continuar con Google») y `lambdas/lib/google.js` lo verifica (RS256 contra las
+  claves públicas de Google, `iss`, `aud` = `GOOGLE_CLIENT_ID`, `exp`). Solo se usa el `sub`.
+- `POST /account/save`    (public) `{ credential, claim }` → `{ medusas:[{ ticket, event }] }` (la frase queda primera; `ticket` como en `/tickets/redeem`). 404 palabra desconocida o anulada.
+- `POST /account/medusas` (public) `{ credential }` → `{ medusas:[{ ticket, event }] }` (`[]` si la cuenta no guardó ninguna).
+- Ambos: 401 token que no sirve, 503 sin `GOOGLE_CLIENT_ID`. Las guardadas cuya frase
+  cambió (reword) o se anuló dejan de aparecer (se compara `claimNorm`).
+
+Auth (legacy MetaCall, sin ruta en `aws-handler.js`; el sitio no lo usa):
 - `POST /auth/exchange` `{ code, provider, redirect_uri }` → session/user (store in `hm_sessions`)
 - `GET  /auth/me` (Bearer) → user
 
@@ -212,7 +226,16 @@ Default panel/task seed = the set already in `public/js/staff-panel.js`
 - Newsletter: `POST /newsletter/subscribe` (fallback toast).
 - Calendar: "Agregar a calendario" → googleUrl + ICS (via `/calendar/*` or
   client-built ICS fallback).
-- Auth: real OAuth popup when `GOOGLE_CLIENT_ID` etc. set, else demo login.
+- Tu medusa en el inicio: la última que se abrió en este navegador (`localStorage`
+  `hm_claimed`: claim, nivel, rasgos, `saved`) se dibuja en una tarjeta del hero; tocarla
+  abre «Tu hidromedusa».
+- Cuenta: con `GOOGLE_CLIENT_ID`, el modal ofrece «Continuar con Google» para guardarla
+  (`/account/save`) o traerlas en otro navegador (`/account/medusas`, chips si hay varias).
+  El script de Google se carga recién al abrir el modal. Desde el navegador de una app
+  (Instagram, etc.) Google no deja entrar: Android abre Chrome (`intent://`), iOS deja la
+  URL lista (`?claim=…&guardar=1` / `?cuenta=1`) y explica cómo pasar a Safari.
+- Legal: `/#privacidad` y `/#terminos` abren esos modales al entrar (Google los linkea en
+  su pantalla de permisos).
 - **Remove** the membership section, its nav links, and `join()` logic.
 - Consolidate: after porting, delete `client/`, `public/js/{app,auth,tickets,
   staff,animations}.js`, `public/index.legacy.html`. Keep `public/js/staff-panel.js`

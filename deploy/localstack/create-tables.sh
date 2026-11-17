@@ -61,4 +61,10 @@ create_table "${PREFIX}sessions" \
   --key-schema AttributeName=token,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST
 
+# hm_accounts — PK sub (S): cuenta de Google → medusas guardadas
+create_table "${PREFIX}accounts" \
+  --attribute-definitions AttributeName=sub,AttributeType=S \
+  --key-schema AttributeName=sub,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+
 echo "All tables ready (prefix '${PREFIX}', endpoint ${ENDPOINT})."

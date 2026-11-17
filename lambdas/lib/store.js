@@ -7,6 +7,7 @@
 //   tasks.{getAll,getPanel,putPanel}
 //   newsletter.{add,list}
 //   sessions.{put,get,del}
+//   accounts.{get,put}
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
@@ -24,6 +25,7 @@ const T = {
   tasks:      `${PREFIX}tasks`,
   newsletter: `${PREFIX}newsletter`,
   sessions:   `${PREFIX}sessions`,
+  accounts:   `${PREFIX}accounts`,
 };
 
 // LocalStack needs *some* credentials; real AWS uses the default provider chain.
@@ -245,4 +247,17 @@ const sessions = {
   },
 };
 
-module.exports = { tickets, tasks, newsletter, sessions, TABLES: T, TASK_SEED };
+// ── Accounts ──────────────────────────────────────
+// Cuenta de Google (opcional) keyed by `sub`: { sub, medusas: [{ id, claimNorm }], createdAt, updatedAt }.
+const accounts = {
+  async get(sub) {
+    const r = await run('accounts.get', new GetCommand({ TableName: T.accounts, Key: { sub } }));
+    return r.Item || null;
+  },
+  async put(a) {
+    await run('accounts.put', new PutCommand({ TableName: T.accounts, Item: a }));
+    return a;
+  },
+};
+
+module.exports = { tickets, tasks, newsletter, sessions, accounts, TABLES: T, TASK_SEED };

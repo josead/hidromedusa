@@ -9,6 +9,9 @@ PREFIX="hm_"
 ROLE="hidromedusa-api-role"
 FN="hidromedusa-api"
 RUNTIME="nodejs20.x"
+# "Guardar con Google": el Client ID es público (proyecto hidromedusa de Google Cloud; el mismo que HM_CONFIG del front).
+# Vacío = cuenta apagada (503).
+GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-135324745714-r9u90qfimqvf7a08f7nv1jo88gs531lu.apps.googleusercontent.com}"
 HERE="$(cd "$(dirname "$0")/../.." && pwd)"        # repo root
 ACCOUNT="$(aws sts get-caller-identity --query Account --output text)"
 USER_NAME="$(aws iam get-user --query 'User.UserName' --output text)"
@@ -46,9 +49,13 @@ create_table "${PREFIX}tickets" \
 create_table "${PREFIX}newsletter" \
   --attribute-definitions AttributeName=email,AttributeType=S \
   --key-schema AttributeName=email,KeyType=HASH
+create_table "${PREFIX}accounts" \
+  --attribute-definitions AttributeName=sub,AttributeType=S \
+  --key-schema AttributeName=sub,KeyType=HASH
 echo "   esperando ACTIVE…"
 aws dynamodb wait table-exists --region "${REGION}" --table-name "${PREFIX}tickets"
 aws dynamodb wait table-exists --region "${REGION}" --table-name "${PREFIX}newsletter"
+aws dynamodb wait table-exists --region "${REGION}" --table-name "${PREFIX}accounts"
 
 # ── 2) Rol de ejecución del Lambda ─────────────────────────────────────────────
 echo "→ [2/6] Rol de ejecución ${ROLE}"
@@ -69,7 +76,7 @@ sleep 8   # propagación del rol antes de crear la función
 # ── 3) Empaquetar el código (SDK v3 lo da el runtime) ──────────────────────────
 echo "→ [3/6] Zip del código"
 ZIP="/tmp/hm-api.zip"; rm -f "${ZIP}"
-( cd "${HERE}/lambdas" && zip -qr "${ZIP}" aws-handler.js tickets newsletter lib jellyfish booking )
+( cd "${HERE}/lambdas" && zip -qr "${ZIP}" aws-handler.js tickets newsletter lib jellyfish booking account )
 echo "   $(du -h "${ZIP}" | cut -f1) → ${ZIP}"
 
 # ── 4) Crear/actualizar la función ─────────────────────────────────────────────
@@ -89,6 +96,7 @@ print(json.dumps({'Variables': {
   'SES_FROM':         'Hidromedusa <entrada@hidromedusa.com>',
   'SES_REGION':       '${REGION}',
   'API_BASE':         'https://p2vsvdihylfl6w4c6pfnnuwd4u0dwcvw.lambda-url.sa-east-1.on.aws',
+  'GOOGLE_CLIENT_ID': '${GOOGLE_CLIENT_ID}',
 }}))")"
 echo "→ [4/6] Función Lambda ${FN}"
 if aws lambda get-function --region "${REGION}" --function-name "${FN}" >/dev/null 2>&1; then
