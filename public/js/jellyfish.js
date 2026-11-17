@@ -88,6 +88,19 @@
     };
   }
 
+  // Wave phase between neighbouring tentacles: small, so they never cross.
+  // From the free room between two of them (gap) and the wave height (amp), in grid cells.
+  function tentLag(gap, amp) {
+    return Math.max(0, Math.min(0.45, (gap - 1.2) / amp));
+  }
+
+  // Level 1: whether N tentacles of width th fit over `spread` with a gap between
+  // them. If not they take the whole rim, and go thin if even that is not enough
+  // at rest (rim half-width bellW / 2), never a solid block.
+  function tentFits(p, spread, th) {
+    return 2 * spread / (p.tentN - 1) >= th + 1;
+  }
+
   // ── Draw one animation frame ─────────────────────────────────────────────────
   function drawFrame(ctx, p, frame) {
     ctx.clearRect(0, 0, GRID_W * SCALE, GRID_H * SCALE);
@@ -172,31 +185,35 @@
     }
 
     // ── Tentacles ──
+    // Rooted at the rim and never crossing: each one leans to its own side
+    // (u: -1 left … 1 right) and neighbours wave almost together.
     const tentTop = rimY + fringeH + 1;
     const N       = p.tentN;
-    const spread  = Math.max(1, lastHW - 1);
+    const th      = tentFits(p, p.bellW / 2, p.tentThick) ? p.tentThick : 1;
+    const spread  = Math.max(1, tentFits(p, lastHW - 1, th) ? lastHW - 1 : lastHW);
     const lenMod  = frame === 1 ? 3 : (frame === 2 ? -2 : 0);
     const tLen    = Math.max(3, p.tentLen + lenMod);
+    const lag     = tentLag(2 * spread / (N - 1) - th, 1.5);
 
     for (let i = 0; i < N; i++) {
-      const xBase = N === 1 ? cx
-        : cx - spread + (i * 2 * spread / (N - 1));
+      const u     = N === 1 ? 0 : 2 * i / (N - 1) - 1;
+      const xBase = cx + u * spread;
       // frame 1: tentacles spread outward slightly
-      const splayMod = frame === 1 ? (i - (N - 1) / 2) * 0.9 : 0;
+      const splayMod = frame === 1 ? u * (N - 1) / 2 * 0.9 : 0;
 
       for (let dy = 0; dy < tLen; dy++) {
         const prog = dy / tLen;
-        let xOff = splayMod;
+        let xOff = splayMod * prog;
 
         switch (p.tentStyle) {
           case 0: // gentle natural drift
-            xOff += (i % 2 === 0 ? 1 : -1) * prog * prog * 1.2;
+            xOff += u * prog * prog * 1.2;
             break;
-          case 1: // sine wave
-            xOff += Math.sin(prog * Math.PI * 3 + i * 1.1 + frame * 0.8) * 1.5;
+          case 1: // sine wave, still at the root
+            xOff += Math.sin(prog * Math.PI * 3 + i * lag + frame * 0.8) * 1.5 * Math.min(1, prog / 0.3);
             break;
-          case 2: // curl (alternating direction)
-            xOff += (i % 2 === 0 ? 1 : -1) * Math.pow(prog, 1.4) * 2.5;
+          case 2: // curl outward
+            xOff += u * Math.pow(prog, 1.4) * 2.5;
             break;
         }
 
@@ -207,7 +224,7 @@
 
         if (gx >= 0 && gx < GRID_W && gy >= 0 && gy < GRID_H) {
           ctx.fillStyle = col;
-          ctx.fillRect(gx * SCALE, gy * SCALE, p.tentThick * SCALE, SCALE);
+          ctx.fillRect(gx * SCALE, gy * SCALE, th * SCALE, SCALE);
         }
       }
     }
@@ -241,6 +258,15 @@
   function profile(style, t) {
     const s = Math.sin(t * Math.PI / 2);
     return style === 0 ? s : style === 1 ? 0.38 + 0.62 * s : Math.pow(s, 1.9);
+  }
+
+  // Cuánto se abren las puntas de los tentáculos (fan) y cuánto más al latir (splay), sin salirse del lienzo
+  function tentFan(p, espiral) {
+    const F = [2.4, 0, 5][p.tentStyle], S = 0.9 * (p.tentN - 1);
+    const room = HD_W / 2 - 1 - ((p.bellW * HD) / 2 - 2) - (p.tentThick === 2 ? 3 : 2) - 0.8
+      - (p.tentStyle === 1 ? 3 : 0) - (espiral ? 7.2 : 0);
+    const c = clamp01(room / (F + S));
+    return [F * c, S * c];
   }
 
   function drawHD(ctx, p, rasgos, seed, time, S) {
@@ -333,22 +359,25 @@
     }
 
     // ── Tentáculos: mismo número, largo y estilo, con luz y sombra ──
+    // Salen del borde y no se cruzan: cada uno se abre hacia su lado (u: -1 izquierda … 1 derecha)
+    // y los vecinos ondulan casi juntos.
     const N      = p.tentN;
     const spread = Math.max(1, hwR - 2);
     const tw     = p.tentThick === 2 ? 3 : 2;
     const tl     = tw === 3 ? [72, 58, 44] : [66, 48];
+    const lag    = tentLag(2 * (p.bellW - 2) / (N - 1) - tw, 3);   // con la campana en reposo, para que no cambie al latir
+    const [fan, splay] = tentFan(p, has('espiral'));
     for (let i = 0; i < N; i++) {
-      const xb   = N === 1 ? cx : cx - spread + (i * 2 * spread) / (N - 1);
+      const u    = N === 1 ? 0 : (2 * i) / (N - 1) - 1;
+      const xb   = cx + u * spread;
       const side = i % 2 === 0 ? 1 : -1;
       const len  = tLen - (has('espiral') && i % 2 ? 5 : 0);
       const pts  = [];
       for (let s = 0; s <= len; s += 0.5) {
-        const pr = s / len;
-        let x = xb - tw / 2 + (i - (N - 1) / 2) * 1.8 * k;
-        if (p.tentStyle === 0)      x += side * pr * pr * 2.4;
-        else if (p.tentStyle === 1) x += Math.sin(pr * Math.PI * 3 + i * 1.1 - ph * Math.PI * 2) * 3;
-        else                        x += side * Math.pow(pr, 1.4) * 5;
-        x += Math.sin(time * 1.3 + i * 2.1 + pr * 2) * 0.8 * pr;     // deriva
+        const pr = s / len, q = s / tLen;   // q, igual para todas: ondulan juntas aunque la espiral acorte algunas
+        let x = xb - tw / 2 + u * (fan * Math.pow(q, p.tentStyle === 2 ? 1.4 : 2) + splay * k * q);
+        if (p.tentStyle === 1) x += Math.sin(q * Math.PI * 3 + i * lag - ph * Math.PI * 2) * 3 * smooth(q / 0.3);
+        x += Math.sin(time * 1.3 + i * lag + q * 2) * 0.8 * q;     // deriva
         pts.push([x, tTop + s, pr, 0]);
       }
       if (has('espiral')) {   // la punta se enrolla hacia afuera

@@ -48,6 +48,16 @@ function derive(nHash, aHash) {
   };
 }
 
+// Same as public/js/jellyfish.js: wave phase between neighbouring tentacles,
+// and whether their roots fit under the rim (whole rim, then thin, never a block)
+function tentLag(gap, amp) {
+  return Math.max(0, Math.min(0.45, (gap - 1.2) / amp));
+}
+
+function tentFits(p, spread, th) {
+  return 2 * spread / (p.tentN - 1) >= th + 1;
+}
+
 function generateSVG(noun, adjective) {
   const nHash = fnv(noun);
   const aHash = fnv(adjective);
@@ -127,23 +137,26 @@ function generateSVG(noun, adjective) {
 
   const tentTop = rimY + fringeH + 1;
   const N      = p.tentN;
-  const spread = Math.max(1, lastHW - 1);
+  const th     = tentFits(p, p.bellW / 2, p.tentThick) ? p.tentThick : 1;
+  const spread = Math.max(1, tentFits(p, lastHW - 1, th) ? lastHW - 1 : lastHW);
+  const lag    = tentLag(2 * spread / (N - 1) - th, 1.5);
 
   for (let i = 0; i < N; i++) {
-    const xBase = N === 1 ? cx : cx - spread + (i * 2 * spread / (N - 1));
+    const u     = N === 1 ? 0 : 2 * i / (N - 1) - 1;
+    const xBase = cx + u * spread;
     for (let dy = 0; dy < p.tentLen; dy++) {
       const prog = dy / p.tentLen;
       let xOff = 0;
       switch (p.tentStyle) {
-        case 0: xOff = (i % 2 === 0 ? 1 : -1) * prog * prog * 1.2; break;
-        case 1: xOff = Math.sin(prog * Math.PI * 3 + i * 1.1) * 1.5; break;
-        case 2: xOff = (i % 2 === 0 ? 1 : -1) * Math.pow(prog, 1.4) * 2.5; break;
+        case 0: xOff = u * prog * prog * 1.2; break;
+        case 1: xOff = Math.sin(prog * Math.PI * 3 + i * lag) * 1.5 * Math.min(1, prog / 0.3); break;
+        case 2: xOff = u * Math.pow(prog, 1.4) * 2.5; break;
       }
       const gx = Math.round(xBase + xOff);
       const gy = tentTop + dy;
       const alpha = Math.max(0.12, 1 - prog * 0.7);
       if (gx >= 0 && gx < GRID_W && gy >= 0 && gy < GRID_H) {
-        rects.push(`<rect x="${gx * SCALE}" y="${gy * SCALE}" width="${p.tentThick * SCALE}" height="${SCALE}" fill="${hsla(p.tentHue, p.tentSat, 58, alpha)}"/>`);
+        rects.push(`<rect x="${gx * SCALE}" y="${gy * SCALE}" width="${th * SCALE}" height="${SCALE}" fill="${hsla(p.tentHue, p.tentSat, 58, alpha)}"/>`);
       }
     }
   }
