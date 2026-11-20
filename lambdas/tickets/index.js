@@ -345,16 +345,37 @@ async function remove(req) {
   }
 }
 
+// Asistencia: a qué fechas vino la persona de esta entrada. La marca sale de la lista de la puerta
+// (/listas/ → `asistencias[eventId] = { at, por:'lista', n }`, n = cuántos de la entrada pasaron),
+// del QR de la noche (`por:'qr'`: la noche en que nació, que no evoluciona) o de haber evolucionado
+// esa noche (`evos`). Sin marca, la fecha de la entrada NO dice que vino.
+function vinoA(t, eventId) {
+  const a = (t.asistencias || {})[eventId];
+  if ((t.evos || {})[eventId] || (a && a.por === 'qr')) return 'qr';
+  if (a || (t.status === 'used' && t.eventId === eventId)) return 'lista';
+  return null;
+}
+
 // Lo único de una entrada que sale por redeem/evolve. La frase se dice en voz alta en la fiesta y
 // hay solo 18×18, así que cualquiera puede probarlas todas: nunca nombre, mail ni teléfono.
 // Nace en nivel 1 y suma un nivel y un rasgo por cada fecha a la que volvió (`evos`, en orden).
+// `fechas` = sus hidro-memorias: la fecha de la entrada con la que nació (`entrada`) y cada fecha a
+// la que vino (`vino`), de la más vieja a la más nueva, con lo que hace falta para mostrarlas.
 function publicTicket(t) {
   const evos = Object.entries(t.evos || {})
     .sort((a, b) => String(a[1].at).localeCompare(String(b[1].at)))
     .map(([eventId, e]) => ({ eventId, rasgo: e.rasgo, date: (EVENTS[eventId] || {}).date || null }));
+  const ids = new Set([t.eventId, ...Object.keys(t.asistencias || {}), ...Object.keys(t.evos || {})]);
+  const fechas = [...ids].filter((id) => EVENTS[id]).map((id) => {
+    const e = EVENTS[id];
+    return {
+      eventId: id, name: e.name, date: e.date, time: e.time || '', end: e.end, venue: e.venue,
+      entrada: id === t.eventId, vino: !!vinoA(t, id), rasgo: ((t.evos || {})[id] || {}).rasgo || null,
+    };
+  }).sort((a, b) => a.date.localeCompare(b.date));
   return {
     id: t.id, type: t.type, eventId: t.eventId, claim: t.claim, status: t.status,
-    level: 1 + evos.length, rasgos: evos.map((e) => e.rasgo), evos,
+    level: 1 + evos.length, rasgos: evos.map((e) => e.rasgo), evos, fechas,
   };
 }
 
@@ -408,10 +429,13 @@ async function evolve(req) {
     const ticket = await ticketByClaim(body.claim);
     if (!ticket) return { status: 404, body: { error: 'No encontramos esa palabra' } };
     const event = EVENTS[ticket.eventId] || null;
-    if (ticket.eventId === CURRENT_EVENT) {
+    if (ticket.eventId === CURRENT_EVENT) {   // no evoluciona, pero queda la marca de que vino
+      const marked = vinoA(ticket, CURRENT_EVENT) ? ticket : await store.tickets.update(ticket.id, {
+        asistencias: { ...(ticket.asistencias || {}), [CURRENT_EVENT]: { at: new Date().toISOString(), por: 'qr' } },
+      });
       return {
         status: 409,
-        body: { error: 'Tu medusa nació esta noche: evoluciona en la próxima fecha', ticket: publicTicket(ticket), event },
+        body: { error: 'Tu medusa nació esta noche: quedó marcado que viniste ✓ Evoluciona en la próxima fecha', ticket: publicTicket(marked), event },
       };
     }
     const had = (ticket.evos || {})[CURRENT_EVENT];
@@ -549,32 +573,70 @@ async function claimInvite(req) {
 // público. Para cambiarla: printf %s 'nueva' | sha256sum
 const LISTS_KEY_SHA256 = 'bfc89bdc0fc4091f03f03b6d98e8f66cda8e29d8ac197043392e0b6a0b20518c';
 
-// PUBLIC (con clave): lo justo para armar la lista de puerta de la fecha vigente, sin
-// contactos, y las medusas que evolucionaron esta noche (solo frase y rasgo).
+const listsKeyOk = (body) => crypto.timingSafeEqual(
+  crypto.createHash('sha256').update(String((body || {}).clave || '').trim()).digest(),
+  Buffer.from(LISTS_KEY_SHA256, 'hex'),
+);
+// En la lista de la puerta de esa fecha: con palabra (pagaron o se les liberó) o invitados.
+const enLista = (t, eventId) => t.eventId === eventId && (((t.status === 'freed' || t.status === 'used') && t.claim) || t.status === 'guest');
+
+// PUBLIC (con clave): lo justo para armar la lista de puerta de una fecha (`evento`, por defecto la
+// vigente; las pasadas sirven para marcar de memoria quién vino), sin contactos, y las medusas que
+// evolucionaron esa noche (solo frase y rasgo). `vino` = la marca de asistencia ('lista' | 'qr' | null)
+// y `n` cuántos de esa entrada tachó la puerta; se cambian con /tickets/attend.
 async function lists(req) {
-  const typed = crypto.createHash('sha256').update(String(req.body?.clave || '').trim()).digest();
-  if (!crypto.timingSafeEqual(typed, Buffer.from(LISTS_KEY_SHA256, 'hex'))) {
-    return { status: 401, body: { error: 'Clave incorrecta' } };
-  }
+  const body = req.body || {};
+  if (!listsKeyOk(body)) return { status: 401, body: { error: 'Clave incorrecta' } };
+  const evento = EVENTS[body.evento] ? body.evento : CURRENT_EVENT;
   try {
     const every = await store.tickets.list();
-    const all = every.filter((t) => t.eventId === CURRENT_EVENT);
-    const pick = (t) => ({ claim: t.claim || null, buyerName: t.buyerName || '', status: t.status });
-    const evolved = every.filter((t) => t.claim && t.evos && t.evos[CURRENT_EVENT])
-      .sort((a, b) => String(a.evos[CURRENT_EVENT].at).localeCompare(String(b.evos[CURRENT_EVENT].at)))
-      .map((t) => ({ claim: t.claim, rasgo: t.evos[CURRENT_EVENT].rasgo, level: 1 + Object.keys(t.evos).length }));
+    const all = every.filter((t) => t.eventId === evento);
+    const pick = (t) => ({
+      id: t.id, claim: t.claim || null, buyerName: t.buyerName || '', status: t.status,
+      n: ((t.asistencias || {})[evento] || {}).n || 0, vino: vinoA(t, evento),
+    });
+    const evolved = every.filter((t) => t.claim && t.evos && t.evos[evento])
+      .sort((a, b) => String(a.evos[evento].at).localeCompare(String(b.evos[evento].at)))
+      .map((t) => ({ claim: t.claim, rasgo: t.evos[evento].rasgo, level: 1 + Object.keys(t.evos).length }));
     return {
       status: 200,
       body: {
-        paid: all.filter((t) => (t.status === 'freed' || t.status === 'used') && t.claim).map(pick),
+        paid: all.filter((t) => enLista(t, evento) && t.status !== 'guest').map(pick),
         guests: all.filter((t) => t.status === 'guest').map(pick),
         cancelled: all.filter((t) => t.status === 'cancelled' && t.claim).map(pick),
         invitesUnused: all.filter((t) => t.status === 'invite').length,
         evolved,
-        event: EVENTS[CURRENT_EVENT],
+        event: EVENTS[evento],
+        current: CURRENT_EVENT,
+        eventos: Object.values(EVENTS).map(({ id, name, date, end }) => ({ id, name, date, end }))
+          .sort((a, b) => b.date.localeCompare(a.date)),
         at: new Date().toISOString(),
       },
     };
+  } catch (err) {
+    return { status: 500, body: { error: err.message } };
+  }
+}
+
+// PUBLIC (con clave): la puerta tacha a alguien de la lista de una fecha → marca de asistencia en
+// la base (la ven todos los celulares y su medusa la muestra). `n` = cuántos de esa entrada pasaron
+// (0 la saca). Solo entradas de la lista de esa fecha; la marca del QR de la noche no se borra acá.
+async function attend(req) {
+  const body = req.body || {};
+  if (!listsKeyOk(body)) return { status: 401, body: { error: 'Clave incorrecta' } };
+  const evento = body.evento;
+  if (!EVENTS[evento]) return { status: 400, body: { error: 'Fecha desconocida' } };
+  const n = Math.max(0, Math.min(20, parseInt(body.n, 10) || 0));
+  try {
+    const ticket = body.id ? await store.tickets.get(String(body.id)) : null;
+    if (!ticket || !enLista(ticket, evento)) return { status: 404, body: { error: 'No está en la lista de esa fecha' } };
+    const asistencias = { ...(ticket.asistencias || {}) };
+    const prev = asistencias[evento];
+    if (n > 0) asistencias[evento] = { at: (prev && prev.at) || new Date().toISOString(), por: (prev && prev.por) || 'lista', n };
+    else if (prev && prev.por === 'qr') asistencias[evento] = { at: prev.at, por: 'qr' };
+    else delete asistencias[evento];
+    const updated = await store.tickets.update(ticket.id, { asistencias });
+    return { status: 200, body: { id: updated.id, n, vino: vinoA(updated, evento) } };
   } catch (err) {
     return { status: 500, body: { error: err.message } };
   }
@@ -596,6 +658,6 @@ async function getTicket(req) {
 
 module.exports = {
   request, capture, list, free, issue, reword, cancel, rename, remove, redeem, evolve, scan, getTicket,
-  createInvites, checkInvite, claimInvite, lists,
+  createInvites, checkInvite, claimInvite, lists, attend,
   publicTicket, ticketByClaim, EVENTS,   // para account/
 };

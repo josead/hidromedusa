@@ -299,7 +299,7 @@
   .task-pri.high { border-color: var(--hot); color: var(--hot); }
 
   /* ---------- Jellyfish display ---------- */
-  .jf-wrap { text-align: center; padding: 26px 16px 14px; background: var(--abyss); border: 2px solid var(--acid); border-bottom: none; }
+  .jf-wrap { text-align: center; padding: 26px 16px 16px; background: var(--abyss); border: 2px solid var(--acid); }
   .jf-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; color: var(--acid); text-transform: uppercase; margin-bottom: 14px; }
   .jf-canvas-wrap { display: inline-block; position: relative; cursor: pointer; }
   .jf-canvas-wrap canvas { image-rendering: pixelated; display: block;
@@ -323,6 +323,35 @@
   .jf-saved { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--acid); }
   .gsi-slot { width: 100%; min-height: 40px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
   .jf-chips { margin-bottom: 14px; }
+  /* «Mi medusa» | «Mis hidro-memorias» */
+  .jf-tabs { display: flex; margin-bottom: 14px; }
+  .jf-tabs button { flex: 1; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 11px 6px; background: none; color: var(--bone-dim); border: 1.5px solid var(--line-strong); cursor: pointer; }
+  .jf-tabs button + button { border-left: none; }
+  .jf-tabs button[aria-selected="true"] { background: var(--acid); color: var(--ink); border-color: var(--acid); font-weight: 700; }
+  .jf-name { font-family: var(--display); font-size: clamp(26px,6vw,34px); line-height: 1; text-transform: uppercase; color: var(--bone); margin-top: 14px; word-break: break-word; }
+  .jf-marcas { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px; }
+  .jf-marca { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--acid); border: 1px solid var(--acid); padding: 3px 7px; }
+  .jf-foot { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.5; text-align: left; border-top: 1px dashed var(--line-strong); margin-top: 16px; padding-top: 14px; }
+  .jf-to-mem { color: var(--acid); cursor: pointer; display: inline-block; margin-top: 6px; }
+  /* Hidro-memorias: una tarjeta por fecha */
+  .mem-intro { font-family: var(--mono); font-size: 11px; line-height: 1.55; color: var(--bone-dim); margin: 0 0 12px; }
+  .mem-card { border: 1.5px solid var(--line-strong); background: var(--abyss); margin-bottom: 10px; }
+  .mem-card.mem-next { border: 2px solid var(--acid); }
+  .mem-top { padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; border-bottom: 1px dashed var(--line-strong); }
+  .mem-next .mem-top { border-bottom-color: var(--acid); }
+  .mem-tag { font-family: var(--display); font-size: 22px; line-height: 1; text-transform: uppercase; color: var(--acid); }
+  .mem-card:not(.mem-next) .mem-tag { color: var(--bone); }
+  .mem-title { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .1em; margin-top: 6px; }
+  .mem-body { padding: 4px 16px 10px; }
+  .mem-body > .mem-what { padding: 10px 0 4px; }
+  .mem-jf { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+  .mem-jf + .mem-jf { border-top: 1px solid var(--line); }
+  .mem-jf canvas { width: 40px; height: auto; flex: none; image-rendering: pixelated; filter: drop-shadow(0 0 8px rgba(198,255,26,0.3)); }
+  .mem-name { font-family: var(--body); font-weight: 600; font-size: 15px; text-transform: capitalize; }
+  .mem-what { font-family: var(--mono); font-size: 11px; line-height: 1.5; color: var(--bone-dim); margin-top: 2px; }
+  .mem-ok { color: var(--acid); font-weight: 700; }
+  .mem-body .tk-pass { margin: 4px -16px 0; padding: 20px 18px; }
+  .mem-card .tk-meta { border-top: 1px dashed var(--line-strong); }
 
   /* ---------- Jellyfish fullscreen ---------- */
   #jf-fullscreen {
@@ -342,10 +371,6 @@
   #jf-fs-hint { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 18px; letter-spacing: 0.12em; }
 
   /* ---------- Ticket card (redeem) ---------- */
-  .tk-card { border: 2px solid var(--acid); background: var(--abyss); position: relative; }
-  .tk-top { padding: 18px 20px; border-bottom: 2px dashed var(--acid); display: flex; justify-content: space-between; align-items: flex-start; }
-  .tk-top .tk-type { font-family: var(--display); font-size: 30px; text-transform: uppercase; line-height: 0.9; color: var(--acid); }
-  .tk-top .tk-ev { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; margin-top: 6px; }
   .tk-status { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; border: 1.5px solid var(--acid); color: var(--acid); padding: 4px 9px; flex-shrink: 0; }
   .tk-status.used { border-color: var(--muted); color: var(--muted); }
   .tk-pass { padding: 26px 22px; text-align: center; background: var(--bone); color: var(--ink); }
@@ -427,6 +452,9 @@
   .hero-jf:hover, .hero-jf:focus-visible { border-color: var(--acid); outline: none; }
   .hero-jf canvas { width: 112px; height: 176px; display: block; image-rendering: pixelated; filter: drop-shadow(0 0 12px rgba(198,255,26,.35)); }
   .hero-jf .hn-t, .hero-jf .hn-s { display: block; overflow-wrap: anywhere; }
+  .hero-mem { display: block; width: 100%; max-width: 860px; margin-top: 10px; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--acid); text-decoration: none; }
+  .hero-mem:hover, .hero-mem:focus-visible { text-decoration: underline; }
+  .hero-mem[hidden] { display: none; }
   .hero-jf:hover .btn-line, .hero-jf:focus-visible .btn-line { background: var(--bone); color: var(--ink); border-color: var(--bone); }
   @media (max-width: 720px) {
     .hero-jf { grid-template-columns: 84px 1fr auto; gap: 14px; padding: 12px; }
@@ -521,7 +549,7 @@
     /* piso de tamaño para las etiquetas mono más chicas */
     .brand-sub { font-size: 9.5px; }
     .plate-foot, .plate-cross span, .tk-meta .k, .tk-status,
-    .stub-meta .k, .tier-tag, .cat-status, .tk-top .tk-ev { font-size: 11px; }
+    .stub-meta .k, .tier-tag, .cat-status, .mem-title { font-size: 11px; }
     /* más contraste en pie de página */
     .foot-col a, .foot-brand p { color: var(--bone-dim); }
     /* pie: marca y newsletter a lo ancho, los links de a dos. Si no, a 360 px la grilla mide 390
@@ -580,7 +608,8 @@
         </span>
         <span class="btn btn-line"><span class="hj-cta-t">Ver mi medusa</span> <i data-lucide="arrow-right" width="16"></i></span>
       </button>
-      <script>try { if((JSON.parse(localStorage.getItem('hm_claimed')||'null')||{}).claim) document.getElementById('hero-jf').hidden=false; } catch(e){}</script>
+      <a class="hero-mem reveal" id="hero-mem" hidden href="#" onclick="openMyJf('memorias');return false">Mis hidro-memorias: tus fechas con Hidromedusa →</a>
+      <script>try { if((JSON.parse(localStorage.getItem('hm_claimed')||'null')||{}).claim) document.getElementById('hero-jf').hidden=document.getElementById('hero-mem').hidden=false; } catch(e){}</script>
 
       <!-- próxima fecha destacada: se muestra hasta el día del evento -->
       <a class="hero-next reveal" data-until="2026-12-04" onclick="buy()" style="cursor:pointer;text-decoration:none;color:inherit">
@@ -922,7 +951,7 @@
           <label class="field-label">Tus dos palabras</label>
           <input class="field" id="redeem-claim" placeholder="ej. medusa violeta" autocomplete="off" onkeydown="if(event.key==='Enter')redeem()" />
           <div class="jf-chips" id="redeem-chips" hidden></div>
-          <button class="btn btn-acid btn-block btn-lg" id="redeem-go" onclick="redeem()">Ver mi entrada</button>
+          <button class="btn btn-acid btn-block btn-lg" id="redeem-go" onclick="redeem()">Ver mi hidromedusa</button>
           <div class="jf-cuenta" id="redeem-cuenta" hidden>
             <div class="jf-or">¿Ya la guardaste con Google? Traela desde tu cuenta</div>
             <div class="gsi-slot" id="gsi-recover"></div>
@@ -1256,7 +1285,7 @@ function setEvoMode(code){
   document.getElementById('redeem-intro').innerHTML=code
     ? 'Escaneaste el QR de la noche 🪼 Cargá tus <b style="color:var(--acid)">dos palabras</b> y tu medusa evoluciona.'
     : 'Cargá tus <b style="color:var(--acid)">dos palabras</b>. Se habilitan cuando el staff confirme tu lugar.';
-  document.getElementById('redeem-go').textContent=code ? 'Evolucionar mi medusa' : 'Ver mi entrada';
+  document.getElementById('redeem-go').textContent=code ? 'Evolucionar mi medusa' : 'Ver mi hidromedusa';
 }
 let _evoBusy=false;
 async function evolve(claim){
@@ -1300,26 +1329,113 @@ function parseClaim(claim){
   return parts.length>=2 ? {noun:parts[0], adj:parts.slice(1).join('-')} : null;
 }
 
+const escHtml=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Las fechas de una medusa (`ticket.fechas` del backend): la de la entrada con la que nació (`entrada`) y
+// cada una a la que vino (`vino`, marcada en la puerta o con el QR de la noche), con su nombre y lugar.
+// Sin `fechas` (modo demo/offline) queda solo la de la entrada.
+function fechasDe(tk, ev){
+  if(Array.isArray(tk.fechas) && tk.fechas.length) return tk.fechas;
+  const e=ev||HM_EVENT;
+  return [{ eventId:e.id||tk.eventId, name:e.name||e.title, date:e.date, time:e.time, end:e.end, venue:e.venue,
+    dateLabel:e.dateLabel, entrada:true, vino:tk.status==='used', rasgo:null }];
+}
+function jfTab(t, desde){
+  const mem=t==='memorias';
+  const tm=document.getElementById('jt-medusa'), tr=document.getElementById('jt-memorias');
+  if(!tm) return;
+  tm.setAttribute('aria-selected', String(!mem)); tr.setAttribute('aria-selected', String(mem));
+  document.getElementById('jp-medusa').hidden=mem;
+  const pane=document.getElementById('jp-memorias');
+  pane.hidden=!mem;
+  if(mem){
+    const n=renderMemorias(pane);
+    if(desde!==null) track('memorias',{ desde:desde||'pestana', fechas:n.fechas, medusas:n.medusas });
+  }
+}
+// «Mis hidro-memorias»: una tarjeta por fecha con todas tus medusas (la que se ve y las de tu cuenta de
+// Google), la que viene primero y después de la más nueva a la más vieja.
+// Nombre de la fecha bajo la etiqueta, solo si dice algo más que el lugar («Fechón estelar» sí, «Los Rojos» no).
+function memTitle(L){
+  const t=String(L.title||'').replace(/^Hidromedusa\s*·\s*/i,'').trim();
+  return t && L.tag.toLowerCase().indexOf(t.toLowerCase())<0 ? '<div class="mem-title">'+escHtml(t)+'</div>' : '';
+}
+function renderMemorias(pane){
+  const cur=window._jfTk; if(!cur) return { fechas:0, medusas:0 };
+  const meds=(window._jfAccount||[]).map(m=>({ tk:m.ticket, ev:m.event }));
+  const i=meds.findIndex(m=>claimKey(m.tk.claim)===claimKey(cur.tk.claim));
+  if(i>=0) meds[i]=cur; else meds.unshift(cur);
+  const byEv={};
+  meds.forEach(m=>fechasDe(m.tk, m.ev).forEach(f=>{
+    (byEv[f.eventId]=byEv[f.eventId]||{ f, items:[] }).items.push({ tk:m.tk, f });
+  }));
+  if(!eventOver(HM_EVENT) && !byEv[HM_EVENT.id]) byEv[HM_EVENT.id]={ f:{ ...HM_EVENT, eventId:HM_EVENT.id }, items:[], proxima:true };
+  const cards=Object.values(byEv).sort((a,b)=>{
+    const ua=!eventOver(a.f), ub=!eventOver(b.f);
+    return ua!==ub ? (ua ? -1 : 1) : String(b.f.date).localeCompare(String(a.f.date));
+  });
+  const statusMap={ freed:'Válida', pending:'Pendiente', used:'Usada' };
+  let h='<p class="mem-intro">Tus fechas con Hidromedusa: con qué entrada nació cada medusa y a cuáles viniste. La marca <b>✓</b> la ponen la puerta o el QR de la noche.</p>';
+  h+=cards.map(c=>{
+    const L=evLabels(c.f), over=eventOver(c.f);
+    const tag=over ? 'Recuerdo' : 'Próxima';
+    let body='';
+    if(c.proxima){
+      body='<div class="mem-what">Llevá tu medusa: en la fiesta escaneá el QR de la noche y evoluciona.'
+        +(TICKET.price==='GRATIS' ? '' : ' <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Pedí tu entrada →</a>')+'</div>';
+    }
+    body+=c.items.map(it=>{
+      const f=it.f, what=[];
+      if(f.entrada) what.push(over ? 'Nació con esta entrada' : 'Tu entrada'+(statusMap[it.tk.status] ? ' · '+statusMap[it.tk.status] : ''));
+      if(f.vino) what.push('<b class="mem-ok">✓ Viniste</b>');
+      if(f.rasgo) what.push('evolucionó: ganó '+escHtml(window.JellyfishGen ? JellyfishGen.rasgoLabel(f.rasgo) : f.rasgo));
+      const pass=f.entrada && !over ? `<div class="tk-pass">
+          <div class="k">Tus palabras clave</div>
+          <div class="v">${escHtml(it.tk.claim)}</div>
+          <div class="n">${TICKET.price==='GRATIS' ? 'No hace falta entrada: la tocada es gratis. Guardá tus dos palabras: en cada fecha a la que vuelvas, tu medusa evoluciona.'
+            : 'En la puerta decí tus palabras clave y te damos tu entrada-sticker. Guardalas: en cada fecha a la que vuelvas, tu medusa evoluciona.'}</div>
+        </div>` : '';
+      return `<div class="mem-jf"><canvas data-claim="${escHtml(it.tk.claim)}" data-level="${Math.max(1, it.tk.level|0)}" data-rasgos="${escHtml((it.tk.rasgos||[]).join(','))}"></canvas>
+        <div><div class="mem-name">${escHtml(it.tk.claim.replace(/-/g,' '))}</div><div class="mem-what">${what.join(' · ')}</div></div></div>${pass}`;
+    }).join('');
+    const meta=!over ? `<div class="tk-meta">
+        <div><div class="k">Fecha</div><div class="v">${escHtml(L.dateLabel)}</div></div>
+        <div><div class="k">Lugar</div><div class="v">${escHtml(L.venue)}</div></div>
+      </div>` : '';
+    return `<div class="mem-card${over?'':' mem-next'}">
+      <div class="mem-top"><div><div class="mem-tag">${escHtml(L.tag)}</div>${memTitle(L)}</div>
+        <div class="tk-status${over?' used':''}">${tag}</div></div>
+      <div class="mem-body">${body}</div>${meta}</div>`;
+  }).join('');
+  pane.innerHTML=h;
+  // Cada medusa en chiquito, quieta
+  pane.querySelectorAll('canvas[data-claim]').forEach(cv=>{
+    const p=parseClaim(cv.dataset.claim);
+    if(!p || !window.JellyfishGen){ cv.remove(); return; }
+    JellyfishGen.preview(cv, p.noun, p.adj, { level:+cv.dataset.level, rasgos:cv.dataset.rasgos ? cv.dataset.rasgos.split(',') : [], scale:1 });
+  });
+  return { fechas:cards.filter(c=>!c.proxima).length, medusas:meds.length };
+}
+// La medusa va aparte de la entrada: «Mi medusa» (el dibujo, su nombre, nivel, rasgos y las fechas a las
+// que vino, con la marca ✓ de la puerta o del QR) y «Mis hidro-memorias» (las fechas de todas tus medusas:
+// la entrada con la que nació cada una y a cuáles viniste; la entrada de una fecha que viene, con las
+// palabras clave para la puerta).
 // o = { evolved } anima la evolución (del nivel anterior al nuevo) · { note } aviso arriba de la medusa
 function renderTicketCard(tk, ev, o){
   o=o||{};
-  const typeLabel='ENTRADA';
-  const statusMap={ freed:'Válida', pending:'Pendiente', used:'Usada', cancelled:'Cancelada' };
-  const over=eventOver(ev);
-  const status=over && tk.status!=='cancelled' ? 'Recuerdo' : (statusMap[tk.status]||'Válida');
-  const L=evLabels(ev);
   const level=Math.max(1, tk.level|0), rasgos=tk.rasgos||[];
-  const pass=over ? 'Tu hidromedusa nació esa noche y es tuya: compartila cuando quieras.'
-    : TICKET.price==='GRATIS' ? 'No hace falta entrada: la tocada es gratis. Guardá tus dos palabras: en cada fecha a la que vuelvas, tu medusa evoluciona.'
-    : 'En la puerta decí tus palabras clave y te damos tu entrada-sticker. Guardalas: en cada fecha a la que vuelvas, tu medusa evoluciona.';
-  // Entrada de una fecha que ya pasó mientras hay otra anunciada → que la traiga a evolucionar.
-  const nextOn=over && !eventOver(HM_EVENT) && (ev&&ev.id)!==HM_EVENT.id;
-  const evoNow=!eventOver(HM_EVENT) && (tk.evos||[]).some(e=>e.eventId===HM_EVENT.id);
+  const fechas=fechasDe(tk, ev);
+  const nextOn=!eventOver(HM_EVENT);
+  const bornNext=nextOn && fechas.some(f=>f.entrada && f.eventId===HM_EVENT.id);
+  const evoNow=nextOn && (tk.evos||[]).some(e=>e.eventId===HM_EVENT.id);
+  const entradaYa=fechas.find(f=>f.entrada && !eventOver(f));   // su entrada para una fecha que viene
   const foot=evoNow ? '🪼 Ya evolucionó en esta fecha. En la próxima, escaneá el QR de nuevo y gana otro rasgo.'
+    : bornNext ? '🪼 En cada fecha a la que vuelvas con tu medusa, escaneá el QR de la noche: sube de nivel y gana un rasgo.'
     : nextOn ? '🪼 Llevala a la próxima, '+HM_EVENT.shortLabel+': en la fiesta escaneá el QR de la noche y tu medusa evoluciona.'
       +(TICKET.price==='GRATIS' ? '' : ' <a onclick="closeRedeem();buy()" style="color:var(--acid);cursor:pointer">Pedí tu entrada →</a>')
-    : over ? '🪼 La próxima fecha se anuncia primero acá, por mail y en Instagram. Llevá tu medusa: en cada fecha evoluciona.'
-    : '🪼 En cada fecha a la que vuelvas con tu medusa, escaneá el QR de la noche: sube de nivel y gana un rasgo.';
+    : '🪼 La próxima fecha se anuncia primero acá, por mail y en Instagram. Llevá tu medusa: en cada fecha evoluciona.';
+  const nudge=entradaYa && TICKET.price!=='GRATIS'
+    ? '<a class="jf-to-mem" onclick="jfTab(\'memorias\',\'entrada\')">Tu entrada para el '+evLabels(entradaYa).short.split(' · ')[0]+' está en «Mis hidro-memorias» →</a>' : '';
+  const marcas=fechas.filter(f=>f.vino).map(f=>'<span class="jf-marca">✓ '+escHtml(evLabels(f).short)+'</span>').join('');
   const box=document.getElementById('redeem-result');
   const parsed=parseClaim(tk.claim);
   const hasJf=parsed && window.JellyfishGen;
@@ -1328,8 +1444,14 @@ function renderTicketCard(tk, ev, o){
   const prev=claimedJf();
   const saved=(window._jfAccount||[]).some(m=>claimKey(m.ticket.claim)===claimKey(tk.claim))
     || !!(prev.saved && claimKey(prev.claim)===claimKey(tk.claim));
+  window._jfTk={ tk, ev };   // la que se ve, para armar las hidro-memorias
 
   box.innerHTML=`
+    <div class="jf-tabs" role="tablist">
+      <button type="button" role="tab" id="jt-medusa" onclick="jfTab('medusa')">Mi medusa</button>
+      <button type="button" role="tab" id="jt-memorias" onclick="jfTab('memorias')">Mis hidro-memorias</button>
+    </div>
+    <div id="jp-medusa" role="tabpanel" aria-labelledby="jt-medusa">
     <div class="jf-chips" id="jf-chips" hidden></div>
     ${hasJf?`
     <div class="jf-wrap">
@@ -1339,7 +1461,9 @@ function renderTicketCard(tk, ev, o){
         <canvas id="jf-canvas"></canvas>
         <div class="jf-hint">toca para pantalla completa</div>
       </div>
+      <div class="jf-name">${escHtml(tk.claim.replace(/-/g,' '))}</div>
       <div class="jf-lvl" id="jf-lvl"></div>
+      ${marcas?'<div class="jf-marcas" title="Fechas a las que vino">'+marcas+'</div>':''}
       <div class="jf-actions">
         ${viaChrome
           ? `<a class="btn btn-acid" style="font-size:11px;padding:8px 14px" href="${jfChromeUrl(tk.claim)}" onclick="event.stopPropagation();jfToChrome()">Abrir en Chrome para compartir ↗</a>`
@@ -1347,28 +1471,17 @@ function renderTicketCard(tk, ev, o){
         <button class="btn btn-line" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();openJfFullscreen()">Pantalla completa ↑</button>
       </div>
       ${viaChrome?'<div class="jf-hint">Este navegador no deja compartir tu medusa: se abre en Chrome</div>':'<div class="jf-hint" id="jf-vid" aria-live="polite"></div>'}
+      <div class="jf-foot">${foot}${nudge?'<br>'+nudge:''}</div>
       ${gsiOn()?'<div class="jf-cuenta" id="jf-cuenta"></div>':''}
     </div>`:''}
-    <div class="tk-card">
-      <div class="tk-top">
-        <div><div class="tk-type">${typeLabel}</div><div class="tk-ev">${L.title}</div></div>
-        <div class="tk-status ${tk.status==='used'?'used':''}">${status}</div>
-      </div>
-      <div class="tk-pass">
-        <div class="k">Tus palabras clave</div>
-        <div class="v">${tk.claim||'—'}</div>
-        <div class="n">${pass}</div>
-      </div>
-      <div class="tk-meta">
-        <div><div class="k">Fecha</div><div class="v">${L.dateLabel}</div></div>
-        <div><div class="k">Lugar</div><div class="v">${L.venue}</div></div>
-      </div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.5;border-top:1px dashed var(--line-strong);padding:14px 20px">${foot}</div>
     </div>
+    <div id="jp-memorias" role="tabpanel" aria-labelledby="jt-memorias" hidden></div>
     <div style="display:flex;gap:8px;margin-top:14px">
       <button class="btn btn-line" style="flex:1" onclick="closeRedeem()">Cerrar</button>
       <button class="btn btn-line" style="flex:0;font-size:10px;color:var(--muted);border-color:var(--line)" onclick="forgetJf()">Olvidar 🌊</button>
     </div>`;
+  const want=o.tab||window._jfWantTab; window._jfWantTab=null;
+  jfTab(hasJf ? (want||'medusa') : 'memorias', want==='memorias' ? 'inicio' : null);
 
   document.getElementById('redeem-form').style.display='none';
   accountChips(document.getElementById('jf-chips'), tk.claim, showAccountJf);
@@ -1377,7 +1490,6 @@ function renderTicketCard(tk, ev, o){
   if(hasJf){
     window._jfClaim=tk.claim;
     window._jfParsed=parsed;
-    window._jfEv=ev;   // la fecha de ESTA entrada, para la imagen de compartir
     window._jfOpts={ level, rasgos, scale:3 };   // nivel 2+: 168×264, apenas más grande que el 140×220 del nivel 1
     prepShareJf();   // la imagen de compartir queda lista antes del toque
     if(window._jfShareHint){ window._jfShareHint=false; toast('Tocá «Compartir en Instagram» 📸'); }   // llegó desde la app a Chrome
@@ -1437,7 +1549,7 @@ function closeRedeem(){
   document.getElementById('redeem-claim').value='';
   if(window._jfHandle){ window._jfHandle.stop(); window._jfHandle=null; }
   window._jfTok=(window._jfTok||0)+1;
-  window._jfClaim=null; window._jfParsed=null; window._jfEv=null; window._jfOpts=null; window._jfShare=null;
+  window._jfClaim=null; window._jfParsed=null; window._jfTk=null; window._jfWantTab=null; window._jfOpts=null; window._jfShare=null;
   window._jfRecover=false;
   const chips=document.getElementById('redeem-chips'); chips.hidden=true; chips.innerHTML='';
   // Note: localStorage claim is intentionally kept so it auto-restores next visit.
@@ -1463,7 +1575,8 @@ function heroJf(){
   const card=document.getElementById('hero-jf');
   const s=claimedJf(), p=parseClaim(s.claim);
   if(_heroJf){ _heroJf.stop(); _heroJf=null; }
-  if(!p || !window.JellyfishGen){ card.hidden=true; return; }
+  const mem=document.getElementById('hero-mem');
+  if(!p || !window.JellyfishGen){ card.hidden=mem.hidden=true; return; }
   const level=Math.max(1, s.level|0), rasgos=s.rasgos||[];
   document.getElementById('hero-jf-k').textContent='Tu medusa · nivel '+level;
   document.getElementById('hero-jf-name').textContent=s.claim.replace(/-/g,' ');
@@ -1472,13 +1585,17 @@ function heroJf(){
     .filter(Boolean).join(' · ');
   const el=document.getElementById('hero-jf-s');
   el.textContent=sub; el.hidden=!sub;
-  card.hidden=false;
+  card.hidden=mem.hidden=false;
   _heroJf=JellyfishGen.render(document.getElementById('hero-jf-canvas'), p.noun, p.adj, { level, rasgos, scale:2 });
 }
-function openMyJf(){
+// Desde el inicio: la tarjeta abre «Mi medusa» y el link de abajo, «Mis hidro-memorias»
+// (la tarjeta se arma después de traer la medusa, por eso la pestaña queda pedida en _jfWantTab).
+function openMyJf(tab){
   const s=claimedJf();
-  track('mi-medusa',{ nivel:Math.max(1, s.level|0), guardada:!!s.saved });
+  track('mi-medusa',{ nivel:Math.max(1, s.level|0), guardada:!!s.saved, ...(tab ? { pestana:tab } : {}) });
+  window._jfWantTab=tab||null;
   openModal('m-redeem');
+  if(tab && document.getElementById('jt-memorias')){ window._jfWantTab=null; jfTab(tab, 'inicio'); }   // ya estaba armada
 }
 
 /* ---------- Cuenta de Google (opcional): guardar y traer medusas ---------- */
@@ -1705,15 +1822,22 @@ function downloadJf(){
 // Ahora se arma apenas aparece la medusa, sincrónica con toDataURL() (~15 ms), y el toque comparte sin esperar.
 // Con la imagen lista se arma también el video (buildShareVideo): si llega a estar antes del toque, se comparte
 // el video; si no (o el navegador no sabe hacerlo), la imagen.
+// La medusa no es de una fecha: la imagen y el texto de compartir invitan a la que viene (la anunciada).
+// Entre fechas, sin fecha.
+function shareLabels(){
+  if(eventOver(HM_EVENT)) return { line:'HIDROMEDUSA · TANDIL', text:'Hidromedusa · Tandil' };
+  const L=evLabels(HM_EVENT);
+  return { line:'HIDROMEDUSA · '+L.tag+' · TANDIL', text:'Hidromedusa · '+L.short+' · Tandil' };
+}
 function prepShareJf(){
   const p=window._jfParsed;
   if(!p||!window.JellyfishGen) return null;
-  const o=window._jfOpts||{}, claim=window._jfClaim||'hidromedusa', L=evLabels(window._jfEv);
+  const o=window._jfOpts||{}, claim=window._jfClaim||'hidromedusa', L=shareLabels();
   // La misma medusa dibujada de nuevo (otra tarjeta igual): se sigue con lo ya armado
-  const key=[claim, o.level|0, (o.rasgos||[]).join(','), L.tag].join('|'), old=window._jfShare;
+  const key=[claim, o.level|0, (o.rasgos||[]).join(','), L.line].join('|'), old=window._jfShare;
   if(old && old.key===key){ old.o=o; jfVidHint(old); return old; }
   const s=window._jfShare={ o, key, file:null, video:null, vid:'preparando' };
-  s.text='🪼 '+claim.replace(/-/g,' ')+((o.level|0)>=2 ? ' · nivel '+o.level : '')+' — Hidromedusa · '+L.short+' · Tandil';
+  s.text='🪼 '+claim.replace(/-/g,' ')+((o.level|0)>=2 ? ' · nivel '+o.level : '')+' — '+L.text;
   s.build=function(){
     if(s.file) return;
     const url=drawShareJf(p, claim, o, L).toDataURL('image/png'), bin=atob(url.slice(url.indexOf(',')+1));
@@ -1782,7 +1906,7 @@ function shareCard(p, claim, o, L, k){
   // Event tag
   ctx.font='13px "Space Mono","Courier New",monospace';
   ctx.fillStyle='rgba(168,163,153,0.75)';
-  ctx.fillText('HIDROMEDUSA · '+L.tag+' · TANDIL', CW/2, hd ? TY+114 : TY+88);
+  ctx.fillText(L.line, CW/2, hd ? TY+114 : TY+88);
 
   // URL watermark
   ctx.font='11px "Space Mono","Courier New",monospace';
@@ -2014,7 +2138,7 @@ const LEGAL={
     <h4>4. Notificaciones</h4><p>Podés optar por recibir avisos antes de las tocadas y novedades. Te podés dar de baja cuando quieras.</p>
     <h4>5. Conducta</h4><p>El respeto entre asistentes es fundamental. Cualquier conducta que atente contra la seguridad de otros es motivo de expulsión sin reembolso.</p>` },
   privacidad:{ title:'Política de Privacidad', html:`
-    <h4>Qué datos recopilamos</h4><p>Nombre y, si los dejás, email y WhatsApp para gestionar tu entrada. Si guardás tu medusa con Google (opcional), solo un identificador de tu cuenta de Google y qué medusas guardaste: ni tu mail ni tu nombre. El script de Google se carga recién cuando abrís «Tu hidromedusa», nunca al entrar a la web.</p>
+    <h4>Qué datos recopilamos</h4><p>Nombre y, si los dejás, email y WhatsApp para gestionar tu entrada. Si guardás tu medusa con Google (opcional), solo un identificador de tu cuenta de Google y qué medusas guardaste: ni tu mail ni tu nombre. Si venís a una fecha, la lista de la puerta o el QR de la noche le dejan a tu entrada una marca de asistencia (sin datos tuyos): la ves en «Mis hidro-memorias». El script de Google se carga recién cuando abrís «Tu hidromedusa», nunca al entrar a la web.</p>
     <h4>Para qué los usamos</h4><p>Para <b>contar con vos para la diversión</b>: confirmar tu entrada por WhatsApp o Instagram, recordatorios antes de las tocadas y novedades. Nunca vendemos tus datos.</p>
     <h4>Pagos</h4><p>Cuando una fecha tiene entrada paga, el pago se coordina directamente por WhatsApp con el staff. No procesamos ni almacenamos datos de tarjeta en el sitio.</p>
     <h4>Tus derechos</h4><p>Podés acceder, rectificar o borrar tus datos cuando quieras escribiendo a <b>hola@hidromedusa.com</b>.</p>

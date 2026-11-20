@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <!-- Lista de puerta y evoluciones de la noche para el staff, en vivo desde la base (POST /tickets/lists con clave).
+     Tachar a alguien guarda en la base que vino (POST /tickets/attend): lo ven todos los celulares y su medusa
+     lo muestra en «Mis hidro-memorias». Con el selector de fecha se marcan de memoria las fechas pasadas.
      Privada: noindex, pero NO va en robots.txt (el preview del link tiene que poder leerla) ni en el sitemap. -->
 <meta name="robots" content="noindex" />
 <title>Listas · Hidromedusa</title>
@@ -69,6 +71,11 @@
   .nm{color:var(--bone-dim);font-size:14px;margin-left:auto;text-align:right;}
   .x2{font-family:var(--mono);font-size:10px;font-weight:700;background:var(--bone);color:var(--ink);padding:1px 5px;margin-left:5px;}
   .warn{border:1px dashed var(--line-strong);padding:8px 10px;margin-top:14px;font-size:13px;line-height:1.5;}
+  .warn button{margin-top:8px;display:block;}
+  .ev{display:flex;gap:8px;align-items:center;margin-top:10px;}
+  .ev select{flex:1;font:inherit;font-size:14px;background:var(--bg-2);color:var(--bone);border:1px solid var(--line-strong);padding:9px 10px;border-radius:0;}
+  .qr{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--acid);border:1px solid var(--acid);padding:1px 5px;margin-left:5px;}
+  .sync{font-family:var(--mono);font-size:11px;color:var(--hot);min-height:0;margin:4px 0;}
   .hide{display:none!important;}
 </style>
 </head>
@@ -84,8 +91,10 @@
   </form>
 
   <div id="app" class="hide">
+    <div class="ev"><select id="ev" aria-label="Fecha" onchange="pickEv(this.value)"></select></div>
     <div class="tabs"><button id="t-door" class="on" onclick="tab('door')">Puerta</button><button id="t-evo" onclick="tab('evo')">Evoluciones</button></div>
     <div class="bar"><input id="q" type="search" placeholder="Buscar palabra o nombre…" oninput="filter()" /><button class="ghost" onclick="load()">↻</button></div>
+    <div class="sync" id="sync" aria-live="polite"></div>
     <div id="door"></div>
     <div id="evo" class="hide"></div>
   </div>
@@ -100,23 +109,82 @@ const personas=(n)=>{const m=/\bx\s*(\d+)\s*$/i.exec(n||'');return m?+m[1]:1;};
 const clean=(n)=>String(n||'').replace(/\s*\bx\s*\d+\s*$/i,'');
 const x2=(n)=>personas(n)>1?`<span class="x2">x${personas(n)}</span>`:'';
 
-// Casillas tachadas: quedan guardadas en ESTE celular (no se comparten entre dispositivos).
+// Casillas: una por persona de la entrada. Tachar guarda en la base cuántos de esa entrada pasaron
+// (POST /tickets/attend → la marca de que vino, que ven todos los celulares y la medusa). Si no hay
+// señal, quedan en este celular (hm-listas-pend) y se mandan solas al volver.
+const PK='hm-listas-pend';
+let pend={};
+try{pend=JSON.parse(localStorage.getItem(PK)||'{}');}catch(e){}
+const savePend=()=>{try{localStorage.setItem(PK,JSON.stringify(pend));}catch(e){}};
+// Las casillas de antes (solo en este celular, sin base): se ofrecen para subir a la fecha que se ve.
 const TK='hm-listas-ticks';
 let ticks={};
 try{ticks=JSON.parse(localStorage.getItem(TK)||'{}');}catch(e){}
-function setTick(id,on){ ticks[id]=on; try{localStorage.setItem(TK,JSON.stringify(ticks));}catch(e){} }
-function cks(prefix,n){
+let DATA=null, EVENTO='';
+try{EVENTO=sessionStorage.getItem('hm-listas-ev')||'';}catch(e){}   // solo esta pestaña: la próxima vez abre en la fecha que viene
+const pkey=(id)=>EVENTO+'|'+id;
+function cks(t,n){
+  const p=pend[pkey(t.id)], on=p?p.n:(t.n||0);
   let h='';
-  for(let i=0;i<n;i++){const id=prefix+':'+i;h+=`<input type="checkbox" data-id="${esc(id)}" ${ticks[id]?'checked':''} onchange="tickChange(this)">`;}
-  return `<span class="cks">${h}</span>`;
+  for(let i=0;i<n;i++)h+=`<input type="checkbox" aria-label="Vino" ${i<on?'checked':''} onchange="tickChange(this)">`;
+  return `<span class="cks" data-id="${esc(t.id)}">${h}</span>`;
 }
-function tickChange(el){ setTick(el.dataset.id,el.checked); paintDone(); }
+function tickChange(el){
+  const box=el.closest('.cks'), id=box.dataset.id;
+  const n=[...box.querySelectorAll('input')].filter((b)=>b.checked).length;
+  pend[pkey(id)]={evento:EVENTO,id,n}; savePend(); paintDone(); flush();
+}
+let flushing=false;
+async function flush(){
+  if(flushing||!CLAVE)return;
+  flushing=true;
+  try{
+    for(const k of Object.keys(pend)){
+      const p=pend[k];
+      let res;
+      try{res=await fetch(API_BASE+'/tickets/attend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clave:CLAVE,evento:p.evento,id:p.id,n:p.n})});}
+      catch(e){break;}   // sin señal: queda para después
+      if(res.status===401){gateOut();break;}
+      if(res.status>=500)break;
+      const d=await res.json().catch(()=>({}));
+      if(pend[k]&&pend[k].n===p.n)delete pend[k];   // si la tocaron de nuevo mientras iba, sigue pendiente
+      savePend();
+      if(res.ok&&DATA&&p.evento===EVENTO){for(const t of [...DATA.paid,...DATA.guests])if(t.id===p.id){t.n=d.n;t.vino=d.vino;}}
+      if(!res.ok)$('sync').textContent='No se pudo marcar: '+(d.error||res.status);
+    }
+  }finally{flushing=false;showSync();}
+}
+function showSync(){
+  const n=Object.keys(pend).length;
+  if(n)$('sync').textContent=`${n} marca${n>1?'s':''} sin guardar (sin señal): se mandan solas al volver`;
+  else if(/sin guardar/.test($('sync').textContent))$('sync').textContent='';
+}
+window.addEventListener('online',flush);
 function paintDone(){
   document.querySelectorAll('[data-row]').forEach((r)=>{
     const boxes=[...r.querySelectorAll('input[type=checkbox]')];
     r.classList.toggle('done',boxes.length>0&&boxes.every((b)=>b.checked));
   });
 }
+// Casillas viejas de esta fecha (de cuando quedaban solo en el celular) que la base todavía no tiene
+function oldTicks(){
+  if(!DATA)return [];
+  const out=[];
+  const look=(t,prefix,n)=>{let k=0;for(let i=0;i<n;i++)if(ticks[prefix+':'+i])k++;if(k>(t.n||0)&&!pend[pkey(t.id)])out.push({t,n:k,prefix});};
+  DATA.paid.forEach((t)=>look(t,'d:'+t.claim,personas(t.buyerName)));
+  DATA.guests.forEach((t)=>look(t,'g:'+fold(t.buyerName),1));
+  return out;
+}
+function uploadOld(){
+  for(const {t,n,prefix} of oldTicks()){
+    pend[pkey(t.id)]={evento:EVENTO,id:t.id,n};
+    for(const k of Object.keys(ticks))if(k.startsWith(prefix+':'))delete ticks[k];   // ya no hacen falta acá
+  }
+  savePend(); try{localStorage.setItem(TK,JSON.stringify(ticks));}catch(e){}
+  render(DATA); flush();
+}
+function pickEv(v){EVENTO=v;try{sessionStorage.setItem('hm-listas-ev',v);}catch(e){}load();}
+function gateOut(){try{localStorage.removeItem('hm-listas-clave');}catch(e){} $('gate').classList.remove('hide');$('app').classList.add('hide');$('err').textContent='Clave incorrecta';}
 
 let CLAVE='';
 try{CLAVE=localStorage.getItem('hm-listas-clave')||'';}catch(e){}
@@ -126,13 +194,14 @@ async function load(fromGate){
   if(!CLAVE)return;
   $('err').textContent='';
   try{
-    const res=await fetch(API_BASE+'/tickets/lists',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clave:CLAVE})});
+    const res=await fetch(API_BASE+'/tickets/lists',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clave:CLAVE,evento:EVENTO||undefined})});
     const data=await res.json().catch(()=>({}));
-    if(res.status===401){try{localStorage.removeItem('hm-listas-clave');}catch(e){} $('gate').classList.remove('hide');$('app').classList.add('hide');$('err').textContent='Clave incorrecta';return;}
+    if(res.status===401){gateOut();return;}
     if(!res.ok)throw new Error(data.error||('Error '+res.status));
     try{localStorage.setItem('hm-listas-clave',CLAVE);}catch(e){}
     $('gate').classList.add('hide');$('app').classList.remove('hide');
     render(data);
+    flush();
   }catch(e){
     if(fromGate||$('app').classList.contains('hide'))$('err').textContent='No se pudo cargar: '+e.message;
     else $('meta').textContent='Sin conexión — mostrando la última versión';
@@ -140,33 +209,45 @@ async function load(fromGate){
 }
 
 function render(d){
+  DATA=d;
+  if(d.event)EVENTO=d.event.id;
+  const sel=$('ev');
+  sel.innerHTML=(d.eventos||[]).map((e)=>{const [y,m,dd]=e.date.split('-');return `<option value="${esc(e.id)}" ${e.id===EVENTO?'selected':''}>${+dd}/${+m}/${y} · ${esc(e.name.replace(/^Hidromedusa · /,''))}${e.id===d.current?' (la que viene)':''}</option>`;}).join('');
+  sel.parentNode.classList.toggle('hide',(d.eventos||[]).length<2);
+  const past=!!(d.event&&d.event.end&&Date.now()>Date.parse(d.event.end));
   const at=new Date(d.at).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:'America/Argentina/Buenos_Aires'});
-  $('meta').textContent=`${d.event?d.event.name+' · ':''}actualizado ${at} · las casillas quedan en este celular`;
+  $('meta').textContent=`${d.event?d.event.name+' · ':''}actualizado ${at}`;
   const paid=[...d.paid].sort((a,b)=>a.claim.localeCompare(b.claim));
   const guests=[...d.guests].sort((a,b)=>fold(a.buyerName).localeCompare(fold(b.buyerName)));
   const nPaid=paid.reduce((s,t)=>s+personas(t.buyerName),0);
   const anul=d.cancelled.map((t)=>`<b>${esc(pal(t.claim))}</b>`).join(', ');
+  const nVino=[...paid,...guests].reduce((s,t)=>{const p=pend[pkey(t.id)],n=p?p.n:(t.n||0);return s+(n||(t.vino==='qr'?1:0));},0);
+  const qr=(t)=>t.vino==='qr'?'<span class="qr" title="Marcó que vino con el QR de la noche">QR ✓</span>':'';
+  const viejas=oldTicks();
 
   // ── Puerta ──
-  let h=`<div class="tot"><div><b>${nPaid+guests.length}</b>personas</div><div><b>${nPaid}</b>con entrada (${paid.length})</div><div><b>${guests.length}</b>invitados</div></div>
-  <div class="how">Te dicen su <b>palabra clave</b> → buscala, tachá una casilla por persona y dales la entrada-sticker. <span class="x2">x2</span> = entran 2. <b>Invitados</b> van por nombre. Si no se acuerdan la palabra, buscá el nombre.</div>
-  <h2>Con entrada <small>· por palabra</small></h2>`;
-  h+=paid.map((t)=>`<div class="row" data-row data-q="${esc(fold(t.claim+' '+t.buyerName))}">${cks('d:'+t.claim,personas(t.buyerName))}<span class="p">${esc(pal(t.claim))}</span><span class="nm">${esc(clean(t.buyerName))}${x2(t.buyerName)}</span></div>`).join('');
+  let h=`<div class="tot"><div><b>${nPaid+guests.length}</b>personas</div><div><b>${nPaid}</b>con entrada (${paid.length})</div><div><b>${guests.length}</b>invitados</div><div><b>${nVino}</b>vinieron</div></div>
+  <div class="how">${past
+    ? `<b>Fecha pasada:</b> tachá a los que vinieron (una casilla por persona). Queda guardado en la base y su medusa muestra la marca <b>✓</b> en «Mis hidro-memorias».`
+    : `Te dicen su <b>palabra clave</b> → buscala, tachá una casilla por persona y dales la entrada-sticker. <span class="x2">x2</span> = entran 2. <b>Invitados</b> van por nombre. Si no se acuerdan la palabra, buscá el nombre. Lo que tachás <b>queda guardado para todos los celulares</b> y es la marca de que vino.`}</div>`;
+  if(viejas.length)h+=`<div class="warn">Este celular tiene <b>${viejas.length}</b> ${viejas.length>1?'entradas tachadas':'entrada tachada'} de esta fecha que todavía no ${viejas.length>1?'están':'está'} en la base (de cuando las casillas quedaban solo acá).<button onclick="uploadOld()">${viejas.length>1?'Subirlas':'Subirla'} a la base</button></div>`;
+  h+=`<h2>Con entrada <small>· por palabra</small></h2>`;
+  h+=paid.map((t)=>`<div class="row" data-row data-q="${esc(fold(t.claim+' '+t.buyerName))}">${cks(t,personas(t.buyerName))}<span class="p">${esc(pal(t.claim))}${qr(t)}</span><span class="nm">${esc(clean(t.buyerName))}${x2(t.buyerName)}</span></div>`).join('');
   h+=`<h2>Invitados <small>· sin palabra</small></h2>`;
-  h+=guests.map((t)=>`<div class="row" data-row data-q="${esc(fold(t.buyerName))}">${cks('g:'+fold(t.buyerName),1)}<span class="nm" style="margin-left:0;text-align:left;color:var(--bone)">${esc(t.buyerName)}</span></div>`).join('');
+  h+=guests.map((t)=>`<div class="row" data-row data-q="${esc(fold(t.buyerName))}">${cks(t,1)}<span class="nm" style="margin-left:0;text-align:left;color:var(--bone)">${esc(t.buyerName)}</span></div>`).join('');
   if(anul)h+=`<div class="warn">⚠️ Anulada (no entra): ${anul}</div>`;
-  if(d.invitesUnused)h+=`<div class="warn">${d.invitesUnused} invitaciones sin usar: si alguien se anota, aparece acá al actualizar (↻).</div>`;
+  if(d.invitesUnused&&!past)h+=`<div class="warn">${d.invitesUnused} invitaciones sin usar: si alguien se anota, aparece acá al actualizar (↻).</div>`;
   $('door').innerHTML=h;
 
   // ── Evoluciones: medusas que subieron de nivel esta noche con el QR (sin nombres), la última arriba ──
   const evo=[...(d.evolved||[])].reverse();
   const porNivel={};for(const t of evo)porNivel[t.level]=(porNivel[t.level]||0)+1;
   let e=`<div class="tot"><div><b>${evo.length}</b>evolucionaron</div>${Object.keys(porNivel).sort().map((n)=>`<div><b>${porNivel[n]}</b>a nivel ${n}</div>`).join('')}</div>
-  <div class="how">Las medusas que subieron de nivel esta noche con el <b>QR de la noche</b>, la última arriba. Si a alguien no le anda, que escanee el QR de nuevo y cargue sus dos palabras. La que nació esta noche evoluciona recién en la próxima fecha.</div>`;
+  <div class="how">Las medusas que subieron de nivel ${past?'esa':'esta'} noche con el <b>QR de la noche</b>, la última arriba. Si a alguien no le anda, que escanee el QR de nuevo y cargue sus dos palabras. La que nació esta noche evoluciona recién en la próxima fecha.</div>`;
   e+=evo.map((t)=>`<div class="row" data-q="${esc(fold(t.claim))}"><span class="p">${esc(pal(t.claim))}</span><span class="nm">nivel ${esc(t.level)} · ${esc(t.rasgo==='trebol'?'trébol':t.rasgo)}</span></div>`).join('');
   if(!evo.length)e+=`<div class="warn">Todavía ninguna. Se actualiza sola cada minuto (o tocá ↻).</div>`;
   $('evo').innerHTML=e;
-  paintDone();filter();
+  paintDone();filter();showSync();
 }
 
 function filter(){
@@ -181,6 +262,7 @@ function tab(t){
 
 if(CLAVE)load();
 setInterval(()=>{if(!document.hidden)load();},60000);
+showSync();
 </script>
 </body>
 </html>

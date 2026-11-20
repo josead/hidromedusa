@@ -20,6 +20,7 @@ const ROUTES = [
   { m: 'POST', re: /^\/tickets\/invite\/check$/,  fn: tickets.checkInvite },
   { m: 'POST', re: /^\/tickets\/invite\/claim$/,  fn: tickets.claimInvite },
   { m: 'POST', re: /^\/tickets\/lists$/,          fn: tickets.lists },
+  { m: 'POST', re: /^\/tickets\/attend$/,         fn: tickets.attend },
   { m: 'GET',  re: /^\/tickets$/,                 fn: tickets.list },
   { m: 'POST', re: /^\/tickets\/([^/]+)\/free$/,   fn: tickets.free,      params: ['id'] },
   { m: 'POST', re: /^\/tickets\/([^/]+)\/reword$/, fn: tickets.reword,    params: ['id'] },

@@ -26,7 +26,8 @@ conform to this. Read this fully before editing any file.
 Una entrada por fecha en `EVENTS` (`lambdas/tickets/index.js`); `CURRENT_EVENT` es la vigente. Las entradas
 viejas conservan su `eventId` y se ven como "Recuerdo" con SU fecha y lugar; las nuevas (pedidos, palabras,
 invitaciones) nacen con `CURRENT_EVENT`. Si el `leadId` del navegador ya es una entrada de otra fecha,
-`POST /tickets/capture` crea un registro aparte `<leadId>-<CURRENT_EVENT>`. `/tickets/lists` es solo de la vigente.
+`POST /tickets/capture` crea un registro aparte `<leadId>-<CURRENT_EVENT>`. `/tickets/lists` muestra la vigente
+por defecto y cualquier otra con `evento` (para marcar de memoria quién vino a una fecha pasada).
 
 ```
 id: ev-2   (vigente)
@@ -122,8 +123,17 @@ Invitations (free, type 'invitado', id `INV-<CODE>`, no claim phrase):
   createdAt, freedAt|null, usedAt|null,
   inviteCode?, inviteNote?, registeredAt?          // invitations only (channel 'invitacion')
   evos?: { [eventId]: { rasgo, at } }              // evolutions, one per later date (QR de la noche)
+  asistencias?: { [eventId]: { at, por:'lista'|'qr', n? } }   // «vino»: la puerta (n = cuántos de la entrada) o el QR
 }
 ```
+
+### Asistencia («vino»)
+
+La medusa no es la entrada: la entrada es de UNA fecha (`eventId`, la noche en que nació la medusa) y la
+medusa sigue en todas. Que alguien vino a una fecha queda en la entrada que lo trae, sin datos personales:
+`asistencias[eventId]` (lo tacha la puerta en `/listas/` → `POST /tickets/attend`, o el QR de la noche
+la noche en que nació), `evos[eventId]` (evolucionó esa noche, así que vino) o `status:'used'` en su
+propia fecha. `vinoA(t, eventId)` → `'qr' | 'lista' | null`. La puerta no puede borrar una marca `'qr'`.
 
 ### Evolución (QR de la noche)
 
@@ -157,13 +167,14 @@ Tickets:
 - `GET  /tickets`          (staff)  `?status=` → `{ tickets, events, current }` (el panel filtra por `eventId`, por defecto la vigente)
 - `POST /tickets/:id/free` (staff)  `{ staffToken }` → `{ ticket }` (mints claim, sets `freed`)
 - `POST /tickets/issue`    (staff)  `{ type, buyerName, ..., staffToken }` → `{ ticket }` (create + free in one step)
-- `POST /tickets/redeem`   (public) `{ claim }` → `{ ticket:{ id, type, eventId, claim, status, level, rasgos, evos:[{ eventId, rasgo, date }] }, event }` (lookup by claimNorm; 404 if none or cancelled). Sin nombre ni contactos: hay 18×18 frases y se dicen en voz alta. `event` = la fecha en que nació.
-- `POST /tickets/evolve`   (public) `{ claim, code }` → `{ ticket, event, rasgo, evolved:true }` or `{ ticket, event, rasgo, already:true }` (ya evolucionó en esta fecha). 403 QR de otra fecha / antes de `from`, 410 la fecha ya terminó, 404 palabra desconocida o anulada, 409 `{ error, ticket, event }` nació esta noche.
+- `POST /tickets/redeem`   (public) `{ claim }` → `{ ticket:{ id, type, eventId, claim, status, level, rasgos, evos:[{ eventId, rasgo, date }], fechas:[{ eventId, name, date, time, end, venue, entrada, vino, rasgo }] }, event }` (lookup by claimNorm; 404 if none or cancelled). Sin nombre ni contactos: hay 18×18 frases y se dicen en voz alta. `event` = la fecha en que nació. `fechas` = las fechas de esa medusa (la de su entrada, `entrada:true`, y las que tienen marca de asistencia o evolución), de la más vieja a la más nueva; `vino` = hay marca; `rasgo` = lo que ganó esa noche. Es lo que muestra «Mis hidro-memorias». Lo mismo en cada `ticket` de `/account/*`.
+- `POST /tickets/evolve`   (public) `{ claim, code }` → `{ ticket, event, rasgo, evolved:true }` or `{ ticket, event, rasgo, already:true }` (ya evolucionó en esta fecha). 403 QR de otra fecha / antes de `from`, 410 la fecha ya terminó, 404 palabra desconocida o anulada, 409 `{ error, ticket, event }` nació esta noche (igual deja la marca de que vino: `asistencias[CURRENT_EVENT] = { por:'qr' }`).
 - `POST /tickets/:id/scan` (staff)  `{ staffToken }` → `{ valid, ticket, reason? }`
 - `GET  /tickets/:id`      (staff)  → `{ ticket }`
 - `POST /tickets/:id/rename` (staff) `{ buyerName, staffToken }` → `{ ticket }` (only the name changes; no email)
 - `POST /tickets/invites`  (staff)  `{ count?=1 (max 50), note?, staffToken }` → `{ invites:[ticket] }` (status `invite`)
-- `POST /tickets/lists` (clave) `{ clave }` → `{ paid, guests, cancelled:[{claim,buyerName,status}], invitesUnused, evolved:[{claim,rasgo,level}], event, at }` (401 clave incorrecta). `evolved` = las medusas que evolucionaron en la fecha vigente, en orden de llegada (de cualquier fecha de nacimiento, sin nombres). Sin emails/teléfonos; la clave va hasheada (sha256) en `lambdas/tickets/index.js`. La usa `/listas/` (puerta + evoluciones en vivo).
+- `POST /tickets/lists` (clave) `{ clave, evento? }` → `{ paid:[{id,claim,buyerName,status,n,vino}], guests:[{id,claim:null,buyerName,status,n,vino}], cancelled:[{claim,buyerName,status}], invitesUnused, evolved:[{claim,rasgo,level}], event, current, eventos:[{id,name,date,end}], at }` (401 clave incorrecta). `evento` = qué fecha (por defecto, o si no existe, `CURRENT_EVENT`); `eventos` = todas, la más nueva primero. `n` = cuántos de esa entrada tachó la puerta, `vino` = `'qr'|'lista'|null`. `evolved` = las medusas que evolucionaron en esa fecha, en orden de llegada (de cualquier fecha de nacimiento, sin nombres). Sin emails/teléfonos; la clave va hasheada (sha256) en `lambdas/tickets/index.js`. La usa `/listas/` (puerta + evoluciones en vivo).
+- `POST /tickets/attend` (clave) `{ clave, evento, id, n }` → `{ id, n, vino }`: la puerta tacha cuántos de esa entrada pasaron (`n` 0..20; 0 borra la marca de la lista, nunca la del QR). Solo entradas de la lista de esa fecha (liberadas/usadas con palabra o invitados anotados): 404 si no, 400 fecha desconocida, 401 clave.
 - `POST /tickets/invite/check` (public) `{ code }` → `{ ok, event }` (404 unknown/cancelled, 409 already used, 410 event already over)
 - `POST /tickets/invite/claim` (public) `{ code, buyerName, buyerPhone?, buyerEmail? }` (name + phone or email) → `{ ticket:{ id, buyerName, status:'guest' }, event }` (409 if already used, 410 event already over). Front: `/invitacion/?c=CODE`.
 
@@ -214,9 +225,11 @@ Default panel/task seed = the set already in `public/js/staff-panel.js`
 - Buy: modal collects name/email/phone (+ merch idea for VIP) → "Pedir por
   WhatsApp" opens `https://wa.me/<WHATSAPP_NUMBER>?text=<prefilled>` AND
   best-effort `POST /tickets/request`. No payment UI.
-- Retrieve: "Reclamar tu palabra" → input phrase → `POST /tickets/redeem` → render
-  a **ticket card showing the palabras clave** and the jellyfish at its level (NO QR).
-  Works without login. No physical sticker for the current free date.
+- Retrieve: "Reclamar tu palabra" → input phrase → `POST /tickets/redeem` → «Tu hidromedusa» con dos
+  pestañas: **Mi medusa** (la medusa a su nivel, el nombre, chips ✓ de las fechas a las que vino,
+  compartir; sin entrada abajo) y **Mis hidro-memorias** (una tarjeta por fecha con todas las medusas
+  del navegador/cuenta: con qué entrada nació, ✓ vino, qué ganó; la entrada de la fecha que viene
+  con sus palabras clave; y la «Próxima» si hay una anunciada). NO QR. Works without login.
 - Evolve: `/?evo=CODE` keeps the code in `sessionStorage` (`hm_evo`) and opens the same
   modal in "Evolucionar" mode → `POST /tickets/evolve` → the card animates from the
   previous level to the new one.
@@ -228,7 +241,10 @@ Default panel/task seed = the set already in `public/js/staff-panel.js`
   client-built ICS fallback).
 - Tu medusa en el inicio: la última que se abrió en este navegador (`localStorage`
   `hm_claimed`: claim, nivel, rasgos, `saved`) se dibuja en una tarjeta del hero; tocarla
-  abre «Tu hidromedusa».
+  abre «Tu hidromedusa» y el link de abajo, «Mis hidro-memorias».
+- `/listas/` (clave): selector de fecha; tachar una casilla manda `POST /tickets/attend` (si no hay
+  señal queda en `hm-listas-pend` y se reintenta al volver); las casillas viejas que quedaban solo
+  en el celular (`hm-listas-ticks`) se ofrecen para subir a la base.
 - Cuenta: con `GOOGLE_CLIENT_ID`, el modal ofrece «Continuar con Google» para guardarla
   (`/account/save`) o traerlas en otro navegador (`/account/medusas`, chips si hay varias).
   El script de Google se carga recién al abrir el modal. Desde el navegador de una app
