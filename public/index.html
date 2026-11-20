@@ -1346,7 +1346,7 @@ function renderTicketCard(tk, ev, o){
           : `<button class="btn btn-acid" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();shareJf()">Compartir en Instagram 📸</button>`}
         <button class="btn btn-line" style="font-size:11px;padding:8px 14px" onclick="event.stopPropagation();openJfFullscreen()">Pantalla completa ↑</button>
       </div>
-      ${viaChrome?'<div class="jf-hint">Este navegador no deja compartir la imagen: tu medusa se abre en Chrome</div>':''}
+      ${viaChrome?'<div class="jf-hint">Este navegador no deja compartir tu medusa: se abre en Chrome</div>':'<div class="jf-hint" id="jf-vid" aria-live="polite"></div>'}
       ${gsiOn()?'<div class="jf-cuenta" id="jf-cuenta"></div>':''}
     </div>`:''}
     <div class="tk-card">
@@ -1703,38 +1703,50 @@ function downloadJf(){
 // unos segundos). Antes la imagen se armaba en el toque con toBlob(), que en esta página tarda más de un segundo
 // (espera un rato libre y las animaciones casi no dejan): en Android se perdía el gesto y caía a la descarga.
 // Ahora se arma apenas aparece la medusa, sincrónica con toDataURL() (~15 ms), y el toque comparte sin esperar.
+// Con la imagen lista se arma también el video (buildShareVideo): si llega a estar antes del toque, se comparte
+// el video; si no (o el navegador no sabe hacerlo), la imagen.
 function prepShareJf(){
   const p=window._jfParsed;
   if(!p||!window.JellyfishGen) return null;
   const o=window._jfOpts||{}, claim=window._jfClaim||'hidromedusa', L=evLabels(window._jfEv);
-  const s=window._jfShare={ o, file:null };
+  // La misma medusa dibujada de nuevo (otra tarjeta igual): se sigue con lo ya armado
+  const key=[claim, o.level|0, (o.rasgos||[]).join(','), L.tag].join('|'), old=window._jfShare;
+  if(old && old.key===key){ old.o=o; jfVidHint(old); return old; }
+  const s=window._jfShare={ o, key, file:null, video:null, vid:'preparando' };
   s.text='🪼 '+claim.replace(/-/g,' ')+((o.level|0)>=2 ? ' · nivel '+o.level : '')+' — Hidromedusa · '+L.short+' · Tandil';
   s.build=function(){
+    if(s.file) return;
     const url=drawShareJf(p, claim, o, L).toDataURL('image/png'), bin=atob(url.slice(url.indexOf(',')+1));
     const bytes=new Uint8Array(bin.length);
     for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
     s.file=new File([bytes], 'hidromedusa-'+claim+'.png', {type:'image/png'});
   };
+  const video=()=>{
+    if(jfViaChrome()){ s.vid='chrome'; return; }   // acá no se comparte: el botón la manda a Chrome
+    buildShareVideo(s, p, claim, o, L).then(()=>{ if(s.video) s.vid='listo'; jfVidHint(s); },
+      e=>{ s.vid=e==='sin-soporte' ? e : 'error'; jfVidHint(s); if(e!=='sin-soporte') console.warn('[compartir] video', e); });
+  };
   // Con Anton y Space Mono cargadas para el texto del canvas
-  if(document.fonts) Promise.all(['50px Anton','bold 15px "Space Mono"','13px "Space Mono"'].map(f=>document.fonts.load(f))).catch(()=>{}).then(s.build);
-  else s.build();
+  if(document.fonts) Promise.all(['50px Anton','bold 15px "Space Mono"','13px "Space Mono"'].map(f=>document.fonts.load(f))).catch(()=>{}).then(s.build).then(video);
+  else { s.build(); video(); }
   return s;
 }
 
-// 9:16 canvas for Instagram Stories (540×960)
-function drawShareJf(p, claim, o, L){
+// La tarjeta 9:16 de las stories (540×960 por k): fondo y textos quedan fijos y frame(t) dibuja la medusa
+// en el instante t (s). k=1 para la imagen; k=2 para el video (1080×1920, la medusa al doble sin suavizar).
+function shareCard(p, claim, o, L, k){
   const CW=540, CH=960;
   const hd=(o.level|0)>=2;
   // Nivel 1: 140×220 a 3× (420×660). Nivel 2+: la grilla de 56×88 a 8 px por celda (448×704) y una línea más de texto.
-  const jfo={ level:o.level, rasgos:o.rasgos, scale:8 };
+  const jfo=hd ? { level:o.level, rasgos:o.rasgos, scale:8 } : undefined;
   const JFW=hd ? JellyfishGen.size(jfo).w : 140*3;
   const JFH=hd ? JellyfishGen.size(jfo).h : 220*3;
   const JFX=Math.round((CW-JFW)/2);     // horizontally centered
   const JFY=hd ? 44 : 70;
 
-  const share=document.createElement('canvas');
-  share.width=CW; share.height=CH;
-  const ctx=share.getContext('2d');
+  const mk=()=>{ const c=document.createElement('canvas'); c.width=CW*k; c.height=CH*k; return c; };
+  const bg=mk(), ctx=bg.getContext('2d');
+  ctx.scale(k,k);
 
   // Background
   ctx.fillStyle='#060607';
@@ -1746,12 +1758,6 @@ function drawShareJf(p, claim, o, L){
   grd.addColorStop(0,'rgba(198,255,26,0.14)');
   grd.addColorStop(1,'rgba(198,255,26,0)');
   ctx.fillStyle=grd; ctx.fillRect(0,0,CW,CH);
-
-  // Jellyfish — render frame-0 on a tmp canvas then drawImage upscaled
-  const tmp=document.createElement('canvas');
-  JellyfishGen.preview(tmp, p.noun, p.adj, hd ? jfo : undefined);  // 140×220 (nivel 1) o 448×704
-  ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(tmp, JFX, JFY, JFW, JFH);
 
   // Thin acid divider
   const TY=JFY+JFH+30;
@@ -1783,32 +1789,134 @@ function drawShareJf(p, claim, o, L){
   ctx.fillStyle='rgba(198,255,26,0.35)';
   ctx.fillText('hidromedusa.com', CW/2, hd ? TY+136 : TY+112);
 
-  return share;
+  // Jellyfish — cada cuadro en un lienzo chico (140×220 el nivel 1, 448×704 el 2+) y agrandado sin suavizar
+  const out=mk(), octx=out.getContext('2d'), tmp=document.createElement('canvas');
+  const sz=JellyfishGen.size(jfo);
+  tmp.width=sz.w; tmp.height=sz.h;
+  const tctx=tmp.getContext('2d');
+  octx.imageSmoothingEnabled=false;
+  let last;
+  return {
+    canvas: out,
+    // t=null: el cuadro fijo de la imagen (el mismo que preview). Devuelve false si la medusa quedó igual que
+    // en el cuadro anterior (el lienzo grande no se toca): el nivel 1 cambia 3 veces cada 0,86 s.
+    frame(t){
+      let key=null;
+      if(t==null) JellyfishGen.preview(tmp, p.noun, p.adj, jfo);
+      else key=JellyfishGen.draw(tctx, p.noun, p.adj, jfo, hd ? Math.floor(t*12)/12 : t);   // el 2+ a 12 cuadros/s, como en la página
+      if(key!=null && key===last) return false;
+      last=key;
+      octx.drawImage(bg, 0, 0);
+      octx.drawImage(tmp, JFX*k, JFY*k, JFW*k, JFH*k);
+      return true;
+    },
+  };
+}
+function drawShareJf(p, claim, o, L){
+  const c=shareCard(p, claim, o, L, 1);
+  c.frame(null);
+  return c.canvas;
+}
+
+/* ---------- Video de compartir: mp4 H.264 de 1080×1920 y 6 s, armado en el navegador ---------- */
+// WebCodecs (VideoEncoder) codifica y mp4-muxer (/js/mp4-muxer.min.js, se carga recién acá) arma el mp4 con el
+// índice adelante. Va más rápido que el tiempo real y no depende de que la pestaña se vea. Instagram muestra los
+// GIF quietos: por eso mp4. Sin VideoEncoder o sin H.264 (Firefox, iPhone viejo) queda la imagen.
+// 24 cuadros/s: el nivel 2+ va a 12 en la página, así cada uno dura justo 2. 6 s = 4 latidos del 2+, ~7 del 1.
+const JF_VID={ w:1080, h:1920, fps:24, secs:6, bitrate:3e6 };
+let _mp4MuxerP=null;
+function loadMp4Muxer(){
+  if(window.Mp4Muxer) return Promise.resolve();
+  return _mp4MuxerP=_mp4MuxerP||new Promise((ok,ko)=>{
+    const el=document.createElement('script');
+    el.src='/js/mp4-muxer.min.js'; el.onload=ok; el.onerror=()=>{ _mp4MuxerP=null; ko('muxer'); };
+    document.head.appendChild(el);
+  });
+}
+async function jfVideoConfig(){
+  if(!window.VideoEncoder || !window.VideoFrame) return null;
+  // High, Main o Baseline, nivel 4.0 (alcanza para 1080×1920 a 30 cuadros)
+  for(const codec of ['avc1.640028','avc1.4d0028','avc1.420028']){
+    const cfg={ codec, width:JF_VID.w, height:JF_VID.h, bitrate:JF_VID.bitrate, framerate:JF_VID.fps, avc:{ format:'avc' } };
+    try { if((await VideoEncoder.isConfigSupported(cfg)).supported) return cfg; } catch(e){}
+  }
+  return null;
+}
+// Debajo del botón: que se está armando el video (unos segundos) y cuándo está
+function jfVidHint(s){
+  const el=document.getElementById('jf-vid');
+  if(!el || s!==window._jfShare) return;
+  el.textContent=s.vid==='armando' ? 'Armando el video de tu medusa…' : s.vid==='listo' ? 'Se comparte en video, con movimiento 🎬' : '';
+}
+async function buildShareVideo(s, p, claim, o, L){
+  const cfg=await jfVideoConfig();
+  if(!cfg) throw 'sin-soporte';
+  s.vid='armando'; jfVidHint(s);
+  await loadMp4Muxer();
+  const muxer=new Mp4Muxer.Muxer({
+    target:new Mp4Muxer.ArrayBufferTarget(),
+    video:{ codec:'avc', width:cfg.width, height:cfg.height, frameRate:JF_VID.fps },
+    fastStart:'in-memory',
+  });
+  let fail=null;
+  const enc=new VideoEncoder({ output:(chunk, meta)=>muxer.addVideoChunk(chunk, meta), error:e=>{ fail=e; } });
+  const live=()=>s===window._jfShare;   // si se cerró la tarjeta o cambió la medusa, se deja de armar
+  let img=null;   // el último cuadro leído del lienzo; si la medusa no cambia se reusa (leerlo es lo que más cuesta)
+  try {
+    enc.configure(cfg);
+    const card=shareCard(p, claim, o, L, 2), n=JF_VID.fps*JF_VID.secs, us=1e6/JF_VID.fps;
+    let slice=performance.now();
+    for(let i=0;i<n;i++){
+      if(fail || !live()) break;
+      if(card.frame(i/JF_VID.fps) || !img){ if(img) img.close(); img=new VideoFrame(card.canvas, { timestamp:0 }); }
+      const vf=new VideoFrame(img, { timestamp:Math.round(i*us), duration:Math.round(us) });
+      enc.encode(vf, { keyFrame:i%(2*JF_VID.fps)===0 });
+      vf.close();
+      // Cada ~30 ms le devuelve el turno a la página (para no trabarla) y no junta más de 4 cuadros en la
+      // cola del codificador. No en cada cuadro: con el fondo 3D andando, cada pausa cuesta un cuadro entero de él.
+      if(performance.now()-slice>30 || enc.encodeQueueSize>4){
+        do { await new Promise(r=>setTimeout(r,0)); } while(enc.encodeQueueSize>4 && !fail);
+        slice=performance.now();
+      }
+    }
+    if(!fail && live()) await enc.flush();
+  } finally {
+    if(img) img.close();
+    if(enc.state!=='closed') enc.close();
+  }
+  if(fail) throw fail;
+  if(!live()) return;
+  muxer.finalize();
+  s.video=new File([muxer.target.buffer], 'hidromedusa-'+claim+'.mp4', {type:'video/mp4'});
 }
 
 function shareJf(){
   const s=window._jfShare && window._jfShare.o===window._jfOpts ? window._jfShare : prepShareJf();
   if(!s) return;
   if(!s.file) s.build();   // las fuentes todavía cargaban: se arma igual, el menú tiene que abrirse en este toque
-  const data={ files:[s.file], title:'Mi hidromedusa', text:s.text };
+  const can=f=>!!(navigator.share && navigator.canShare && navigator.canShare({ files:[f] }));
+  // El video si ya está y el teléfono lo deja compartir; si no, la imagen (no se espera: se perdería el toque)
+  const file=s.video && can(s.video) ? s.video : s.file;
+  const info={ formato:file===s.video ? 'video' : 'imagen', video:s.vid };
   // Web Share API (mobile: opens native share sheet → Instagram, WhatsApp, etc.)
-  if(navigator.share && navigator.canShare && navigator.canShare({ files:data.files })){
-    navigator.share(data).then(()=>track('compartir',{ resultado:'menu' }), e=>{
-      if(e && e.name==='AbortError') return track('compartir',{ resultado:'cancelado' });   // cerró el menú
+  if(can(file)){
+    navigator.share({ files:[file], title:'Mi hidromedusa', text:s.text }).then(()=>track('compartir',{ resultado:'menu', ...info }), e=>{
+      if(e && e.name==='AbortError') return track('compartir',{ resultado:'cancelado', ...info });   // cerró el menú
       saveShareJf(s, (e && e.name) || 'error');
     });
     return;
   }
   saveShareJf(s, navigator.share ? 'sin-archivos' : 'sin-share');
 }
-// Sin menú de compartir (compu, Firefox) o si falló: se descarga la imagen
+// Sin menú de compartir (compu, Firefox) o si falló: se descarga el video (si ya está) o la imagen
 function saveShareJf(s, motivo){
-  track('compartir',{ resultado:'descarga', motivo });
-  const url=URL.createObjectURL(s.file);
-  const a=document.createElement('a'); a.href=url; a.download=s.file.name;
+  const f=s.video || s.file;
+  track('compartir',{ resultado:'descarga', motivo, formato:f===s.video ? 'video' : 'imagen', video:s.vid });
+  const url=URL.createObjectURL(f);
+  const a=document.createElement('a'); a.href=url; a.download=f.name;
   a.click();
   setTimeout(()=>URL.revokeObjectURL(url), 5000);
-  toast('Imagen guardada — subila a tus stories 📸');
+  toast(f===s.video ? 'Video guardado — subilo a tus stories 📸' : 'Imagen guardada — subila a tus stories 📸');
 }
 
 // Navegador interno de una app en Android (Instagram, Facebook…): es un WebView, sin menú de compartir.

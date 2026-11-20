@@ -583,13 +583,15 @@
   }
 
   // Un cuadro en el instante `time` (s), en un lienzo dimensionado con size(): para videos.
+  // Devuelve qué cuadro dibujó (el nivel 1 tiene 3; del 2 en adelante, el instante), para no repetir trabajo.
   function draw(ctx, noun, adjective, o, time) {
     o = opt(o);
     const p = derive(fnv(noun), fnv(adjective));
-    if (o.level >= 2) return drawHD(ctx, p, o.rasgos, fnv(noun + '-' + adjective), time, o.scale);
+    if (o.level >= 2) { drawHD(ctx, p, o.rasgos, fnv(noun + '-' + adjective), time, o.scale); return time; }
     let ms = (time * 1000) % (HOLDS[0] + HOLDS[1] + HOLDS[2]), f = 0;
     while (ms >= HOLDS[f]) { ms -= HOLDS[f]; f++; }
     drawFrame(ctx, p, f);
+    return f;
   }
 
   function render(canvas, noun, adjective, o) {
