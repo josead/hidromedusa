@@ -195,7 +195,7 @@ Calendar:
 
 Cuenta (Google, opcional — `lambdas/account/index.js`):
 - Sin sesiones: cada pedido trae el ID token de Google Identity Services (`credential`, el
-  del botón «Continuar con Google») y `lambdas/lib/google.js` lo verifica (RS256 contra las
+  del botón de Google) y `lambdas/lib/google.js` lo verifica (RS256 contra las
   claves públicas de Google, `iss`, `aud` = `GOOGLE_CLIENT_ID`, `exp`). Solo se usa el `sub`.
 - `POST /account/save`    (public) `{ credential, claim }` → `{ medusas:[{ ticket, event }] }` (la frase queda primera; `ticket` como en `/tickets/redeem`). 404 palabra desconocida o anulada.
 - `POST /account/medusas` (public) `{ credential }` → `{ medusas:[{ ticket, event }] }` (`[]` si la cuenta no guardó ninguna).
@@ -245,8 +245,11 @@ Default panel/task seed = the set already in `public/js/staff-panel.js`
 - `/listas/` (clave): selector de fecha; tachar una casilla manda `POST /tickets/attend` (si no hay
   señal queda en `hm-listas-pend` y se reintenta al volver); las casillas viejas que quedaban solo
   en el celular (`hm-listas-ticks`) se ofrecen para subir a la base.
-- Cuenta: con `GOOGLE_CLIENT_ID`, el modal ofrece «Continuar con Google» para guardarla
-  (`/account/save`) o traerlas en otro navegador (`/account/medusas`, chips si hay varias).
+- Cuenta: con `GOOGLE_CLIENT_ID`, la tarjeta ofrece «Guardar con Google» debajo del nombre de la
+  medusa (`/account/save`) y el formulario «Continuar con Google» para traerlas en otro navegador
+  (`/account/medusas`, chips si hay varias). El botón que se ve es propio (letras verdes); el de
+  Google (iframe de `renderButton`, que solo viene en blanco/azul/negro) va encima casi transparente
+  y es el que recibe el toque.
   El script de Google se carga recién al abrir el modal. Desde el navegador de una app
   (Instagram, etc.) Google no deja entrar: Android abre Chrome (`intent://`), iOS deja la
   URL lista (`?claim=…&guardar=1` / `?cuenta=1`) y explica cómo pasar a Safari.

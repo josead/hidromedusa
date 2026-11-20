@@ -321,7 +321,33 @@
   .jf-cuenta { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line-strong); display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .jf-or { font-family: var(--mono); font-size: 11px; line-height: 1.5; letter-spacing: .04em; color: var(--bone-dim); text-align: center; max-width: 300px; }
   .jf-saved { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--acid); }
-  .gsi-slot { width: 100%; min-height: 40px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .gsi-slot { width: 100%; min-height: 44px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  /* En la tarjeta va pegada a la medusa (debajo del nombre), sin la línea de corte */
+  .jf-cuenta.cerca { margin-top: 14px; padding-top: 0; border-top: 0; gap: 6px; }
+  .jf-cuenta.cerca .jf-or { font-size: 10px; color: var(--muted); }
+  /* Botón de Google con letras verdes: el de Google (iframe, solo blanco/azul/negro) va encima, casi
+     transparente, y recibe el toque; lo que se ve es .gbtn-face. Desde el navegador de una app es un link común. */
+  .gbtn { position: relative; width: 100%; max-width: 320px; height: 44px; }
+  .gbtn-face { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 320px; height: 44px; padding: 0 14px;
+    border: 2px solid var(--acid); background: rgba(198,255,26,.04); color: var(--acid); font-family: var(--mono); font-size: 12px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; text-decoration: none; transition: background .15s, box-shadow .15s; }
+  .gbtn > .gbtn-face { position: absolute; inset: 0; pointer-events: none; }
+  .gbtn-face svg { flex: none; }
+  .gbtn:hover > .gbtn-face, a.gbtn-face:hover { background: rgba(198,255,26,.14); box-shadow: 4px 4px 0 rgba(198,255,26,.25); }
+  .gbtn:focus-within > .gbtn-face, a.gbtn-face:focus-visible { outline: 2px solid var(--bone); outline-offset: 2px; }
+  .gbtn.cargando > .gbtn-face { opacity: .5; }
+  .gbtn-gsi { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; opacity: .01; transform: scaleY(1.1); }
+  /* Cargando la medusa: una medusa que late en lugar del formulario */
+  .jf-loading { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 46px 16px 40px; border: 2px dashed var(--line-strong); background: var(--abyss); }
+  .jf-loading svg { width: 72px; height: 104px; color: var(--acid); filter: drop-shadow(0 0 14px rgba(198,255,26,.35)); animation: jfBob 1.6s ease-in-out infinite; }
+  .jf-loading .tent { animation: jfTent 1.6s ease-in-out infinite; transform-origin: 50% 0; transform-box: fill-box; }
+  .jf-loading .tent:nth-child(odd) { animation-delay: -.4s; }
+  .jf-load-t { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--acid); }
+  .jf-load-t::after { content: ''; display: inline-block; width: 1.4em; text-align: left; animation: jfDots 1.2s steps(4) infinite; }
+  @keyframes jfBob { 0%,100% { transform: translateY(4px) scale(1); opacity: .65; } 50% { transform: translateY(-6px) scale(1.04); opacity: 1; } }
+  @keyframes jfTent { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(.8); } }
+  @keyframes jfDots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+  @media (prefers-reduced-motion: reduce) { .jf-loading svg, .jf-loading .tent, .jf-load-t::after { animation: none; } .jf-load-t::after { content: '…'; } }
   .jf-chips { margin-bottom: 14px; }
   /* «Mi medusa» | «Mis hidro-memorias» */
   .jf-tabs { display: flex; margin-bottom: 14px; }
@@ -1258,14 +1284,28 @@ function fallbackCopy(text,done){
 }
 
 /* ---------- Redeem (frase secreta) ---------- */
+// Mientras se trae la medusa: en lugar del formulario, una medusa que late. Si no se dibuja nada
+// (palabra que no existe, sin red), jfLoadingDone() devuelve el formulario.
+const JF_LOADING_SVG='<svg viewBox="0 0 36 52" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M12 2h12v2h4v2h2v4h2v8H4v-8h2V6h2V4h4z"/><path fill="#050607" opacity=".35" d="M10 8h4v4h-4zM22 8h4v4h-4z"/><g fill="currentColor" opacity=".8"><rect class="tent" x="6" y="20" width="2" height="22"/><rect class="tent" x="11" y="20" width="2" height="28"/><rect class="tent" x="17" y="20" width="2" height="32"/><rect class="tent" x="23" y="20" width="2" height="28"/><rect class="tent" x="28" y="20" width="2" height="22"/></g></svg>';
+function jfLoading(text){
+  document.getElementById('redeem-form').style.display='none';
+  document.getElementById('redeem-result').innerHTML='<div class="jf-loading" role="status">'+JF_LOADING_SVG+'<div class="jf-load-t">'+text+'</div></div>';
+}
+function jfLoadingDone(){
+  const box=document.getElementById('redeem-result');
+  if(!box.querySelector('.jf-loading')) return;
+  box.innerHTML='';
+  document.getElementById('redeem-form').style.display='';
+}
 async function redeem(){
   const claim=(document.getElementById('redeem-claim').value||'').trim();
   if(!claim){ toast('Cargá tu frase de dos palabras'); return; }
   if(window._evoCode) return evolve(claim);
+  jfLoading('Buscando tu medusa');
   let data;
   try { data=await api('/tickets/redeem',{ method:'POST', body:{ claim } }); }
   catch(err){
-    if(err && /http-(404|410)/.test(err.message)){ toast('No encontramos ese código 🪼'); cuentaForm(); return; }
+    if(err && /http-(404|410)/.test(err.message)){ jfLoadingDone(); toast('No encontramos ese código 🪼'); cuentaForm(); return; }
     // demo/offline: aceptar cualquier frase y mostrar una entrada de muestra (con el nivel guardado si es la misma)
     let saved=null; try { saved=JSON.parse(localStorage.getItem('hm_claimed')||'null'); } catch(e){}
     const same=saved && claimKey(saved.claim)===claimKey(claim);
@@ -1291,6 +1331,8 @@ let _evoBusy=false;
 async function evolve(claim){
   if(_evoBusy) return;
   _evoBusy=true;
+  jfLoading('Despertando tu medusa');
+  let aRedeem=false;
   try {
     let data;
     try { data=await api('/tickets/evolve',{ method:'POST', body:{ claim, code:window._evoCode } }); }
@@ -1305,6 +1347,7 @@ async function evolve(claim){
       if(err && (err.status===403 || err.status===410)){   // QR de otra fecha o fuera de hora: la tarjeta de siempre
         setEvoMode(null); track('evolucion-lista',{ estado:'cerrada' });
         toast(b.error||'Ese QR no es el de esta fecha');
+        aRedeem=true;   // redeem() sigue con su propia carga
         return redeem();
       }
       toast('No pudimos conectar 🪼 Probá de nuevo');
@@ -1313,7 +1356,7 @@ async function evolve(claim){
     setEvoMode(null);
     track('evolucion-lista',{ estado:data.evolved ? 'evoluciono' : 'ya', nivel:data.ticket.level });
     renderTicketCard(data.ticket, data.event||HM_EVENT, data.evolved ? { evolved:true } : { note:'Tu medusa ya evolucionó esta noche' });
-  } finally { _evoBusy=false; }
+  } finally { _evoBusy=false; if(!aRedeem) jfLoadingDone(); }
 }
 // ['velo','faro','trebol'] → "con velo, faro y trébol"
 function rasgosLabel(rs){
@@ -1464,6 +1507,7 @@ function renderTicketCard(tk, ev, o){
       <div class="jf-name">${escHtml(tk.claim.replace(/-/g,' '))}</div>
       <div class="jf-lvl" id="jf-lvl"></div>
       ${marcas?'<div class="jf-marcas" title="Fechas a las que vino">'+marcas+'</div>':''}
+      ${gsiOn()?'<div class="jf-cuenta cerca" id="jf-cuenta"></div>':''}
       <div class="jf-actions">
         ${viaChrome
           ? `<a class="btn btn-acid" style="font-size:11px;padding:8px 14px" href="${jfChromeUrl(tk.claim)}" onclick="event.stopPropagation();jfToChrome()">Abrir en Chrome para compartir ↗</a>`
@@ -1472,7 +1516,6 @@ function renderTicketCard(tk, ev, o){
       </div>
       ${viaChrome?'<div class="jf-hint">Este navegador no deja compartir tu medusa: se abre en Chrome</div>':'<div class="jf-hint" id="jf-vid" aria-live="polite"></div>'}
       <div class="jf-foot">${foot}${nudge?'<br>'+nudge:''}</div>
-      ${gsiOn()?'<div class="jf-cuenta" id="jf-cuenta"></div>':''}
     </div>`:''}
     </div>
     <div id="jp-memorias" role="tabpanel" aria-labelledby="jt-memorias" hidden></div>
@@ -1536,7 +1579,7 @@ function renderTicketCard(tk, ev, o){
     if(window._jfSaveHint){   // llegó desde el navegador de una app a guardarla (cuentaFuera)
       window._jfSaveHint=false;
       const row=document.getElementById('jf-cuenta');
-      if(row && !saved){ toast('Tocá «Continuar con Google» para guardarla 🪼'); row.scrollIntoView({ block:'center' }); }
+      if(row && !saved){ toast('Tocá «Guardar con Google» 🪼'); row.scrollIntoView({ block:'center' }); }
     }
   }
 }
@@ -1624,22 +1667,27 @@ function gsiLoad(){
 // Un botón de Google en `el`: 'guardar' la medusa que se ve o 'recuperar' las de la cuenta.
 // En el navegador de una app Google no deja entrar (disallowed_useragent): ahí va cuentaFuera().
 // `data-gsi` marca el lugar como armado (o armándose); sin la marca, cuentaForm() lo vuelve a armar.
+const G_LOGO='<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
+const gsiText=(intent)=>intent==='guardar' ? 'Guardar con Google' : 'Continuar con Google';
 function gsiSlot(el, intent){
   el.dataset.gsi=intent;
   if(inAppBrowser()){
     el.innerHTML=inAppBrowser()==='android'
-      ? `<a class="btn btn-line btn-block" href="${chromeUrl(cuentaQuery(intent))}" onclick="cuentaFuera('${intent}')">Continuar con Google en Chrome ↗</a>
+      ? `<a class="gbtn-face" href="${chromeUrl(cuentaQuery(intent))}" onclick="cuentaFuera('${intent}')">${G_LOGO}<span>${gsiText(intent)} en Chrome ↗</span></a>
          <div class="jf-hint">Google no deja entrar desde el navegador de esta app</div>`
-      : `<button class="btn btn-line btn-block" onclick="cuentaFuera('${intent}')">Continuar con Google ↗</button>`;
+      : `<button type="button" class="gbtn-face" style="cursor:pointer" onclick="cuentaFuera('${intent}')">${G_LOGO}<span>${gsiText(intent)} ↗</span></button>`;
     return;
   }
-  el.innerHTML='';
+  // Se ve el botón verde (apagado hasta que carga Google); el de Google va encima, casi transparente
+  el.innerHTML=`<div class="gbtn cargando"><span class="gbtn-face" aria-hidden="true">${G_LOGO}<span>${gsiText(intent)}</span></span><div class="gbtn-gsi"></div></div>`;
   gsiLoad().then(function(id){
     // Oculto (el formulario quedó tapado por la tarjeta): sin ancho para medir, se arma al volver a verse
     if(!el.isConnected || !el.offsetParent){ delete el.dataset.gsi; return; }
-    const w=Math.round(Math.min(320, Math.max(200, el.getBoundingClientRect().width)));
-    id.renderButton(el, { type:'standard', theme:'filled_black', size:'large', shape:'rectangular', text:'continue_with',
+    const box=el.querySelector('.gbtn'); if(!box) return;
+    const w=Math.round(Math.min(320, Math.max(200, box.getBoundingClientRect().width)));
+    id.renderButton(box.querySelector('.gbtn-gsi'), { type:'standard', theme:'filled_black', size:'large', shape:'rectangular', text:'continue_with',
       locale:'es-419', width:w, click_listener:function(){ _gsiIntent=intent; } });
+    box.classList.remove('cargando');
   }).catch(function(){
     delete el.dataset.gsi;   // la próxima vez que se abra lo vuelve a intentar
     el.innerHTML='<div class="jf-or">No pudimos cargar Google (¿algún bloqueador?). Probá de nuevo más tarde.</div>';
@@ -1661,7 +1709,7 @@ function cuentaError(err, fallback){
 function renderCuenta(saved){
   const row=document.getElementById('jf-cuenta'); if(!row) return;
   if(saved){ row.innerHTML='<div class="jf-saved">✓ Guardada en tu cuenta de Google</div>'; return; }
-  row.innerHTML='<div class="jf-or">Guardala con Google y la recuperás aunque se borre este navegador o cambies de celu</div><div class="gsi-slot" id="gsi-save"></div>';
+  row.innerHTML='<div class="gsi-slot" id="gsi-save"></div><div class="jf-or">Así no la perdés si se borra este navegador o cambiás de celu</div>';
   gsiSlot(document.getElementById('gsi-save'), 'guardar');
 }
 // Fila "¿Ya la guardaste con Google?" del formulario (queda armada mientras siga a la vista)
@@ -1697,18 +1745,18 @@ async function accountSave(credential){
 }
 async function accountLoad(credential){
   const slot=document.getElementById('gsi-recover');
-  slot.innerHTML='<div class="jf-or">Buscando tus medusas…</div>';
+  jfLoading('Trayendo tus medusas');
   let data;
   try { data=await api('/account/medusas',{ method:'POST', body:{ credential } }); }
   catch(err){
     track('cuenta-entrar',{ resultado:'error', status:(err&&err.status)||0 });
     toast(cuentaError(err, 'No pudimos traer tus medusas 🪼 Probá de nuevo'));
-    gsiSlot(slot, 'recuperar');
+    jfLoadingDone(); gsiSlot(slot, 'recuperar');
     return;
   }
   const list=data.medusas||[];
   track('cuenta-entrar',{ resultado:list.length ? 'ok' : 'vacia', medusas:list.length });
-  gsiSlot(slot, 'recuperar');
+  jfLoadingDone(); gsiSlot(slot, 'recuperar');
   if(!list.length){ toast('Esa cuenta de Google todavía no tiene medusas guardadas 🪼'); return; }
   window._jfAccount=list; window._jfRecover=false;
   if(window._evoCode){   // QR de la noche: elige cuál evoluciona y toca el botón
